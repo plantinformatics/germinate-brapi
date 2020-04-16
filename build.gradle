@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group 'uk.ac.hutton.germinate.brapi'
+version '4.0.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven {
+        url 'https://repo.spring.io/plugins-release/'
+    }
+    maven {
+        url 'http://maven.imagej.net/content/repositories/public/'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'lib', include: ['*.jar'])
+
+    implementation 'org.restlet.jee:org.restlet:2.4.0'
+    implementation 'org.restlet.jee:org.restlet.ext.servlet:2.4.0'
+    implementation 'org.restlet.jee:org.restlet.ext.fileupload:2.4.0'
+    implementation 'org.restlet.jee:org.restlet.ext.json:2.4.0'
+    implementation 'org.restlet.jee:org.restlet.ext.gson:2.3.6'
+    implementation 'org.json:json:20160212'
+
+    implementation 'org.jooq:jooq:3.11.10'
+    implementation 'org.jooq:jooq-codegen:3.11.10'
+}
