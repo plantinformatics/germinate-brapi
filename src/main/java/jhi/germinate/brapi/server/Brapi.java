@@ -7,6 +7,7 @@ import jhi.germinate.brapi.server.resource.core.ServerInfoResource;
 import jhi.germinate.brapi.server.resource.core.crop.CropServerResource;
 import jhi.germinate.brapi.server.resource.core.list.*;
 import jhi.germinate.brapi.server.resource.core.location.LocationServerResource;
+import jhi.germinate.brapi.server.resource.core.season.SeasonServerResource;
 
 /**
  * @author Sebastian Raubach
@@ -33,6 +34,7 @@ public class Brapi
 		attachToRouter(router, "/lists/{listDbId}/items", ListModificationServerResource.class);
 		attachToRouter(router, "/locations", LocationServerResource.class);
 		attachToRouter(router, "/search/lists", SearchListServerResource.class);
+		attachToRouter(router, "/seasons", SeasonServerResource.class);
 		attachToRouter(router, "/serverinfo", ServerInfoResource.class);
 	}
 
