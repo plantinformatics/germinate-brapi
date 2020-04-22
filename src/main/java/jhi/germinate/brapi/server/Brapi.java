@@ -8,6 +8,8 @@ import jhi.germinate.brapi.server.resource.core.crop.CropServerResource;
 import jhi.germinate.brapi.server.resource.core.list.*;
 import jhi.germinate.brapi.server.resource.core.location.LocationServerResource;
 import jhi.germinate.brapi.server.resource.core.season.SeasonServerResource;
+import jhi.germinate.brapi.server.resource.genotyping.map.*;
+import jhi.germinate.brapi.server.resource.genotyping.marker.*;
 
 /**
  * @author Sebastian Raubach
@@ -36,6 +38,13 @@ public class Brapi
 		attachToRouter(router, "/search/lists", SearchListServerResource.class);
 		attachToRouter(router, "/seasons", SeasonServerResource.class);
 		attachToRouter(router, "/serverinfo", ServerInfoResource.class);
+
+		//GENOTYPING
+		attachToRouter(router, "/maps", MapServerResource.class);
+		attachToRouter(router, "/maps/{mapDbId}", MapIndividualServerResource.class);
+		attachToRouter(router, "/maps/{mapDbId}/linkagegroups", MapLinkageGroupServerResource.class);
+		attachToRouter(router, "/markerpositions", MarkerPositionServerResource.class);
+		attachToRouter(router, "/search/markerpositions", SearchMarkerPositionServerResource.class);
 	}
 
 	private void attachToRouter(Router router, String url, Class<? extends ServerResource> clazz)
