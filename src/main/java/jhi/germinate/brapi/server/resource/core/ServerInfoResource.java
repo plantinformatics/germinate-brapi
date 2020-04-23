@@ -17,9 +17,96 @@ public class ServerInfoResource extends BaseServerResource<BrapiCallResult>
 
 	static
 	{
+		// SERVERINFO
 		CALLS.add(new BrapiCall("serverinfo")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// CROPS
+		CALLS.add(new BrapiCall("commoncropnames")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// LISTS
+		CALLS.add(new BrapiCall("lists")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("lists/{listDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.PUT)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("lists/{listDbId}/items")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/lists")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// LOCATIONS
+		CALLS.add(new BrapiCall("locations")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("locations/{locationDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/locations")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// SEASONS
+		CALLS.add(new BrapiCall("seasons")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("seasons/{seasonDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// STUDY
+		CALLS.add(new BrapiCall("studies")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("studies/{studyDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("studytypes")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// MAPS
+		CALLS.add(new BrapiCall("maps")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("maps/{mapDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("maps/{mapDbId}/linkagegroups")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("markerpositions")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/markerpositions")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 	}
 

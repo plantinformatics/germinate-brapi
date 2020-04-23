@@ -6,8 +6,9 @@ import org.restlet.routing.Router;
 import jhi.germinate.brapi.server.resource.core.ServerInfoResource;
 import jhi.germinate.brapi.server.resource.core.crop.CropServerResource;
 import jhi.germinate.brapi.server.resource.core.list.*;
-import jhi.germinate.brapi.server.resource.core.location.LocationServerResource;
-import jhi.germinate.brapi.server.resource.core.season.SeasonServerResource;
+import jhi.germinate.brapi.server.resource.core.location.*;
+import jhi.germinate.brapi.server.resource.core.season.*;
+import jhi.germinate.brapi.server.resource.core.study.*;
 import jhi.germinate.brapi.server.resource.genotyping.map.*;
 import jhi.germinate.brapi.server.resource.genotyping.marker.*;
 
@@ -34,9 +35,15 @@ public class Brapi
 		attachToRouter(router, "/lists", ListServerResource.class);
 		attachToRouter(router, "/lists/{listDbId}", ListIndividualServerResource.class);
 		attachToRouter(router, "/lists/{listDbId}/items", ListModificationServerResource.class);
-		attachToRouter(router, "/locations", LocationServerResource.class);
 		attachToRouter(router, "/search/lists", SearchListServerResource.class);
+		attachToRouter(router, "/locations", LocationServerResource.class);
+		attachToRouter(router, "/locations/{locationDbId}", LocationIndividualServerResource.class);
+		attachToRouter(router, "/search/locations", SearchLocationServerResource.class);
 		attachToRouter(router, "/seasons", SeasonServerResource.class);
+		attachToRouter(router, "/season/{seasonDbId}", SeasonIndividualServerResource.class);
+		attachToRouter(router, "/studies", StudyServerResource.class);
+		attachToRouter(router, "/studies/{studyDbId}", StudyIndividualServerResource.class);
+		attachToRouter(router, "/studytypes", StudyTypesServerResource.class);
 		attachToRouter(router, "/serverinfo", ServerInfoResource.class);
 
 		//GENOTYPING

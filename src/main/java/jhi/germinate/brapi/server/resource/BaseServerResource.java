@@ -2,6 +2,7 @@ package jhi.germinate.brapi.server.resource;
 
 import org.restlet.resource.*;
 
+import java.sql.*;
 import java.util.Objects;
 
 import jhi.germinate.brapi.resource.base.BaseResult;
@@ -57,4 +58,12 @@ public abstract class BaseServerResource<T> extends ServerResource
 
 	@Get("json")
 	public abstract BaseResult<T> getJson();
+
+	protected Timestamp getTimestamp(Date date)
+	{
+		if (date != null)
+			return new Timestamp(date.getTime());
+		else
+			return null;
+	}
 }

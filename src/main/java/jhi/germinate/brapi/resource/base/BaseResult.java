@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 public class BaseResult<T>
 {
 	@SerializedName("@context")
-	private String   context  = "https://brapi.org/jsonld/context/metadata.jsonld";
+	private String[] context  = new String[]{"https://brapi.org/jsonld/context/metadata.jsonld"};
 	private Metadata metadata = new Metadata();
 	private T        result;
 

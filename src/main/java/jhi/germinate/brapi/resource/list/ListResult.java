@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.resource;
+package jhi.germinate.brapi.resource.list;
 
 import java.sql.Timestamp;
 import java.util.*;

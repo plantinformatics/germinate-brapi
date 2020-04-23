@@ -8,10 +8,10 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.ListResult;
+import jhi.germinate.brapi.resource.list.ListResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
+import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -23,35 +23,28 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class ListModificationServerResource extends BaseServerResource<ListResult>
+public class ListModificationServerResource extends ListIndividualServerResource
 {
-	private String listDbId;
-
-	@Override
-	public void doInit()
-	{
-		super.doInit();
-
-		try
-		{
-			this.listDbId = getRequestAttributes().get("listDbId").toString();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
 	@Override
 	public BaseResult<ListResult> getJson()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
+	@Override
+	public BaseResult<ListResult> putJson(ListResult updatedList)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
 	@Post
+	@MinUserType(UserType.AUTH_USER)
 	public BaseResult<ListResult> postJson(String[] ids)
 	{
 		if (ids == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+
+		// TODO: Check if they're authorized to do this
 
 		List<String> stringIds = Arrays.asList(ids);
 		try (Connection conn = Database.getConnection();
@@ -95,7 +88,7 @@ public class ListModificationServerResource extends BaseServerResource<ListResul
 						break;
 				}
 
-				return ListIndividualServerResource.getList(listDbId, pageSize);
+				return getList(Integer.toString(result.getGroupId()), pageSize, currentPage);
 			}
 			else
 			{

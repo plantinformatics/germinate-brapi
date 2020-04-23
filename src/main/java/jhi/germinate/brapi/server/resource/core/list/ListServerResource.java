@@ -8,13 +8,12 @@ import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.resource.*;
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import jhi.germinate.brapi.resource.list.ListResult;
 import jhi.germinate.server.Database;
-import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
+import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.records.*;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -28,7 +27,7 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class ListServerResource extends BaseServerResource<ArrayResult<ListResult>>
+public class ListServerResource extends ListBaseServerResource<ArrayResult<ListResult>>
 {
 	public static final String PARAM_LIST_TYPE   = "listType";
 	public static final String PARAM_LIST_NAME   = "listName";
@@ -39,22 +38,6 @@ public class ListServerResource extends BaseServerResource<ArrayResult<ListResul
 	private String listName;
 	private String listDbId;
 	private String listSource;
-
-	public static List<ListResult> mapTo(List<ViewTableGroups> input)
-	{
-		return input.stream()
-					.map(l -> new ListResult()
-						.setDateCreated(l.getCreatedOn())
-						.setDateModified(l.getUpdatedOn())
-						.setListDbId(toString(l.getGroupId()))
-						.setListDescription(l.getGroupDescription())
-						.setListName(l.getGroupName())
-						.setListOwnerName(toString(l.getUserName()))
-						.setListOwnerPersonDbId(toString(l.getUserId()))
-						.setListSize(l.getCount())
-						.setListType(l.getGroupType()))
-					.collect(Collectors.toList());
-	}
 
 	@Override
 	public void doInit()
@@ -68,8 +51,11 @@ public class ListServerResource extends BaseServerResource<ArrayResult<ListResul
 	}
 
 	@Post
+	@MinUserType(UserType.AUTH_USER)
 	public BaseResult<ArrayResult<ListResult>> postJson(ListResult[] newLists)
 	{
+		// TODO: Check if they're authorized to do this
+
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
@@ -128,14 +114,7 @@ public class ListServerResource extends BaseServerResource<ArrayResult<ListResul
 				}
 			}
 
-			// Then get the newly created groups as a result
-			List<ViewTableGroups> locations = context.select()
-													 .hint("SQL_CALC_FOUND_ROWS")
-													 .from(VIEW_TABLE_GROUPS)
-													 .where(VIEW_TABLE_GROUPS.GROUP_ID.in(groupIds))
-													 .fetchInto(ViewTableGroups.class);
-
-			List<ListResult> lists = mapTo(locations);
+			List<ListResult> lists = getLists(context, Collections.singletonList(VIEW_TABLE_GROUPS.GROUP_ID.in(groupIds)));
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<ListResult>()
@@ -154,27 +133,20 @@ public class ListServerResource extends BaseServerResource<ArrayResult<ListResul
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
-			SelectConditionStep<Record> step = context.select()
-													  .hint("SQL_CALC_FOUND_ROWS")
-													  .from(VIEW_TABLE_GROUPS)
-													  .where(VIEW_TABLE_GROUPS.GROUP_VISIBILITY.eq(true));
+			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(listType))
-				step.and(VIEW_TABLE_GROUPS.GROUP_TYPE.eq(listType));
+				conditions.add(VIEW_TABLE_GROUPS.GROUP_TYPE.eq(listType));
 			if (!StringUtils.isEmpty(listName))
-				step.and(VIEW_TABLE_GROUPS.GROUP_NAME.eq(listName));
+				conditions.add(VIEW_TABLE_GROUPS.GROUP_NAME.eq(listName));
 			if (!StringUtils.isEmpty(listDbId))
-				step.and(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId));
+				conditions.add(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId));
 
-			List<ViewTableGroups> locations = step.limit(pageSize)
-												  .offset(pageSize * currentPage)
-												  .fetchInto(ViewTableGroups.class);
-
-			List<ListResult> lists = mapTo(locations);
+			List<ListResult> result = getLists(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<ListResult>()
-				.setData(lists), currentPage, pageSize, totalCount);
+				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)
 		{

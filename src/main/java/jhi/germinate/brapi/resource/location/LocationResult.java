@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.resource;
+package jhi.germinate.brapi.resource.location;
 
 import java.util.*;
 
@@ -13,7 +13,7 @@ public class LocationResult
 	private Map<String, String> additionalInfo = null;
 	private String              coordinateDescription;
 	private String              coordinateUncertainty;
-	private Coordinates         coordinates;
+	private CoordinatesPoint    coordinatesPoint;
 	private String              countryCode;
 	private String              countryName;
 	private String              documentationURL;
@@ -73,14 +73,14 @@ public class LocationResult
 		return this;
 	}
 
-	public Coordinates getCoordinates()
+	public CoordinatesPoint getCoordinatesPoint()
 	{
-		return coordinates;
+		return coordinatesPoint;
 	}
 
-	public LocationResult setCoordinates(Coordinates coordinates)
+	public LocationResult setCoordinatesPoint(CoordinatesPoint coordinatesPoint)
 	{
-		this.coordinates = coordinates;
+		this.coordinatesPoint = coordinatesPoint;
 		return this;
 	}
 
@@ -236,61 +236,5 @@ public class LocationResult
 	{
 		this.topography = topography;
 		return this;
-	}
-
-	public static class Coordinates
-	{
-		private Geometry geometry;
-		private String   type;
-
-		public Geometry getGeometry()
-		{
-			return geometry;
-		}
-
-		public Coordinates setGeometry(Geometry geometry)
-		{
-			this.geometry = geometry;
-			return this;
-		}
-
-		public String getType()
-		{
-			return type;
-		}
-
-		public Coordinates setType(String type)
-		{
-			this.type = type;
-			return this;
-		}
-	}
-
-	public static class Geometry
-	{
-		private double[] coordinates;
-		private String   type;
-
-		public double[] getCoordinates()
-		{
-			return coordinates;
-		}
-
-		public Geometry setCoordinates(double[] coordinates)
-		{
-			this.coordinates = coordinates;
-			return this;
-		}
-
-		public String getType()
-		{
-			return type;
-		}
-
-		public Geometry setType(String type)
-		{
-			this.type = type;
-			return this;
-		}
 	}
 }

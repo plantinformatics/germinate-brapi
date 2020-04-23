@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.resource;
+package jhi.germinate.brapi.resource.map;
 
 import java.util.List;
 

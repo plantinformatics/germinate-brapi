@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.resource;
+package jhi.germinate.brapi.resource.season;
 
 /**
  * @author Sebastian Raubach
