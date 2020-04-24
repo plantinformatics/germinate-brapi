@@ -8,8 +8,8 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.list.ListResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
+import jhi.germinate.brapi.resource.list.Lists;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
@@ -26,20 +26,20 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 public class ListModificationServerResource extends ListIndividualServerResource
 {
 	@Override
-	public BaseResult<ListResult> getJson()
+	public BaseResult<Lists> getJson()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Override
-	public BaseResult<ListResult> putJson(ListResult updatedList)
+	public BaseResult<Lists> putJson(Lists updatedLists)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Post
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<ListResult> postJson(String[] ids)
+	public BaseResult<Lists> postJson(String[] ids)
 	{
 		if (ids == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

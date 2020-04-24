@@ -5,12 +5,11 @@ import org.restlet.data.Status;
 import org.restlet.resource.*;
 
 import java.sql.*;
-import java.util.List;
+import java.util.*;
 
-import jhi.germinate.brapi.resource.*;
+import jhi.germinate.brapi.resource.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.map.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
 
@@ -21,50 +20,40 @@ import static jhi.germinate.server.database.tables.Markers.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchMarkerPositionServerResource extends BaseServerResource<ArrayResult<MarkerPositionResult>>
+public class SearchMarkerPositionServerResource extends MarkerBaseServerResource<ArrayResult<MarkerPosition>>
 {
 	@Override
-	public BaseResult<ArrayResult<MarkerPositionResult>> getJson()
+	public BaseResult<ArrayResult<MarkerPosition>> getJson()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Post
-	public BaseResult<ArrayResult<MarkerPositionResult>> postJson(MarkerPositionSearch search)
+	public BaseResult<ArrayResult<MarkerPosition>> postJson(MarkerPositionSearch search)
 	{
+		if (search == null)
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
-			SelectJoinStep<?> step = context.select(
-				MAPDEFINITIONS.CHROMOSOME.as("linkageGroupName"),
-				MAPS.ID.as("mapDbId"),
-				MAPS.NAME.as("mapName"),
-				MAPDEFINITIONS.DEFINITION_START.as("position"),
-				MARKERS.ID.as("variantDbId"),
-				MARKERS.MARKER_NAME.as("variantName")
-			)
-											.hint("SQL_CALC_FOUND_ROWS")
-											.from(MAPS)
-											.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
-											.leftJoin(MARKERS).on(MARKERS.ID.eq(MAPDEFINITIONS.MARKER_ID));
-
-			step.where(MAPS.VISIBILITY.eq(true));
+			List<Condition> conditions = new ArrayList<>();
 
 			if (!CollectionUtils.isEmpty(search.getMapDbIds()))
-				step.where(MAPS.ID.cast(String.class).in(search.getMapDbIds()));
+				conditions.add(MAPS.ID.cast(String.class).in(search.getMapDbIds()));
 			if (!CollectionUtils.isEmpty(search.getLinkageGroupNames()))
-				step.where(MAPDEFINITIONS.CHROMOSOME.in(search.getLinkageGroupNames()));
+				conditions.add(MAPDEFINITIONS.CHROMOSOME.in(search.getLinkageGroupNames()));
 			if (!CollectionUtils.isEmpty(search.getVariantDbIds()))
-				step.where(MARKERS.ID.cast(String.class).in(search.getVariantDbIds()));
+				conditions.add(MARKERS.ID.cast(String.class).in(search.getVariantDbIds()));
 			if (search.getMaxPosition() != null)
-				step.where(MAPDEFINITIONS.DEFINITION_START.le(search.getMaxPosition()));
+				conditions.add(MAPDEFINITIONS.DEFINITION_START.le(search.getMaxPosition()));
 			if (search.getMinPosition() != null)
-				step.where(MAPDEFINITIONS.DEFINITION_START.ge(search.getMinPosition()));
+				conditions.add(MAPDEFINITIONS.DEFINITION_START.ge(search.getMinPosition()));
 
-			List<MarkerPositionResult> result = step.fetchInto(MarkerPositionResult.class);
+			List<MarkerPosition> result = getMarkerPositions(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<MarkerPositionResult>()
+			return new BaseResult<>(new ArrayResult<MarkerPosition>()
 				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)

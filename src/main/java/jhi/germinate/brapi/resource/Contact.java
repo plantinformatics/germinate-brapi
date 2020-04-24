@@ -3,7 +3,7 @@ package jhi.germinate.brapi.resource;
 /**
  * @author Sebastian Raubach
  */
-public class ContactResult
+public class Contact
 {
 	private String contactDbId;
 	private String email;
@@ -17,7 +17,7 @@ public class ContactResult
 		return contactDbId;
 	}
 
-	public ContactResult setContactDbId(String contactDbId)
+	public Contact setContactDbId(String contactDbId)
 	{
 		this.contactDbId = contactDbId;
 		return this;
@@ -28,7 +28,7 @@ public class ContactResult
 		return email;
 	}
 
-	public ContactResult setEmail(String email)
+	public Contact setEmail(String email)
 	{
 		this.email = email;
 		return this;
@@ -39,7 +39,7 @@ public class ContactResult
 		return instituteName;
 	}
 
-	public ContactResult setInstituteName(String instituteName)
+	public Contact setInstituteName(String instituteName)
 	{
 		this.instituteName = instituteName;
 		return this;
@@ -50,7 +50,7 @@ public class ContactResult
 		return name;
 	}
 
-	public ContactResult setName(String name)
+	public Contact setName(String name)
 	{
 		this.name = name;
 		return this;
@@ -61,7 +61,7 @@ public class ContactResult
 		return orcid;
 	}
 
-	public ContactResult setOrcid(String orcid)
+	public Contact setOrcid(String orcid)
 	{
 		this.orcid = orcid;
 		return this;
@@ -72,7 +72,7 @@ public class ContactResult
 		return type;
 	}
 
-	public ContactResult setType(String type)
+	public Contact setType(String type)
 	{
 		this.type = type;
 		return this;

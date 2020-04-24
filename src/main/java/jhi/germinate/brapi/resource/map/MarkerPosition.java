@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * @author Sebastian Raubach
  */
-public class MarkerPositionResult
+public class MarkerPosition
 {
 	private Map<String, String> additionalInfo;
 	private String              linkageGroupName;
@@ -20,7 +20,7 @@ public class MarkerPositionResult
 		return additionalInfo;
 	}
 
-	public MarkerPositionResult setAdditionalInfo(Map<String, String> additionalInfo)
+	public MarkerPosition setAdditionalInfo(Map<String, String> additionalInfo)
 	{
 		this.additionalInfo = additionalInfo;
 		return this;
@@ -31,7 +31,7 @@ public class MarkerPositionResult
 		return linkageGroupName;
 	}
 
-	public MarkerPositionResult setLinkageGroupName(String linkageGroupName)
+	public MarkerPosition setLinkageGroupName(String linkageGroupName)
 	{
 		this.linkageGroupName = linkageGroupName;
 		return this;
@@ -42,7 +42,7 @@ public class MarkerPositionResult
 		return mapDbId;
 	}
 
-	public MarkerPositionResult setMapDbId(String mapDbId)
+	public MarkerPosition setMapDbId(String mapDbId)
 	{
 		this.mapDbId = mapDbId;
 		return this;
@@ -53,7 +53,7 @@ public class MarkerPositionResult
 		return mapName;
 	}
 
-	public MarkerPositionResult setMapName(String mapName)
+	public MarkerPosition setMapName(String mapName)
 	{
 		this.mapName = mapName;
 		return this;
@@ -64,7 +64,7 @@ public class MarkerPositionResult
 		return position;
 	}
 
-	public MarkerPositionResult setPosition(Long position)
+	public MarkerPosition setPosition(Long position)
 	{
 		this.position = position;
 		return this;
@@ -75,7 +75,7 @@ public class MarkerPositionResult
 		return variantDbId;
 	}
 
-	public MarkerPositionResult setVariantDbId(String variantDbId)
+	public MarkerPosition setVariantDbId(String variantDbId)
 	{
 		this.variantDbId = variantDbId;
 		return this;
@@ -86,7 +86,7 @@ public class MarkerPositionResult
 		return variantName;
 	}
 
-	public MarkerPositionResult setVariantName(String variantName)
+	public MarkerPosition setVariantName(String variantName)
 	{
 		this.variantName = variantName;
 		return this;

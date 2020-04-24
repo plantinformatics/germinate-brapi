@@ -20,17 +20,20 @@ import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchLocationServerResource extends LocationBaseResource<ArrayResult<LocationResult>>
+public class SearchLocationServerResource extends LocationBaseResource<ArrayResult<Location>>
 {
 	@Override
-	public BaseResult<ArrayResult<LocationResult>> getJson()
+	public BaseResult<ArrayResult<Location>> getJson()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Post
-	public BaseResult<ArrayResult<LocationResult>> postJson(LocationSearch search)
+	public BaseResult<ArrayResult<Location>> postJson(LocationSearch search)
 	{
+		if (search == null)
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
@@ -55,10 +58,10 @@ public class SearchLocationServerResource extends LocationBaseResource<ArrayResu
 			if (!CollectionUtils.isEmpty(search.getLocationDbIds()))
 				conditions.add(VIEW_TABLE_LOCATIONS.LOCATION_TYPE.in(search.getLocationTypes()));
 
-			List<LocationResult> result = getLocations(context, conditions);
+			List<Location> result = getLocations(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<LocationResult>()
+			return new BaseResult<>(new ArrayResult<Location>()
 				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)

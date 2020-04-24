@@ -7,7 +7,7 @@ import jhi.germinate.brapi.resource.base.Reference;
 /**
  * @author Sebastian Raubach
  */
-public class LocationResult
+public class Location
 {
 	private String              abbreviation;
 	private Map<String, String> additionalInfo = null;
@@ -34,7 +34,7 @@ public class LocationResult
 		return abbreviation;
 	}
 
-	public LocationResult setAbbreviation(String abbreviation)
+	public Location setAbbreviation(String abbreviation)
 	{
 		this.abbreviation = abbreviation;
 		return this;
@@ -45,7 +45,7 @@ public class LocationResult
 		return additionalInfo;
 	}
 
-	public LocationResult setAdditionalInfo(Map<String, String> additionalInfo)
+	public Location setAdditionalInfo(Map<String, String> additionalInfo)
 	{
 		this.additionalInfo = additionalInfo;
 		return this;
@@ -56,7 +56,7 @@ public class LocationResult
 		return coordinateDescription;
 	}
 
-	public LocationResult setCoordinateDescription(String coordinateDescription)
+	public Location setCoordinateDescription(String coordinateDescription)
 	{
 		this.coordinateDescription = coordinateDescription;
 		return this;
@@ -67,7 +67,7 @@ public class LocationResult
 		return coordinateUncertainty;
 	}
 
-	public LocationResult setCoordinateUncertainty(String coordinateUncertainty)
+	public Location setCoordinateUncertainty(String coordinateUncertainty)
 	{
 		this.coordinateUncertainty = coordinateUncertainty;
 		return this;
@@ -78,7 +78,7 @@ public class LocationResult
 		return coordinatesPoint;
 	}
 
-	public LocationResult setCoordinatesPoint(CoordinatesPoint coordinatesPoint)
+	public Location setCoordinatesPoint(CoordinatesPoint coordinatesPoint)
 	{
 		this.coordinatesPoint = coordinatesPoint;
 		return this;
@@ -89,7 +89,7 @@ public class LocationResult
 		return countryCode;
 	}
 
-	public LocationResult setCountryCode(String countryCode)
+	public Location setCountryCode(String countryCode)
 	{
 		this.countryCode = countryCode;
 		return this;
@@ -100,7 +100,7 @@ public class LocationResult
 		return countryName;
 	}
 
-	public LocationResult setCountryName(String countryName)
+	public Location setCountryName(String countryName)
 	{
 		this.countryName = countryName;
 		return this;
@@ -111,7 +111,7 @@ public class LocationResult
 		return documentationURL;
 	}
 
-	public LocationResult setDocumentationURL(String documentationURL)
+	public Location setDocumentationURL(String documentationURL)
 	{
 		this.documentationURL = documentationURL;
 		return this;
@@ -122,7 +122,7 @@ public class LocationResult
 		return environmentType;
 	}
 
-	public LocationResult setEnvironmentType(String environmentType)
+	public Location setEnvironmentType(String environmentType)
 	{
 		this.environmentType = environmentType;
 		return this;
@@ -133,7 +133,7 @@ public class LocationResult
 		return exposure;
 	}
 
-	public LocationResult setExposure(String exposure)
+	public Location setExposure(String exposure)
 	{
 		this.exposure = exposure;
 		return this;
@@ -144,7 +144,7 @@ public class LocationResult
 		return externalReferences;
 	}
 
-	public LocationResult setExternalReferences(List<Reference> externalReferences)
+	public Location setExternalReferences(List<Reference> externalReferences)
 	{
 		this.externalReferences = externalReferences;
 		return this;
@@ -155,7 +155,7 @@ public class LocationResult
 		return instituteAddress;
 	}
 
-	public LocationResult setInstituteAddress(String instituteAddress)
+	public Location setInstituteAddress(String instituteAddress)
 	{
 		this.instituteAddress = instituteAddress;
 		return this;
@@ -166,7 +166,7 @@ public class LocationResult
 		return instituteName;
 	}
 
-	public LocationResult setInstituteName(String instituteName)
+	public Location setInstituteName(String instituteName)
 	{
 		this.instituteName = instituteName;
 		return this;
@@ -177,7 +177,7 @@ public class LocationResult
 		return locationDbId;
 	}
 
-	public LocationResult setLocationDbId(String locationDbId)
+	public Location setLocationDbId(String locationDbId)
 	{
 		this.locationDbId = locationDbId;
 		return this;
@@ -188,7 +188,7 @@ public class LocationResult
 		return locationName;
 	}
 
-	public LocationResult setLocationName(String locationName)
+	public Location setLocationName(String locationName)
 	{
 		this.locationName = locationName;
 		return this;
@@ -199,7 +199,7 @@ public class LocationResult
 		return locationType;
 	}
 
-	public LocationResult setLocationType(String locationType)
+	public Location setLocationType(String locationType)
 	{
 		this.locationType = locationType;
 		return this;
@@ -210,7 +210,7 @@ public class LocationResult
 		return siteStatus;
 	}
 
-	public LocationResult setSiteStatus(String siteStatus)
+	public Location setSiteStatus(String siteStatus)
 	{
 		this.siteStatus = siteStatus;
 		return this;
@@ -221,7 +221,7 @@ public class LocationResult
 		return slope;
 	}
 
-	public LocationResult setSlope(String slope)
+	public Location setSlope(String slope)
 	{
 		this.slope = slope;
 		return this;
@@ -232,7 +232,7 @@ public class LocationResult
 		return topography;
 	}
 
-	public LocationResult setTopography(String topography)
+	public Location setTopography(String topography)
 	{
 		this.topography = topography;
 		return this;

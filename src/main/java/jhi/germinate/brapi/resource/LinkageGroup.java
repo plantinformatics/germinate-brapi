@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * @author Sebastian Raubach
  */
-public class LinkageGroupResult
+public class LinkageGroup
 {
 	private Map<String, String> additionalInfo;
 	private String              linkageGroupName;
@@ -17,7 +17,7 @@ public class LinkageGroupResult
 		return additionalInfo;
 	}
 
-	public LinkageGroupResult setAdditionalInfo(Map<String, String> additionalInfo)
+	public LinkageGroup setAdditionalInfo(Map<String, String> additionalInfo)
 	{
 		this.additionalInfo = additionalInfo;
 		return this;
@@ -28,7 +28,7 @@ public class LinkageGroupResult
 		return linkageGroupName;
 	}
 
-	public LinkageGroupResult setLinkageGroupName(String linkageGroupName)
+	public LinkageGroup setLinkageGroupName(String linkageGroupName)
 	{
 		this.linkageGroupName = linkageGroupName;
 		return this;
@@ -39,7 +39,7 @@ public class LinkageGroupResult
 		return markerCount;
 	}
 
-	public LinkageGroupResult setMarkerCount(Integer markerCount)
+	public LinkageGroup setMarkerCount(Integer markerCount)
 	{
 		this.markerCount = markerCount;
 		return this;
@@ -50,7 +50,7 @@ public class LinkageGroupResult
 		return maxPosition;
 	}
 
-	public LinkageGroupResult setMaxPosition(Long maxPosition)
+	public LinkageGroup setMaxPosition(Long maxPosition)
 	{
 		this.maxPosition = maxPosition;
 		return this;

@@ -9,8 +9,8 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.list.ListResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
+import jhi.germinate.brapi.resource.list.Lists;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
@@ -25,7 +25,7 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class ListIndividualServerResource extends ListBaseServerResource<ListResult>
+public class ListIndividualServerResource extends ListBaseServerResource<Lists>
 {
 	protected String listDbId;
 
@@ -45,7 +45,7 @@ public class ListIndividualServerResource extends ListBaseServerResource<ListRes
 
 	@Put
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<ListResult> putJson(ListResult updatedList)
+	public BaseResult<Lists> putJson(Lists updatedLists)
 	{
 		// TODO: Check if they're authorized to do this!
 
@@ -71,21 +71,21 @@ public class ListIndividualServerResource extends ListBaseServerResource<ListRes
 						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
 							   .select(DSL.select(LOCATIONS.ID, DSL.val(result.getGroupId()))
 										  .from(LOCATIONS)
-										  .where(LOCATIONS.ID.in(updatedList.getData())))
+										  .where(LOCATIONS.ID.in(updatedLists.getData())))
 							   .execute();
 						break;
 					case 2:
 						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
 							   .select(DSL.select(MARKERS.ID, DSL.val(result.getGroupId()))
 										  .from(MARKERS)
-										  .where(MARKERS.ID.in(updatedList.getData())))
+										  .where(MARKERS.ID.in(updatedLists.getData())))
 							   .execute();
 						break;
 					case 3:
 						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
 							   .select(DSL.select(GERMINATEBASE.ID, DSL.val(result.getGroupId()))
 										  .from(GERMINATEBASE)
-										  .where(GERMINATEBASE.ID.in(updatedList.getData())))
+										  .where(GERMINATEBASE.ID.in(updatedLists.getData())))
 							   .execute();
 						break;
 				}
@@ -107,7 +107,7 @@ public class ListIndividualServerResource extends ListBaseServerResource<ListRes
 	}
 
 	@Override
-	public BaseResult<ListResult> getJson()
+	public BaseResult<Lists> getJson()
 	{
 		if (StringUtils.isEmpty(listDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -115,12 +115,12 @@ public class ListIndividualServerResource extends ListBaseServerResource<ListRes
 		return getList(listDbId, pageSize, currentPage);
 	}
 
-	protected BaseResult<ListResult> getList(String listDbId, int pageSize, int currentPage) {
+	protected BaseResult<Lists> getList(String listDbId, int pageSize, int currentPage) {
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
-			List<ListResult> results = getLists(context, Collections.singletonList(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId)));
-			ListResult result = CollectionUtils.isEmpty(results) ? null : results.get(0);
+			List<Lists> results = getLists(context, Collections.singletonList(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId)));
+			Lists result = CollectionUtils.isEmpty(results) ? null : results.get(0);
 
 			if (result != null)
 			{
@@ -158,8 +158,7 @@ public class ListIndividualServerResource extends ListBaseServerResource<ListRes
 						break;
 				}
 
-				long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-				return new BaseResult<>(result, currentPage, pageSize, totalCount);
+				return new BaseResult<>(result, currentPage, pageSize, 1);
 			}
 			else
 			{

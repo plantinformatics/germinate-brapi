@@ -8,7 +8,7 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.*;
+import jhi.germinate.brapi.resource.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.list.*;
 import jhi.germinate.server.Database;
@@ -18,17 +18,20 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchListServerResource extends ListBaseServerResource<ArrayResult<ListResult>>
+public class SearchListServerResource extends ListBaseServerResource<ArrayResult<Lists>>
 {
 	@Override
-	public BaseResult<ArrayResult<ListResult>> getJson()
+	public BaseResult<ArrayResult<Lists>> getJson()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Post
-	public BaseResult<ArrayResult<ListResult>> postJson(ListSearch search)
+	public BaseResult<ArrayResult<Lists>> postJson(ListSearch search)
 	{
+		if (search == null)
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
@@ -58,10 +61,10 @@ public class SearchListServerResource extends ListBaseServerResource<ArrayResult
 			if (!StringUtils.isEmpty(search.getListType()))
 				conditions.add(VIEW_TABLE_GROUPS.GROUP_TYPE.eq(search.getListType()));
 
-			List<ListResult> lists = getLists(context, conditions);
+			List<Lists> lists = getLists(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<ListResult>()
+			return new BaseResult<>(new ArrayResult<Lists>()
 				.setData(lists), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)

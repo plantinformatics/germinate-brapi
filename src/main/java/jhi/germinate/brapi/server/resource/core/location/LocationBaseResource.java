@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.location.LocationResult;
+import jhi.germinate.brapi.resource.location.*;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.database.tables.pojos.ViewTableLocations;
 
@@ -17,7 +17,7 @@ import static jhi.germinate.server.database.tables.ViewTableLocations.*;
  */
 public abstract class LocationBaseResource<T> extends BaseServerResource<T>
 {
-	protected List<LocationResult> getLocations(DSLContext context, List<Condition> conditions)
+	protected List<Location> getLocations(DSLContext context, List<Condition> conditions)
 	{
 		SelectJoinStep<Record> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
@@ -36,7 +36,7 @@ public abstract class LocationBaseResource<T> extends BaseServerResource<T>
 		return locations.stream()
 						.map(r -> {
 							// Set all the easy fields
-							LocationResult location = new LocationResult()
+							Location location = new Location()
 								.setAbbreviation(r.getLocationNameShort())
 								.setCoordinateUncertainty(toString(r.getLocationCoordinateUncertainty()))
 								.setCountryCode(r.getCountryCode3())
@@ -59,9 +59,9 @@ public abstract class LocationBaseResource<T> extends BaseServerResource<T>
 								else
 									coordinates = new double[]{lng.doubleValue(), lat.doubleValue()};
 
-								location.setCoordinatesPoint(new LocationResult.Coordinates()
+								location.setCoordinatesPoint(new CoordinatesPoint()
 									.setType("Feature")
-									.setGeometry(new LocationResult.Geometry()
+									.setGeometry(new GeometryPoint()
 										.setCoordinates(coordinates)
 										.setType("Point")));
 							}

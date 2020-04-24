@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 /**
  * @author Sebastian Raubach
  */
-public class LastUpdateResult
+public class LastUpdate
 {
 	private Timestamp timestamp;
 	private String    version;
@@ -15,7 +15,7 @@ public class LastUpdateResult
 		return timestamp;
 	}
 
-	public LastUpdateResult setTimestamp(Timestamp timestamp)
+	public LastUpdate setTimestamp(Timestamp timestamp)
 	{
 		this.timestamp = timestamp;
 		return this;
@@ -26,7 +26,7 @@ public class LastUpdateResult
 		return version;
 	}
 
-	public LastUpdateResult setVersion(String version)
+	public LastUpdate setVersion(String version)
 	{
 		this.version = version;
 		return this;

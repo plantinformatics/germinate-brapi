@@ -8,8 +8,8 @@ import org.restlet.resource.ResourceException;
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.map.MapResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
+import jhi.germinate.brapi.resource.map.Map;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
@@ -20,7 +20,7 @@ import static jhi.germinate.server.database.tables.Maps.*;
 /**
  * @author Sebastian Raubach
  */
-public class MapIndividualServerResource extends BaseServerResource<MapResult>
+public class MapIndividualServerResource extends BaseServerResource<Map>
 {
 	private String mapDbId;
 
@@ -33,7 +33,7 @@ public class MapIndividualServerResource extends BaseServerResource<MapResult>
 	}
 
 	@Override
-	public BaseResult<MapResult> getJson()
+	public BaseResult<Map> getJson()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -53,18 +53,13 @@ public class MapIndividualServerResource extends BaseServerResource<MapResult>
 			step.where(MAPS.VISIBILITY.eq(true))
 				.and(MAPS.ID.cast(String.class).eq(mapDbId));
 
-			List<MapResult> result = step.groupBy(MAPS.ID)
-										 .fetchInto(MapResult.class);
+			List<Map> maps = step.groupBy(MAPS.ID)
+								 .limit(pageSize)
+								 .offset(pageSize * currentPage)
+								 .fetchInto(Map.class);
 
-			if (CollectionUtils.isEmpty(result))
-			{
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
-			}
-			else
-			{
-				long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-				return new BaseResult<>(result.get(0), currentPage, pageSize, totalCount);
-			}
+			Map map = CollectionUtils.isEmpty(maps) ? null : maps.get(0);
+			return new BaseResult<>(map, currentPage, pageSize, 1);
 		}
 		catch (SQLException e)
 		{

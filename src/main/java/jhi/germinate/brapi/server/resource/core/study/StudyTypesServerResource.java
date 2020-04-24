@@ -28,6 +28,8 @@ public class StudyTypesServerResource extends BaseServerResource<ArrayResult<Str
 			List<String> result = context.select(DATASETTYPES.DESCRIPTION)
 										 .hint("SQL_CALC_FOUND_ROWS")
 										 .from(DATASETTYPES)
+										 .limit(pageSize)
+										 .offset(pageSize * currentPage)
 										 .fetchInto(String.class);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);

@@ -5,12 +5,14 @@ import org.restlet.routing.Router;
 
 import jhi.germinate.brapi.server.resource.core.ServerInfoResource;
 import jhi.germinate.brapi.server.resource.core.crop.CropServerResource;
+import jhi.germinate.brapi.server.resource.core.germplasm.*;
 import jhi.germinate.brapi.server.resource.core.list.*;
 import jhi.germinate.brapi.server.resource.core.location.*;
 import jhi.germinate.brapi.server.resource.core.season.*;
 import jhi.germinate.brapi.server.resource.core.study.*;
 import jhi.germinate.brapi.server.resource.genotyping.map.*;
 import jhi.germinate.brapi.server.resource.genotyping.marker.*;
+import jhi.germinate.brapi.server.resource.genotyping.variant.*;
 
 /**
  * @author Sebastian Raubach
@@ -43,6 +45,7 @@ public class Brapi
 		attachToRouter(router, "/season/{seasonDbId}", SeasonIndividualServerResource.class);
 		attachToRouter(router, "/studies", StudyServerResource.class);
 		attachToRouter(router, "/studies/{studyDbId}", StudyIndividualServerResource.class);
+		attachToRouter(router, "/search/studies", SearchStudyServerResource.class);
 		attachToRouter(router, "/studytypes", StudyTypesServerResource.class);
 		attachToRouter(router, "/serverinfo", ServerInfoResource.class);
 
@@ -52,6 +55,16 @@ public class Brapi
 		attachToRouter(router, "/maps/{mapDbId}/linkagegroups", MapLinkageGroupServerResource.class);
 		attachToRouter(router, "/markerpositions", MarkerPositionServerResource.class);
 		attachToRouter(router, "/search/markerpositions", SearchMarkerPositionServerResource.class);
+		attachToRouter(router, "/variantsets", VariantSetServerResource.class);
+		attachToRouter(router, "/variantsets/{variantSetDbId}", VariantSetServerResource.class);
+		attachToRouter(router, "/search/variantset", SearchVariantSetServerResource.class);
+
+		// GERMPLASM
+		attachToRouter(router, "/germplasm", GermplasmServerResource.class);
+		attachToRouter(router, "/germplasm/{germplasmDbId}", GermplasmIndividualServerResource.class);
+		attachToRouter(router, "/germplasm/{germplasmDbId}/mcpd", McpdServerResource.class);
+		attachToRouter(router, "/germplasm/{germplasmDbId}/pedigree", PedigreeServerResource.class);
+		attachToRouter(router, "/germplasm/{germplasmDbId}/progeny", ProgenyServerResource.class);
 	}
 
 	private void attachToRouter(Router router, String url, Class<? extends ServerResource> clazz)

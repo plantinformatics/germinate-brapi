@@ -5,7 +5,7 @@ import org.jooq.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.list.ListResult;
+import jhi.germinate.brapi.resource.list.Lists;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
 
@@ -16,7 +16,7 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
  */
 public abstract class ListBaseServerResource<T> extends BaseServerResource<T>
 {
-	protected List<ListResult> getLists(DSLContext context, List<Condition> conditions)
+	protected List<Lists> getLists(DSLContext context, List<Condition> conditions)
 	{
 		SelectConditionStep<Record> step = context.select()
 												  .hint("SQL_CALC_FOUND_ROWS")
@@ -36,7 +36,7 @@ public abstract class ListBaseServerResource<T> extends BaseServerResource<T>
 										   .fetchInto(ViewTableGroups.class);
 
 		return groups.stream()
-					 .map(l -> new ListResult()
+					 .map(l -> new Lists()
 						 .setDateCreated(l.getCreatedOn())
 						 .setDateModified(l.getUpdatedOn())
 						 .setListDbId(toString(l.getGroupId()))

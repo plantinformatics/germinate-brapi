@@ -1,33 +1,32 @@
 package jhi.germinate.brapi.resource.map;
 
 import java.sql.Timestamp;
-import java.util.Map;
 
 /**
  * @author Sebastian Raubach
  */
-public class MapResult
+public class Map
 {
-	private Map<String, String> additionalInfo = null;
-	private String              comments;
-	private String              commonCropName;
-	private String              documentationURL;
-	private Integer             linkageGroupCount;
-	private String              mapDbId;
-	private String              mapName;
-	private String              mapPUI;
-	private Integer             markerCount;
-	private Timestamp           publishedDate;
-	private String              scientificName;
-	private String              type;
-	private String              unit;
+	private java.util.Map additionalInfo = null;
+	private String        comments;
+	private String        commonCropName;
+	private String        documentationURL;
+	private Integer       linkageGroupCount;
+	private String        mapDbId;
+	private String        mapName;
+	private String        mapPUI;
+	private Integer       markerCount;
+	private Timestamp     publishedDate;
+	private String        scientificName;
+	private String        type;
+	private String        unit;
 
-	public Map<String, String> getAdditionalInfo()
+	public java.util.Map getAdditionalInfo()
 	{
 		return additionalInfo;
 	}
 
-	public MapResult setAdditionalInfo(Map<String, String> additionalInfo)
+	public Map setAdditionalInfo(java.util.Map additionalInfo)
 	{
 		this.additionalInfo = additionalInfo;
 		return this;
@@ -38,7 +37,7 @@ public class MapResult
 		return comments;
 	}
 
-	public MapResult setComments(String comments)
+	public Map setComments(String comments)
 	{
 		this.comments = comments;
 		return this;
@@ -49,7 +48,7 @@ public class MapResult
 		return commonCropName;
 	}
 
-	public MapResult setCommonCropName(String commonCropName)
+	public Map setCommonCropName(String commonCropName)
 	{
 		this.commonCropName = commonCropName;
 		return this;
@@ -60,7 +59,7 @@ public class MapResult
 		return documentationURL;
 	}
 
-	public MapResult setDocumentationURL(String documentationURL)
+	public Map setDocumentationURL(String documentationURL)
 	{
 		this.documentationURL = documentationURL;
 		return this;
@@ -71,7 +70,7 @@ public class MapResult
 		return linkageGroupCount;
 	}
 
-	public MapResult setLinkageGroupCount(Integer linkageGroupCount)
+	public Map setLinkageGroupCount(Integer linkageGroupCount)
 	{
 		this.linkageGroupCount = linkageGroupCount;
 		return this;
@@ -82,7 +81,7 @@ public class MapResult
 		return mapDbId;
 	}
 
-	public MapResult setMapDbId(String mapDbId)
+	public Map setMapDbId(String mapDbId)
 	{
 		this.mapDbId = mapDbId;
 		return this;
@@ -93,7 +92,7 @@ public class MapResult
 		return mapName;
 	}
 
-	public MapResult setMapName(String mapName)
+	public Map setMapName(String mapName)
 	{
 		this.mapName = mapName;
 		return this;
@@ -104,7 +103,7 @@ public class MapResult
 		return mapPUI;
 	}
 
-	public MapResult setMapPUI(String mapPUI)
+	public Map setMapPUI(String mapPUI)
 	{
 		this.mapPUI = mapPUI;
 		return this;
@@ -115,7 +114,7 @@ public class MapResult
 		return markerCount;
 	}
 
-	public MapResult setMarkerCount(Integer markerCount)
+	public Map setMarkerCount(Integer markerCount)
 	{
 		this.markerCount = markerCount;
 		return this;
@@ -126,7 +125,7 @@ public class MapResult
 		return publishedDate;
 	}
 
-	public MapResult setPublishedDate(Timestamp publishedDate)
+	public Map setPublishedDate(Timestamp publishedDate)
 	{
 		this.publishedDate = publishedDate;
 		return this;
@@ -137,7 +136,7 @@ public class MapResult
 		return scientificName;
 	}
 
-	public MapResult setScientificName(String scientificName)
+	public Map setScientificName(String scientificName)
 	{
 		this.scientificName = scientificName;
 		return this;
@@ -148,7 +147,7 @@ public class MapResult
 		return type;
 	}
 
-	public MapResult setType(String type)
+	public Map setType(String type)
 	{
 		this.type = type;
 		return this;
@@ -159,7 +158,7 @@ public class MapResult
 		return unit;
 	}
 
-	public MapResult setUnit(String unit)
+	public Map setUnit(String unit)
 	{
 		this.unit = unit;
 		return this;

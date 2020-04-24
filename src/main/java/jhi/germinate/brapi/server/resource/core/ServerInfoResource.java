@@ -3,14 +3,14 @@ package jhi.germinate.brapi.server.resource.core;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.BrapiCallResult;
+import jhi.germinate.brapi.resource.ServerInfo;
 import jhi.germinate.brapi.resource.base.*;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 
 /**
  * @author Sebastian Raubach
  */
-public class ServerInfoResource extends BaseServerResource<BrapiCallResult>
+public class ServerInfoResource extends BaseServerResource<ServerInfo>
 {
 	public static final  String          PARAM_DATA_TYPE = "dataType";
 	private static final List<BrapiCall> CALLS           = new ArrayList<>();
@@ -82,6 +82,10 @@ public class ServerInfoResource extends BaseServerResource<BrapiCallResult>
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/studies")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("studytypes")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
@@ -108,6 +112,42 @@ public class ServerInfoResource extends BaseServerResource<BrapiCallResult>
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// VARIANT
+		CALLS.add(new BrapiCall("variantsets")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("variantsets/{variantSetDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/variantset")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// GERMPLASM
+		CALLS.add(new BrapiCall("germplasm")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}/mcpd")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}/pedigree")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}/progeny")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
 	}
 
 	private BrapiCall.DataType dataType = null;
@@ -127,7 +167,7 @@ public class ServerInfoResource extends BaseServerResource<BrapiCallResult>
 	}
 
 	@Override
-	public BaseResult<BrapiCallResult> getJson()
+	public BaseResult<ServerInfo> getJson()
 	{
 		List<BrapiCall> calls = CALLS;
 
@@ -143,8 +183,8 @@ public class ServerInfoResource extends BaseServerResource<BrapiCallResult>
 
 		calls = calls.subList(start, end);
 
-		return new BaseResult<>(new BrapiCallResult() // TODO: Set other things.
-													  .setCalls(calls), currentPage, pageSize, calls.size());
+		return new BaseResult<>(new ServerInfo() // TODO: Set other things.
+												 .setCalls(calls), currentPage, pageSize, calls.size());
 
 	}
 }

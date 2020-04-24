@@ -19,7 +19,7 @@ import static jhi.germinate.server.database.tables.Maps.*;
 /**
  * @author Sebastian Raubach
  */
-public class MapLinkageGroupServerResource extends BaseServerResource<ArrayResult<LinkageGroupResult>>
+public class MapLinkageGroupServerResource extends BaseServerResource<ArrayResult<LinkageGroup>>
 {
 	private String mapDbId;
 
@@ -32,7 +32,7 @@ public class MapLinkageGroupServerResource extends BaseServerResource<ArrayResul
 	}
 
 	@Override
-	public BaseResult<ArrayResult<LinkageGroupResult>> getJson()
+	public BaseResult<ArrayResult<LinkageGroup>> getJson()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -48,11 +48,13 @@ public class MapLinkageGroupServerResource extends BaseServerResource<ArrayResul
 
 			step.where(MAPS.VISIBILITY.eq(true));
 
-			List<LinkageGroupResult> result = step.groupBy(MAPDEFINITIONS.CHROMOSOME)
-												  .fetchInto(LinkageGroupResult.class);
+			List<LinkageGroup> result = step.groupBy(MAPDEFINITIONS.CHROMOSOME)
+											.limit(pageSize)
+											.offset(pageSize * currentPage)
+											.fetchInto(LinkageGroup.class);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<LinkageGroupResult>().setData(result), currentPage, pageSize, totalCount);
+			return new BaseResult<>(new ArrayResult<LinkageGroup>().setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)
 		{

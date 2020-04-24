@@ -5,7 +5,7 @@ import java.net.URI;
 /**
  * @author Sebastian Raubach
  */
-public class DataLinkResult
+public class DataLink
 {
 	private String dataFormat;
 	private String description;
@@ -21,7 +21,7 @@ public class DataLinkResult
 		return dataFormat;
 	}
 
-	public DataLinkResult setDataFormat(String dataFormat)
+	public DataLink setDataFormat(String dataFormat)
 	{
 		this.dataFormat = dataFormat;
 		return this;
@@ -32,7 +32,7 @@ public class DataLinkResult
 		return description;
 	}
 
-	public DataLinkResult setDescription(String description)
+	public DataLink setDescription(String description)
 	{
 		this.description = description;
 		return this;
@@ -43,7 +43,7 @@ public class DataLinkResult
 		return fileFormat;
 	}
 
-	public DataLinkResult setFileFormat(String fileFormat)
+	public DataLink setFileFormat(String fileFormat)
 	{
 		this.fileFormat = fileFormat;
 		return this;
@@ -54,7 +54,7 @@ public class DataLinkResult
 		return name;
 	}
 
-	public DataLinkResult setName(String name)
+	public DataLink setName(String name)
 	{
 		this.name = name;
 		return this;
@@ -65,7 +65,7 @@ public class DataLinkResult
 		return provenance;
 	}
 
-	public DataLinkResult setProvenance(String provenance)
+	public DataLink setProvenance(String provenance)
 	{
 		this.provenance = provenance;
 		return this;
@@ -76,7 +76,7 @@ public class DataLinkResult
 		return scientificType;
 	}
 
-	public DataLinkResult setScientificType(String scientificType)
+	public DataLink setScientificType(String scientificType)
 	{
 		this.scientificType = scientificType;
 		return this;
@@ -87,7 +87,7 @@ public class DataLinkResult
 		return url;
 	}
 
-	public DataLinkResult setUrl(URI url)
+	public DataLink setUrl(URI url)
 	{
 		this.url = url;
 		return this;
@@ -98,7 +98,7 @@ public class DataLinkResult
 		return version;
 	}
 
-	public DataLinkResult setVersion(String version)
+	public DataLink setVersion(String version)
 	{
 		this.version = version;
 		return this;

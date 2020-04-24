@@ -11,7 +11,7 @@ import java.util.*;
 
 import jhi.germinate.brapi.resource.*;
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.study.StudyResult;
+import jhi.germinate.brapi.resource.study.Study;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.util.*;
@@ -21,7 +21,7 @@ import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
 /**
  * @author Sebastian Raubach
  */
-public class StudyServerResource extends StudyBaseResource<ArrayResult<StudyResult>>
+public class StudyServerResource extends StudyBaseResource<ArrayResult<Study>>
 {
 	public static final String PARAM_CROP_COMMON_NAME           = "cropCommonName";
 	public static final String PARAM_STUDY_TYPE                 = "studyType";
@@ -76,14 +76,14 @@ public class StudyServerResource extends StudyBaseResource<ArrayResult<StudyResu
 
 	@Post
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<ArrayResult<StudyResult>> postJson(StudyResult[] newStudies)
+	public BaseResult<ArrayResult<Study>> postJson(Study[] newStudies)
 	{
 		// TODO: Check if they're allowed to do this
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Override
-	public BaseResult<ArrayResult<StudyResult>> getJson()
+	public BaseResult<ArrayResult<Study>> getJson()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -108,10 +108,10 @@ public class StudyServerResource extends StudyBaseResource<ArrayResult<StudyResu
 					conditions.add(VIEW_TABLE_DATASETS.END_DATE.isNotNull().and(VIEW_TABLE_DATASETS.END_DATE.le(new Date(System.currentTimeMillis()))));
 			}
 
-			List<StudyResult> result = getStudies(context, conditions);
+			List<Study> result = getStudies(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<StudyResult>()
+			return new BaseResult<>(new ArrayResult<Study>()
 				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)

@@ -3,7 +3,7 @@ package jhi.germinate.brapi.resource;
 /**
  * @author Sebastian Raubach
  */
-public class EnvironmentalParameterResult
+public class EnvironmentalParameter
 {
 	private String description;
 	private String parameterName;
@@ -18,7 +18,7 @@ public class EnvironmentalParameterResult
 		return description;
 	}
 
-	public EnvironmentalParameterResult setDescription(String description)
+	public EnvironmentalParameter setDescription(String description)
 	{
 		this.description = description;
 		return this;
@@ -29,7 +29,7 @@ public class EnvironmentalParameterResult
 		return parameterName;
 	}
 
-	public EnvironmentalParameterResult setParameterName(String parameterName)
+	public EnvironmentalParameter setParameterName(String parameterName)
 	{
 		this.parameterName = parameterName;
 		return this;
@@ -40,7 +40,7 @@ public class EnvironmentalParameterResult
 		return parameterPUI;
 	}
 
-	public EnvironmentalParameterResult setParameterPUI(String parameterPUI)
+	public EnvironmentalParameter setParameterPUI(String parameterPUI)
 	{
 		this.parameterPUI = parameterPUI;
 		return this;
@@ -51,7 +51,7 @@ public class EnvironmentalParameterResult
 		return unit;
 	}
 
-	public EnvironmentalParameterResult setUnit(String unit)
+	public EnvironmentalParameter setUnit(String unit)
 	{
 		this.unit = unit;
 		return this;
@@ -62,7 +62,7 @@ public class EnvironmentalParameterResult
 		return unitPUI;
 	}
 
-	public EnvironmentalParameterResult setUnitPUI(String unitPUI)
+	public EnvironmentalParameter setUnitPUI(String unitPUI)
 	{
 		this.unitPUI = unitPUI;
 		return this;
@@ -73,7 +73,7 @@ public class EnvironmentalParameterResult
 		return value;
 	}
 
-	public EnvironmentalParameterResult setValue(String value)
+	public EnvironmentalParameter setValue(String value)
 	{
 		this.value = value;
 		return this;
@@ -84,7 +84,7 @@ public class EnvironmentalParameterResult
 		return valuePUI;
 	}
 
-	public EnvironmentalParameterResult setValuePUI(String valuePUI)
+	public EnvironmentalParameter setValuePUI(String valuePUI)
 	{
 		this.valuePUI = valuePUI;
 		return this;

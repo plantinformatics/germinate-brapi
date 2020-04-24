@@ -8,9 +8,9 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.*;
+import jhi.germinate.brapi.resource.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.location.LocationResult;
+import jhi.germinate.brapi.resource.location.Location;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 
@@ -19,7 +19,7 @@ import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 /**
  * @author Sebastian Raubach
  */
-public class LocationServerResource extends LocationBaseResource<ArrayResult<LocationResult>>
+public class LocationServerResource extends LocationBaseResource<ArrayResult<Location>>
 {
 	public static final String PARAM_LOCATION_TYPE = "locationType";
 
@@ -35,13 +35,13 @@ public class LocationServerResource extends LocationBaseResource<ArrayResult<Loc
 
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<LocationResult>> postJson(LocationResult[] newLocations)
+	public BaseResult<ArrayResult<Location>> postJson(Location[] newLocations)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Override
-	public BaseResult<ArrayResult<LocationResult>> getJson()
+	public BaseResult<ArrayResult<Location>> getJson()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -51,10 +51,10 @@ public class LocationServerResource extends LocationBaseResource<ArrayResult<Loc
 			if (!StringUtils.isEmpty(locationType))
 				conditions.add(VIEW_TABLE_LOCATIONS.LOCATION_TYPE.eq(locationType));
 
-			List<LocationResult> result = getLocations(context, conditions);
+			List<Location> result = getLocations(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<LocationResult>()
+			return new BaseResult<>(new ArrayResult<Location>()
 				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)

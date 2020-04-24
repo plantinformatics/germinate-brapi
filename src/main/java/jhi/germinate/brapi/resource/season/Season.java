@@ -3,7 +3,7 @@ package jhi.germinate.brapi.resource.season;
 /**
  * @author Sebastian Raubach
  */
-public class SeasonResult
+public class Season
 {
 	private String seasonDbId;
 	private String seasonName;
@@ -14,7 +14,7 @@ public class SeasonResult
 		return seasonDbId;
 	}
 
-	public SeasonResult setSeasonDbId(String seasonDbId)
+	public Season setSeasonDbId(String seasonDbId)
 	{
 		this.seasonDbId = seasonDbId;
 		return this;
@@ -25,7 +25,7 @@ public class SeasonResult
 		return seasonName;
 	}
 
-	public SeasonResult setSeasonName(String seasonName)
+	public Season setSeasonName(String seasonName)
 	{
 		this.seasonName = seasonName;
 		return this;
@@ -36,7 +36,7 @@ public class SeasonResult
 		return year;
 	}
 
-	public SeasonResult setYear(int year)
+	public Season setYear(int year)
 	{
 		this.year = year;
 		return this;

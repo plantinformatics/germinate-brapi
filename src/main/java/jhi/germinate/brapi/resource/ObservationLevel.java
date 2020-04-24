@@ -3,7 +3,7 @@ package jhi.germinate.brapi.resource;
 /**
  * @author Sebastian Raubach
  */
-public class ObservationLevelResult
+public class ObservationLevel
 {
 	private String levelName;
 	private Integer levelOrder;
@@ -13,7 +13,7 @@ public class ObservationLevelResult
 		return levelName;
 	}
 
-	public ObservationLevelResult setLevelName(String levelName)
+	public ObservationLevel setLevelName(String levelName)
 	{
 		this.levelName = levelName;
 		return this;
@@ -24,7 +24,7 @@ public class ObservationLevelResult
 		return levelOrder;
 	}
 
-	public ObservationLevelResult setLevelOrder(Integer levelOrder)
+	public ObservationLevel setLevelOrder(Integer levelOrder)
 	{
 		this.levelOrder = levelOrder;
 		return this;

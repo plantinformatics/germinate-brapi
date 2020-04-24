@@ -28,6 +28,8 @@ dependencies {
     implementation 'org.restlet.jee:org.restlet.ext.gson:2.3.6'
     implementation 'org.json:json:20160212'
 
+    implementation 'ch.systems.cisd:jhdf5:14.12.0'
+
     implementation 'org.jooq:jooq:3.11.10'
     implementation 'org.jooq:jooq-codegen:3.11.10'
 }

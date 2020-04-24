@@ -6,7 +6,7 @@ import org.jooq.impl.DSL;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.season.SeasonResult;
+import jhi.germinate.brapi.resource.season.Season;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasets.*;
@@ -16,7 +16,7 @@ import static jhi.germinate.server.database.tables.Datasets.*;
  */
 public abstract class SeasonBaseServerResource<T> extends BaseServerResource<T>
 {
-	protected List<SeasonResult> getSeasons(DSLContext context, List<Condition> conditions)
+	protected List<Season> getSeasons(DSLContext context, List<Condition> conditions)
 	{
 		SelectConditionStep<?> step = context.selectDistinct(DSL.year(DATASETS.DATE_START))
 											 .hint("SQL_CALC_FOUND_ROWS")
@@ -35,7 +35,7 @@ public abstract class SeasonBaseServerResource<T> extends BaseServerResource<T>
 								  .fetchInto(Integer.class);
 
 		return years.stream()
-					.map(y -> new SeasonResult()
+					.map(y -> new Season()
 						.setYear(y)
 						.setSeasonDbId(Integer.toString(y))
 						.setSeasonName(Integer.toString(y)))

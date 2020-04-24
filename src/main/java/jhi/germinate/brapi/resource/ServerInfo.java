@@ -7,7 +7,7 @@ import jhi.germinate.brapi.resource.base.BrapiCall;
 /**
  * @author Sebastian Raubach
  */
-public class BrapiCallResult
+public class ServerInfo
 {
 	private List<BrapiCall> calls;
 	private String          contactEmail;
@@ -23,7 +23,7 @@ public class BrapiCallResult
 		return calls;
 	}
 
-	public BrapiCallResult setCalls(List<BrapiCall> calls)
+	public ServerInfo setCalls(List<BrapiCall> calls)
 	{
 		this.calls = calls;
 		return this;
@@ -34,7 +34,7 @@ public class BrapiCallResult
 		return contactEmail;
 	}
 
-	public BrapiCallResult setContactEmail(String contactEmail)
+	public ServerInfo setContactEmail(String contactEmail)
 	{
 		this.contactEmail = contactEmail;
 		return this;
@@ -45,7 +45,7 @@ public class BrapiCallResult
 		return documentationURL;
 	}
 
-	public BrapiCallResult setDocumentationURL(String documentationURL)
+	public ServerInfo setDocumentationURL(String documentationURL)
 	{
 		this.documentationURL = documentationURL;
 		return this;
@@ -56,7 +56,7 @@ public class BrapiCallResult
 		return location;
 	}
 
-	public BrapiCallResult setLocation(String location)
+	public ServerInfo setLocation(String location)
 	{
 		this.location = location;
 		return this;
@@ -67,7 +67,7 @@ public class BrapiCallResult
 		return organizationName;
 	}
 
-	public BrapiCallResult setOrganizationName(String organizationName)
+	public ServerInfo setOrganizationName(String organizationName)
 	{
 		this.organizationName = organizationName;
 		return this;
@@ -78,7 +78,7 @@ public class BrapiCallResult
 		return organizationURL;
 	}
 
-	public BrapiCallResult setOrganizationURL(String organizationURL)
+	public ServerInfo setOrganizationURL(String organizationURL)
 	{
 		this.organizationURL = organizationURL;
 		return this;
@@ -89,7 +89,7 @@ public class BrapiCallResult
 		return serverDescription;
 	}
 
-	public BrapiCallResult setServerDescription(String serverDescription)
+	public ServerInfo setServerDescription(String serverDescription)
 	{
 		this.serverDescription = serverDescription;
 		return this;
@@ -100,7 +100,7 @@ public class BrapiCallResult
 		return serverName;
 	}
 
-	public BrapiCallResult setServerName(String serverName)
+	public ServerInfo setServerName(String serverName)
 	{
 		this.serverName = serverName;
 		return this;

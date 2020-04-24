@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.resource.*;
-import jhi.germinate.brapi.resource.study.StudyResult;
+import jhi.germinate.brapi.resource.study.Study;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.database.tables.pojos.ViewTableDatasets;
 import jhi.germinate.server.util.*;
@@ -19,20 +19,20 @@ import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
  */
 public abstract class StudyBaseResource<T> extends BaseServerResource<T>
 {
-	protected List<StudyResult> getStudies(DSLContext context, List<Condition> conditions)
+	protected List<Study> getStudies(DSLContext context, List<Condition> conditions)
 	{
-		Map<Integer, List<ContactResult>> collaborators = new HashMap<>();
+		Map<Integer, List<Contact>> collaborators = new HashMap<>();
 
 		context.selectFrom(VIEW_TABLE_COLLABORATORS)
 			   .forEach(r -> {
 				   Integer id = r.getDatasetId();
 
-				   List<ContactResult> list = collaborators.get(id);
+				   List<Contact> list = collaborators.get(id);
 
 				   if (list == null)
 					   list = new ArrayList<>();
 
-				   list.add(new ContactResult()
+				   list.add(new Contact()
 					   .setContactDbId(Integer.toString(r.getCollaboratorId()))
 					   .setEmail(r.getCollaboratorEmail())
 					   .setInstituteName(r.getInstitutionName())
@@ -58,11 +58,11 @@ public abstract class StudyBaseResource<T> extends BaseServerResource<T>
 											   .fetchInto(ViewTableDatasets.class);
 
 		return datasets.stream()
-					   .map(r -> new StudyResult()
+					   .map(r -> new Study()
 						   .setActive(r.getEndDate() != null && r.getEndDate().getTime() < System.currentTimeMillis())
 						   .setContacts(collaborators.get(r.getDatasetId()))
 						   .setEndDate(getTimestamp(r.getEndDate()))
-						   .setLastUpdate(new LastUpdateResult()
+						   .setLastUpdate(new LastUpdate()
 							   .setTimestamp(r.getUpdatedOn())
 							   .setVersion(r.getVersion()))
 						   .setLicense(r.getLicenseName())

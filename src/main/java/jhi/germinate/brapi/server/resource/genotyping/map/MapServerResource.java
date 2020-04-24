@@ -10,7 +10,7 @@ import java.util.List;
 
 import jhi.germinate.brapi.resource.*;
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.map.MapResult;
+import jhi.germinate.brapi.resource.map.Map;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
@@ -23,7 +23,7 @@ import static jhi.germinate.server.database.tables.Maps.*;
 /**
  * @author Sebastian Raubach
  */
-public class MapServerResource extends BaseServerResource<ArrayResult<MapResult>>
+public class MapServerResource extends BaseServerResource<ArrayResult<Map>>
 {
 	public static final String PARAM_COMMON_CROP_NAME = "commonCropName";
 	public static final String PARAM_MAP_PUI          = "mapPUI";
@@ -53,7 +53,7 @@ public class MapServerResource extends BaseServerResource<ArrayResult<MapResult>
 	}
 
 	@Override
-	public BaseResult<ArrayResult<MapResult>> getJson()
+	public BaseResult<ArrayResult<Map>> getJson()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -96,11 +96,13 @@ public class MapServerResource extends BaseServerResource<ArrayResult<MapResult>
 			if (!StringUtils.isEmpty(mapPUI))
 				step.where(MAPS.NAME.eq(mapPUI));
 
-			List<MapResult> result = step.groupBy(MAPS.ID)
-										 .fetchInto(MapResult.class);
+			List<Map> result = step.groupBy(MAPS.ID)
+								   .limit(pageSize)
+								   .offset(pageSize * currentPage)
+								   .fetchInto(Map.class);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<MapResult>()
+			return new BaseResult<>(new ArrayResult<Map>()
 				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)

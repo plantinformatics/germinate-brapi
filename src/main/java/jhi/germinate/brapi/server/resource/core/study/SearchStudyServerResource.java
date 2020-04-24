@@ -9,7 +9,7 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.*;
+import jhi.germinate.brapi.resource.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.study.*;
 import jhi.germinate.server.Database;
@@ -20,11 +20,14 @@ import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchStudyServerResource extends StudyBaseResource<ArrayResult<StudyResult>>
+public class SearchStudyServerResource extends StudyBaseResource<ArrayResult<Study>>
 {
 	@Post
-	public BaseResult<ArrayResult<StudyResult>> postJson(StudySearch search)
+	public BaseResult<ArrayResult<Study>> postJson(StudySearch search)
 	{
+		if (search == null)
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
@@ -48,10 +51,10 @@ public class SearchStudyServerResource extends StudyBaseResource<ArrayResult<Stu
 					conditions.add(VIEW_TABLE_DATASETS.END_DATE.isNotNull().and(VIEW_TABLE_DATASETS.END_DATE.le(new Date(System.currentTimeMillis()))));
 			}
 
-			List<StudyResult> result = getStudies(context, conditions);
+			List<Study> result = getStudies(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<StudyResult>()
+			return new BaseResult<>(new ArrayResult<Study>()
 				.setData(result), currentPage, pageSize, totalCount);
 		}
 		catch (SQLException e)
@@ -62,7 +65,7 @@ public class SearchStudyServerResource extends StudyBaseResource<ArrayResult<Stu
 	}
 
 	@Override
-	public BaseResult<ArrayResult<StudyResult>> getJson()
+	public BaseResult<ArrayResult<Study>> getJson()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
