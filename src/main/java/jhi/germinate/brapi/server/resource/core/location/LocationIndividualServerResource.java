@@ -46,9 +46,6 @@ public class LocationIndividualServerResource extends LocationBaseResource<Locat
 	@Override
 	public BaseResult<Location> getJson()
 	{
-		if (StringUtils.isEmpty(locationDbId))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{

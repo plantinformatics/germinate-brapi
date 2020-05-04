@@ -109,9 +109,6 @@ public class ListIndividualServerResource extends ListBaseServerResource<Lists>
 	@Override
 	public BaseResult<Lists> getJson()
 	{
-		if (StringUtils.isEmpty(listDbId))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
 		return getList(listDbId, pageSize, currentPage);
 	}
 

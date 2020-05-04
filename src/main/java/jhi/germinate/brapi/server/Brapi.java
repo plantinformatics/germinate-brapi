@@ -5,7 +5,6 @@ import org.restlet.routing.Router;
 
 import jhi.germinate.brapi.server.resource.core.ServerInfoResource;
 import jhi.germinate.brapi.server.resource.core.crop.CropServerResource;
-import jhi.germinate.brapi.server.resource.core.germplasm.*;
 import jhi.germinate.brapi.server.resource.core.list.*;
 import jhi.germinate.brapi.server.resource.core.location.*;
 import jhi.germinate.brapi.server.resource.core.season.*;
@@ -13,6 +12,9 @@ import jhi.germinate.brapi.server.resource.core.study.*;
 import jhi.germinate.brapi.server.resource.genotyping.map.*;
 import jhi.germinate.brapi.server.resource.genotyping.marker.*;
 import jhi.germinate.brapi.server.resource.genotyping.variant.*;
+import jhi.germinate.brapi.server.resource.germplasm.attributevalue.*;
+import jhi.germinate.brapi.server.resource.germplasm.breedingmethod.*;
+import jhi.germinate.brapi.server.resource.germplasm.germplasm.*;
 
 /**
  * @author Sebastian Raubach
@@ -60,11 +62,19 @@ public class Brapi
 		attachToRouter(router, "/search/variantset", SearchVariantSetServerResource.class);
 
 		// GERMPLASM
+		attachToRouter(router, "/breedingmethod", BreedingMethodServerResource.class);
+		attachToRouter(router, "/breedingmethod/{breedingMethodDbId}", BreedingMethodIndividualServerResource.class);
 		attachToRouter(router, "/germplasm", GermplasmServerResource.class);
 		attachToRouter(router, "/germplasm/{germplasmDbId}", GermplasmIndividualServerResource.class);
 		attachToRouter(router, "/germplasm/{germplasmDbId}/mcpd", McpdServerResource.class);
 		attachToRouter(router, "/germplasm/{germplasmDbId}/pedigree", PedigreeServerResource.class);
 		attachToRouter(router, "/germplasm/{germplasmDbId}/progeny", ProgenyServerResource.class);
+		attachToRouter(router, "/search/germplasm", SearchGermplasmServerResource.class);
+
+		// GERMPLASM ATTRIBUTES
+		attachToRouter(router, "/attributevalues", AttributeValueServerResource.class);
+		attachToRouter(router, "/attributevalues/{attributeValueDbId}", AttributeValueIndividualServerResource.class);
+		attachToRouter(router, "/search/attributevalues", SearchAttributeValueServerResource.class);
 	}
 
 	private void attachToRouter(Router router, String url, Class<? extends ServerResource> clazz)

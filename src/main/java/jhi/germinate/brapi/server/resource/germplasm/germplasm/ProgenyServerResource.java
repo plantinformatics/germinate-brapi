@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.server.resource.core.germplasm;
+package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
 import org.jooq.DSLContext;
 import org.restlet.data.Status;

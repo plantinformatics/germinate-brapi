@@ -127,14 +127,26 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
+		// BREEDING METHOD
+		CALLS.add(new BrapiCall("breedingmethod")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("breedingmethod/{breedingMethodDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
 		// GERMPLASM
 		CALLS.add(new BrapiCall("germplasm")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.PUT)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}/mcpd")
 			.addDataType(BrapiCall.DataType.json)
@@ -147,6 +159,21 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 		CALLS.add(new BrapiCall("germplasm/{germplasmDbId}/progeny")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/germplasm")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// GERMPLASM ATTRIBUTES
+		CALLS.add(new BrapiCall("attributevalues")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("attributevalues/{attributeValueDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.PUT)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 	}
 

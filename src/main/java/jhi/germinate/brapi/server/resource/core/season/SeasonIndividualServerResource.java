@@ -47,9 +47,6 @@ public class SeasonIndividualServerResource extends SeasonBaseServerResource<Sea
 	@Override
 	public BaseResult<Season> getJson()
 	{
-		if (StringUtils.isEmpty(seasonDbId))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{

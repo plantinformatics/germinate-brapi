@@ -1,17 +1,19 @@
-package jhi.germinate.brapi.server.resource.core.germplasm;
+package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.resource.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.germplasm.Germplasm;
 import jhi.germinate.server.Database;
+import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.Germinatebase;
 import jhi.germinate.server.util.StringUtils;
 
@@ -73,6 +75,29 @@ public class GermplasmServerResource extends GermplasmBaseServerResource<ArrayRe
 		this.progenyDbId = getQueryValue(PARAM_PROGENY_DB_ID);
 		this.externalReferenceID = getQueryValue(PARAM_EXTERNAL_REFERENCE_ID);
 		this.externalReferenceSource = getQueryValue(PARAM_EXTERNAL_REFERENCE_SOURCE);
+	}
+
+	@Post
+	@MinUserType(UserType.DATA_CURATOR)
+	public BaseResult<ArrayResult<Germplasm>> postJson(Germplasm[] newGermplasm)
+	{
+		try (Connection conn = Database.getConnection();
+			 DSLContext context = Database.getContext(conn))
+		{
+			List<Integer> newIds = Arrays.stream(newGermplasm)
+										 .map(g -> addGermplasm(context, g, false))
+										 .collect(Collectors.toList());
+
+			List<Germplasm> list = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.in(newIds)));
+
+			return new BaseResult<>(new ArrayResult<Germplasm>()
+				.setData(list), currentPage, pageSize, list.size());
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+		}
 	}
 
 	@Override

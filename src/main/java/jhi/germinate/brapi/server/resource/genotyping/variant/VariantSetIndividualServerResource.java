@@ -38,17 +38,10 @@ public class VariantSetIndividualServerResource extends VariantSetBaseServerReso
 	@Override
 	public BaseResult<VariantSet> getJson()
 	{
-		if (StringUtils.isEmpty(variantSetDbId))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
-			List<Condition> conditions = new ArrayList<>();
-
-			conditions.add(DATASETS.ID.cast(String.class).eq(variantSetDbId));
-
-			List<VariantSet> results = getVariantSets(context, conditions);
+			List<VariantSet> results = getVariantSets(context, Collections.singletonList(DATASETS.ID.cast(String.class).eq(variantSetDbId)));
 			VariantSet result = CollectionUtils.isEmpty(results) ? null : results.get(0);
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
