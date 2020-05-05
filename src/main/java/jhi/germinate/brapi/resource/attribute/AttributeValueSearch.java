@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.resource.germplasm;
+package jhi.germinate.brapi.resource.attribute;
 
 import java.util.List;
 

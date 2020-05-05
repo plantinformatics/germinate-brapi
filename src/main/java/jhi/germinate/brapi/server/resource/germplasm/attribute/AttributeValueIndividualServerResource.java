@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.server.resource.germplasm.attributevalue;
+package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
 import org.jooq.DSLContext;
 import org.restlet.data.Status;
@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.*;
 
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.AttributeValue;
+import jhi.germinate.brapi.resource.attribute.AttributeValue;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.records.AttributedataRecord;
@@ -40,16 +40,16 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 
 	@Put
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<AttributeValue> putJson(AttributeValue updateValue)
+	public BaseResult<AttributeValue> putJson(AttributeValue toUpdate)
 	{
-		if (StringUtils.isEmpty(attributeValueDbId) || updateValue == null || updateValue.getAttributeValueDbId() != null && !Objects.equals(updateValue.getAttributeValueDbId(), attributeValueDbId))
+		if (StringUtils.isEmpty(attributeValueDbId) || toUpdate == null || toUpdate.getAttributeValueDbId() != null && !Objects.equals(toUpdate.getAttributeValueDbId(), attributeValueDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
 			AttributedataRecord record = context.selectFrom(ATTRIBUTEDATA)
-												.where(ATTRIBUTEDATA.ID.cast(String.class).eq(updateValue.getAttributeValueDbId()))
+												.where(ATTRIBUTEDATA.ID.cast(String.class).eq(toUpdate.getAttributeValueDbId()))
 												.fetchAny();
 
 			if (record == null)
@@ -58,8 +58,8 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 			}
 			else
 			{
-				record.setValue(updateValue.getValue());
-				record.setUpdatedOn(updateValue.getDeterminedDate());
+				record.setValue(toUpdate.getValue());
+				record.setCreatedOn(toUpdate.getDeterminedDate());
 				record.store();
 
 				return getJson();

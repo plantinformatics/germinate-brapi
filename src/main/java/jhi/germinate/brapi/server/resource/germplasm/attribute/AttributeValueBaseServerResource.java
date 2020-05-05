@@ -1,10 +1,10 @@
-package jhi.germinate.brapi.server.resource.germplasm.attributevalue;
+package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
 import org.jooq.*;
 
 import java.util.List;
 
-import jhi.germinate.brapi.resource.germplasm.AttributeValue;
+import jhi.germinate.brapi.resource.attribute.AttributeValue;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.util.CollectionUtils;
 

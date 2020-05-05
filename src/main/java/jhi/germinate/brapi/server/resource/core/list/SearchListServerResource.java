@@ -8,7 +8,7 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.ArrayResult;
+import jhi.germinate.brapi.resource.base.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.list.*;
 import jhi.germinate.server.Database;

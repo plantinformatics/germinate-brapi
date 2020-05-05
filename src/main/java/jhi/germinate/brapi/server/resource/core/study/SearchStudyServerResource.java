@@ -9,7 +9,7 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.ArrayResult;
+import jhi.germinate.brapi.resource.base.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.study.*;
 import jhi.germinate.server.Database;

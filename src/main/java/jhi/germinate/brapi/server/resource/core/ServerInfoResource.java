@@ -91,6 +91,20 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
+		// CALLSETS
+		CALLS.add(new BrapiCall("callsets")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("callsets/{callSetDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("callsets/{callSetDbId}/calls")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
 		// MAPS
 		CALLS.add(new BrapiCall("maps")
 			.addDataType(BrapiCall.DataType.json)
@@ -114,6 +128,22 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
 		// VARIANT
+		CALLS.add(new BrapiCall("variants")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("variants/{variantDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("variants/{variantDbId}/calls")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/variants")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("variantsets")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
@@ -166,6 +196,24 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
 		// GERMPLASM ATTRIBUTES
+		CALLS.add(new BrapiCall("attributes")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("attributes/{attributeDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.PUT)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("attributes/categories")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/attributes")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("attributevalues")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)

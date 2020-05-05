@@ -7,7 +7,7 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.ArrayResult;
+import jhi.germinate.brapi.resource.base.ArrayResult;
 import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.brapi.resource.season.Season;
 import jhi.germinate.server.Database;

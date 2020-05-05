@@ -8,8 +8,7 @@ import org.restlet.resource.ResourceException;
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.*;
-import jhi.germinate.brapi.resource.base.BaseResult;
+import jhi.germinate.brapi.resource.base.*;
 import jhi.germinate.brapi.resource.map.Map;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;

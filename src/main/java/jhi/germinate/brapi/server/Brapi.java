@@ -9,10 +9,11 @@ import jhi.germinate.brapi.server.resource.core.list.*;
 import jhi.germinate.brapi.server.resource.core.location.*;
 import jhi.germinate.brapi.server.resource.core.season.*;
 import jhi.germinate.brapi.server.resource.core.study.*;
+import jhi.germinate.brapi.server.resource.genotyping.call.*;
 import jhi.germinate.brapi.server.resource.genotyping.map.*;
 import jhi.germinate.brapi.server.resource.genotyping.marker.*;
 import jhi.germinate.brapi.server.resource.genotyping.variant.*;
-import jhi.germinate.brapi.server.resource.germplasm.attributevalue.*;
+import jhi.germinate.brapi.server.resource.germplasm.attribute.*;
 import jhi.germinate.brapi.server.resource.germplasm.breedingmethod.*;
 import jhi.germinate.brapi.server.resource.germplasm.germplasm.*;
 
@@ -22,12 +23,14 @@ import jhi.germinate.brapi.server.resource.germplasm.germplasm.*;
 public class Brapi
 {
 	private String urlPrefix;
-	private Router router;
+	private Router routerAuth;
+	private Router routerUnauth;
 
-	public Brapi(String urlPrefix, Router router)
+	public Brapi(String urlPrefix, Router routerAuth, Router routerUnauth)
 	{
 		this.urlPrefix = urlPrefix;
-		this.router = router;
+		this.routerAuth = routerAuth;
+		this.routerUnauth = routerUnauth;
 
 		init();
 	}
@@ -35,46 +38,64 @@ public class Brapi
 	private void init()
 	{
 		// CORE
-		attachToRouter(router, "/commoncropnames", CropServerResource.class);
-		attachToRouter(router, "/lists", ListServerResource.class);
-		attachToRouter(router, "/lists/{listDbId}", ListIndividualServerResource.class);
-		attachToRouter(router, "/lists/{listDbId}/items", ListModificationServerResource.class);
-		attachToRouter(router, "/search/lists", SearchListServerResource.class);
-		attachToRouter(router, "/locations", LocationServerResource.class);
-		attachToRouter(router, "/locations/{locationDbId}", LocationIndividualServerResource.class);
-		attachToRouter(router, "/search/locations", SearchLocationServerResource.class);
-		attachToRouter(router, "/seasons", SeasonServerResource.class);
-		attachToRouter(router, "/season/{seasonDbId}", SeasonIndividualServerResource.class);
-		attachToRouter(router, "/studies", StudyServerResource.class);
-		attachToRouter(router, "/studies/{studyDbId}", StudyIndividualServerResource.class);
-		attachToRouter(router, "/search/studies", SearchStudyServerResource.class);
-		attachToRouter(router, "/studytypes", StudyTypesServerResource.class);
-		attachToRouter(router, "/serverinfo", ServerInfoResource.class);
+		attachToRouter(routerAuth, "/commoncropnames", CropServerResource.class);
+		attachToRouter(routerAuth, "/lists", ListServerResource.class);
+		attachToRouter(routerAuth, "/lists/{listDbId}", ListIndividualServerResource.class);
+		attachToRouter(routerAuth, "/lists/{listDbId}/items", ListModificationServerResource.class);
+		attachToRouter(routerAuth, "/search/lists", SearchListServerResource.class);
+		attachToRouter(routerAuth, "/locations", LocationServerResource.class);
+		attachToRouter(routerAuth, "/locations/{locationDbId}", LocationIndividualServerResource.class);
+		attachToRouter(routerAuth, "/search/locations", SearchLocationServerResource.class);
+		attachToRouter(routerAuth, "/seasons", SeasonServerResource.class);
+		attachToRouter(routerAuth, "/season/{seasonDbId}", SeasonIndividualServerResource.class);
+		attachToRouter(routerAuth, "/studies", StudyServerResource.class);
+		attachToRouter(routerAuth, "/studies/{studyDbId}", StudyIndividualServerResource.class);
+		attachToRouter(routerAuth, "/search/studies", SearchStudyServerResource.class);
+		attachToRouter(routerAuth, "/studytypes", StudyTypesServerResource.class);
+		attachToRouter(routerUnauth, "/serverinfo", ServerInfoResource.class);
 
 		//GENOTYPING
-		attachToRouter(router, "/maps", MapServerResource.class);
-		attachToRouter(router, "/maps/{mapDbId}", MapIndividualServerResource.class);
-		attachToRouter(router, "/maps/{mapDbId}/linkagegroups", MapLinkageGroupServerResource.class);
-		attachToRouter(router, "/markerpositions", MarkerPositionServerResource.class);
-		attachToRouter(router, "/search/markerpositions", SearchMarkerPositionServerResource.class);
-		attachToRouter(router, "/variantsets", VariantSetServerResource.class);
-		attachToRouter(router, "/variantsets/{variantSetDbId}", VariantSetServerResource.class);
-		attachToRouter(router, "/search/variantset", SearchVariantSetServerResource.class);
+		// TODO: write implementation
+		attachToRouter(routerAuth, "/calls", CallServerResource.class);
+		// TODO: write implementation
+		attachToRouter(routerAuth, "/search/calls", SearchCallServerResource.class);
+		attachToRouter(routerAuth, "/callsets", CallSetServerResource.class);
+		attachToRouter(routerAuth, "/callsets/{callSetDbId}", CallSetIndividualServerResource.class);
+		// TODO: write implementation
+		attachToRouter(routerAuth, "/callsets/{callSetDbId}/calls", CallSetCallServerResource.class);
+		attachToRouter(routerAuth, "/search/callsets", SearchCallSetServerResource.class);
+		attachToRouter(routerAuth, "/maps", MapServerResource.class);
+		attachToRouter(routerAuth, "/maps/{mapDbId}", MapIndividualServerResource.class);
+		attachToRouter(routerAuth, "/maps/{mapDbId}/linkagegroups", MapLinkageGroupServerResource.class);
+		attachToRouter(routerAuth, "/markerpositions", MarkerPositionServerResource.class);
+		attachToRouter(routerAuth, "/search/markerpositions", SearchMarkerPositionServerResource.class);
+		attachToRouter(routerAuth, "/variants", VariantServerResource.class);
+		attachToRouter(routerAuth, "/variants/{variantDbId}", VariantIndividualServerResource.class);
+		// TODO: Write implementation
+		attachToRouter(routerAuth, "/variants/{variantDbId}/calls", VariantCallServerResource.class);
+		attachToRouter(routerAuth, "/search/variants", SearchVariantServerResource.class);
+		attachToRouter(routerAuth, "/variantsets", VariantSetServerResource.class);
+		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}", VariantSetServerResource.class);
+		attachToRouter(routerAuth, "/search/variantset", SearchVariantSetServerResource.class);
 
 		// GERMPLASM
-		attachToRouter(router, "/breedingmethod", BreedingMethodServerResource.class);
-		attachToRouter(router, "/breedingmethod/{breedingMethodDbId}", BreedingMethodIndividualServerResource.class);
-		attachToRouter(router, "/germplasm", GermplasmServerResource.class);
-		attachToRouter(router, "/germplasm/{germplasmDbId}", GermplasmIndividualServerResource.class);
-		attachToRouter(router, "/germplasm/{germplasmDbId}/mcpd", McpdServerResource.class);
-		attachToRouter(router, "/germplasm/{germplasmDbId}/pedigree", PedigreeServerResource.class);
-		attachToRouter(router, "/germplasm/{germplasmDbId}/progeny", ProgenyServerResource.class);
-		attachToRouter(router, "/search/germplasm", SearchGermplasmServerResource.class);
+		attachToRouter(routerAuth, "/breedingmethod", BreedingMethodServerResource.class);
+		attachToRouter(routerAuth, "/breedingmethod/{breedingMethodDbId}", BreedingMethodIndividualServerResource.class);
+		attachToRouter(routerAuth, "/germplasm", GermplasmServerResource.class);
+		attachToRouter(routerAuth, "/germplasm/{germplasmDbId}", GermplasmIndividualServerResource.class);
+		attachToRouter(routerAuth, "/germplasm/{germplasmDbId}/mcpd", McpdServerResource.class);
+		attachToRouter(routerAuth, "/germplasm/{germplasmDbId}/pedigree", PedigreeServerResource.class);
+		attachToRouter(routerAuth, "/germplasm/{germplasmDbId}/progeny", ProgenyServerResource.class);
+		attachToRouter(routerAuth, "/search/germplasm", SearchGermplasmServerResource.class);
 
 		// GERMPLASM ATTRIBUTES
-		attachToRouter(router, "/attributevalues", AttributeValueServerResource.class);
-		attachToRouter(router, "/attributevalues/{attributeValueDbId}", AttributeValueIndividualServerResource.class);
-		attachToRouter(router, "/search/attributevalues", SearchAttributeValueServerResource.class);
+		attachToRouter(routerAuth, "/attributes", AttributeServerResource.class);
+		attachToRouter(routerAuth, "/attributes/{attributeDbId}", AttributeIndividualServerResource.class);
+		attachToRouter(routerAuth, "/attributes/categories", AttributeCategoryServerResource.class);
+		attachToRouter(routerAuth, "/search/attributes", SearchAttributeServerResource.class);
+		attachToRouter(routerAuth, "/attributevalues", AttributeValueServerResource.class);
+		attachToRouter(routerAuth, "/attributevalues/{attributeValueDbId}", AttributeValueIndividualServerResource.class);
+		attachToRouter(routerAuth, "/search/attributevalues", SearchAttributeValueServerResource.class);
 	}
 
 	private void attachToRouter(Router router, String url, Class<? extends ServerResource> clazz)

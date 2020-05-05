@@ -1,4 +1,4 @@
-package jhi.germinate.brapi.server.resource.germplasm.attributevalue;
+package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
 import org.jooq.*;
 import org.restlet.data.Status;
@@ -7,9 +7,9 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.ArrayResult;
+import jhi.germinate.brapi.resource.base.ArrayResult;
+import jhi.germinate.brapi.resource.attribute.*;
 import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.*;
 

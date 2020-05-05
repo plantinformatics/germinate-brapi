@@ -30,6 +30,8 @@ public abstract class VariantSetBaseServerResource<T> extends BaseServerResource
 											 .where(DATASETS.DATASETTYPE_ID.eq(1))
 											 .and(DATASETS.DATASET_STATE_ID.eq(1));
 
+		// TODO: Set availableFormats. Make links point to endpoints that dynamically create them.
+
 		if (conditions != null)
 		{
 			for (Condition condition : conditions)
