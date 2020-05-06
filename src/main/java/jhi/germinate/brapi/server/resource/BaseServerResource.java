@@ -3,6 +3,7 @@ package jhi.germinate.brapi.server.resource;
 import org.restlet.resource.*;
 
 import java.sql.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import jhi.germinate.brapi.resource.base.BaseResult;
@@ -58,6 +59,18 @@ public abstract class BaseServerResource<T> extends ServerResource
 
 	@Get("json")
 	public abstract BaseResult<T> getJson();
+
+	protected synchronized String getSimpleDate(Date date)
+	{
+		try
+		{
+			return date.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
 
 	protected Timestamp getTimestamp(Date date)
 	{

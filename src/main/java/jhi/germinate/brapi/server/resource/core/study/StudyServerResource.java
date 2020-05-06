@@ -77,7 +77,7 @@ public class StudyServerResource extends StudyBaseResource<ArrayResult<Study>>
 	@MinUserType(UserType.AUTH_USER)
 	public BaseResult<ArrayResult<Study>> postJson(Study[] newStudies)
 	{
-		// TODO: Check if they're allowed to do this
+
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 

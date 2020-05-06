@@ -91,6 +91,16 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
+		// TRIALS
+		CALLS.add(new BrapiCall("trials")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("trials/{trialDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
 		// CALLSETS
 		CALLS.add(new BrapiCall("callsets")
 			.addDataType(BrapiCall.DataType.json)

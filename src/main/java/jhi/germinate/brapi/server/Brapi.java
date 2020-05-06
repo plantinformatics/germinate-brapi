@@ -9,6 +9,7 @@ import jhi.germinate.brapi.server.resource.core.list.*;
 import jhi.germinate.brapi.server.resource.core.location.*;
 import jhi.germinate.brapi.server.resource.core.season.*;
 import jhi.germinate.brapi.server.resource.core.study.*;
+import jhi.germinate.brapi.server.resource.core.trial.*;
 import jhi.germinate.brapi.server.resource.genotyping.call.*;
 import jhi.germinate.brapi.server.resource.genotyping.map.*;
 import jhi.germinate.brapi.server.resource.genotyping.marker.*;
@@ -52,6 +53,8 @@ public class Brapi
 		attachToRouter(routerAuth, "/studies/{studyDbId}", StudyIndividualServerResource.class);
 		attachToRouter(routerAuth, "/search/studies", SearchStudyServerResource.class);
 		attachToRouter(routerAuth, "/studytypes", StudyTypesServerResource.class);
+		attachToRouter(routerAuth, "/trials", TrialServerResource.class);
+		attachToRouter(routerAuth, "/trials/{trialDbId}", TrialIndividualServerResource.class);
 		attachToRouter(routerUnauth, "/serverinfo", ServerInfoResource.class);
 
 		//GENOTYPING
@@ -76,6 +79,8 @@ public class Brapi
 		attachToRouter(routerAuth, "/search/variants", SearchVariantServerResource.class);
 		attachToRouter(routerAuth, "/variantsets", VariantSetServerResource.class);
 		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}", VariantSetServerResource.class);
+		// TODO: implement
+//		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}/calls", VariantSetCallServerResource.class);
 		attachToRouter(routerAuth, "/search/variantset", SearchVariantSetServerResource.class);
 
 		// GERMPLASM
