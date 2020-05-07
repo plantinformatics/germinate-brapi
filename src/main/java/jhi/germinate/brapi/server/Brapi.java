@@ -23,15 +23,21 @@ import jhi.germinate.brapi.server.resource.germplasm.germplasm.*;
  */
 public class Brapi
 {
-	private String urlPrefix;
-	private Router routerAuth;
-	private Router routerUnauth;
+	public static Brapi BRAPI;
 
-	public Brapi(String urlPrefix, Router routerAuth, Router routerUnauth)
+	private final String urlPrefix;
+	private final Router routerAuth;
+	private final Router routerUnauth;
+	public final  String hdf5BaseFolder;
+
+	public Brapi(String urlPrefix, Router routerAuth, Router routerUnauth, String hdf5BaseFolder)
 	{
 		this.urlPrefix = urlPrefix;
 		this.routerAuth = routerAuth;
 		this.routerUnauth = routerUnauth;
+		this.hdf5BaseFolder = hdf5BaseFolder;
+
+		BRAPI = this;
 
 		init();
 	}
@@ -64,7 +70,6 @@ public class Brapi
 		attachToRouter(routerAuth, "/search/calls", SearchCallServerResource.class);
 		attachToRouter(routerAuth, "/callsets", CallSetServerResource.class);
 		attachToRouter(routerAuth, "/callsets/{callSetDbId}", CallSetIndividualServerResource.class);
-		// TODO: write implementation
 		attachToRouter(routerAuth, "/callsets/{callSetDbId}/calls", CallSetCallServerResource.class);
 		attachToRouter(routerAuth, "/search/callsets", SearchCallSetServerResource.class);
 		attachToRouter(routerAuth, "/maps", MapServerResource.class);
@@ -74,13 +79,12 @@ public class Brapi
 		attachToRouter(routerAuth, "/search/markerpositions", SearchMarkerPositionServerResource.class);
 		attachToRouter(routerAuth, "/variants", VariantServerResource.class);
 		attachToRouter(routerAuth, "/variants/{variantDbId}", VariantIndividualServerResource.class);
-		// TODO: Write implementation
 		attachToRouter(routerAuth, "/variants/{variantDbId}/calls", VariantCallServerResource.class);
 		attachToRouter(routerAuth, "/search/variants", SearchVariantServerResource.class);
 		attachToRouter(routerAuth, "/variantsets", VariantSetServerResource.class);
-		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}", VariantSetServerResource.class);
+		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}", VariantSetIndividualServerResource.class);
 		// TODO: implement
-//		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}/calls", VariantSetCallServerResource.class);
+		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}/calls", VariantSetCallServerResource.class);
 		attachToRouter(routerAuth, "/search/variantset", SearchVariantSetServerResource.class);
 
 		// GERMPLASM

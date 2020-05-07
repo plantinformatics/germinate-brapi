@@ -19,21 +19,22 @@ public abstract class CallSetBaseServerResource<T> extends BaseServerResource<T>
 {
 	protected List<CallSet> getCallSets(DSLContext context, List<Condition> conditions)
 	{
-		SelectJoinStep<?> step = context.select(
+		SelectConditionStep<?> step = context.select(
 			DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), GERMINATEBASE.ID).as("callSetDbId"),
 			GERMINATEBASE.NAME.as("callSetName"),
 			DATASETMEMBERS.CREATED_ON.as("created"),
 			DATASETMEMBERS.UPDATED_ON.as("updated"),
 			DATASETMEMBERS.DATASET_ID.as("studyDbId")
 		)
-										.hint("SQL_CALC_FOUND_ROWS")
-										.from(DATASETMEMBERS)
-										.leftJoin(GERMINATEBASE).on(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(2).and(DATASETMEMBERS.FOREIGN_ID.eq(GERMINATEBASE.ID)));
+											 .hint("SQL_CALC_FOUND_ROWS")
+											 .from(DATASETMEMBERS)
+											 .leftJoin(GERMINATEBASE).on(DATASETMEMBERS.FOREIGN_ID.eq(GERMINATEBASE.ID))
+											 .where(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(2));
 
 		if (!CollectionUtils.isEmpty(conditions))
 		{
 			for (Condition condition : conditions)
-				step.where(condition);
+				step.and(condition);
 		}
 
 		List<CallSet> result = step.limit(pageSize)

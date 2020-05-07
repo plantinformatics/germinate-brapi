@@ -8,14 +8,12 @@ import org.restlet.resource.ResourceException;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.TokenBaseResult;
+import jhi.germinate.brapi.resource.base.*;
 import jhi.germinate.brapi.resource.variant.Variant;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
-import static jhi.germinate.server.database.tables.Markers.*;
 import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
 
 /**
@@ -47,12 +45,9 @@ public class VariantServerResource extends VariantBaseServerResource<ArrayResult
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(variantDbId))
-				conditions.add(MARKERS.ID.cast(String.class).eq(variantDbId));
+				conditions.add(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId));
 			if (!StringUtils.isEmpty(variantSetDbId))
-				conditions.add(DSL.exists(DSL.selectOne().from(DATASETMEMBERS)
-											 .where(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1))
-											 .and(DATASETMEMBERS.DATASET_ID.cast(String.class).eq(variantSetDbId))
-											 .and(DATASETMEMBERS.FOREIGN_ID.eq(VIEW_TABLE_MARKERS.MARKER_ID))));
+				conditions.add(DATASETMEMBERS.DATASET_ID.cast(String.class).eq(variantSetDbId));
 
 			List<Variant> variants = getVariants(context, conditions);
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);

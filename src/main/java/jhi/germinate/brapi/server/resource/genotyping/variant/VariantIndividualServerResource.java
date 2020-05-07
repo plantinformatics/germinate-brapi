@@ -1,6 +1,7 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
@@ -12,6 +13,7 @@ import jhi.germinate.brapi.resource.variant.Variant;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
 
+import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
 
 /**
@@ -41,7 +43,7 @@ public class VariantIndividualServerResource extends VariantBaseServerResource<V
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{
-			List<Variant> variants = getVariants(context, Collections.singletonList(VIEW_TABLE_MARKERS.MARKER_ID.cast(String.class).eq(variantDbId)));
+			List<Variant> variants = getVariants(context, Collections.singletonList(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId)));
 
 			if (CollectionUtils.isEmpty(variants))
 				return new TokenBaseResult<>(null, currentPage, pageSize, 0);

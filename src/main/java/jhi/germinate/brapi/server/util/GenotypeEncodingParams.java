@@ -62,4 +62,15 @@ public class GenotypeEncodingParams
 		this.sepUnphased = sepUnphased;
 		return this;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "GenotypeEncodingParams{" +
+			"collapse=" + collapse +
+			", unknownString='" + unknownString + '\'' +
+			", sepPhased='" + sepPhased + '\'' +
+			", sepUnphased='" + sepUnphased + '\'' +
+			'}';
+	}
 }

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.resource.variant.Variant;
 import jhi.germinate.brapi.server.resource.TokenBaseServerResource;
-import jhi.germinate.server.database.tables.pojos.ViewTableMarkers;
 import jhi.germinate.server.util.CollectionUtils;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
@@ -22,50 +21,39 @@ public abstract class VariantBaseServerResource<T> extends TokenBaseServerResour
 {
 	protected List<Variant> getVariants(DSLContext context, List<Condition> conditions)
 	{
-		Map<Integer, List<Integer>> markerToDataset = context.selectFrom(DATASETMEMBERS)
-															 .where(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1))
-															 .fetchGroups(DATASETMEMBERS.FOREIGN_ID, DATASETMEMBERS.DATASET_ID);
-
-
-		SelectJoinStep<?> step = context.select()
-										.hint("SQL_CALC_FOUND_ROWS")
-										.from(VIEW_TABLE_MARKERS);
+		SelectConditionStep<?> step = context.select()
+											 .hint("SQL_CALC_FOUND_ROWS")
+											 .from(DATASETMEMBERS)
+											 .leftJoin(VIEW_TABLE_MARKERS).on(DATASETMEMBERS.FOREIGN_ID.eq(VIEW_TABLE_MARKERS.MARKER_ID))
+											 .where(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1));
 
 		if (!CollectionUtils.isEmpty(conditions))
 		{
 			for (Condition condition : conditions)
-				step.where(condition);
+				step.and(condition);
 		}
 
 		return step.limit(pageSize)
 				   .offset(pageSize * currentPage)
-				   .fetchInto(ViewTableMarkers.class)
 				   .stream()
 				   .map(m -> {
 					   Variant result = new Variant()
-						   .setVariantDbId(Integer.toString(m.getMarkerId()))
-						   .setCreated(m.getCreatedOn())
-						   .setUpdated(m.getUpdatedOn())
-						   .setVariantType(m.getMarkerType());
+						   .setVariantDbId(m.get(DATASETMEMBERS.DATASET_ID) + "-" + m.get(VIEW_TABLE_MARKERS.MARKER_ID))
+						   .setCreated(m.get(VIEW_TABLE_MARKERS.CREATED_ON))
+						   .setUpdated(m.get(VIEW_TABLE_MARKERS.UPDATED_ON))
+						   .setVariantType(m.get(VIEW_TABLE_MARKERS.MARKER_TYPE));
 
 					   List<String> names = new ArrayList<>();
-					   names.add(m.getMarkerName());
+					   names.add(m.get(VIEW_TABLE_MARKERS.MARKER_NAME));
 
-					   if (m.getMarkerSynonyms() != null)
+					   if (m.get(VIEW_TABLE_MARKERS.MARKER_SYNONYMS) != null)
 					   {
-						   for (JsonElement name : m.getMarkerSynonyms())
+						   for (JsonElement name : m.get(VIEW_TABLE_MARKERS.MARKER_SYNONYMS))
 							   names.add(name.getAsString());
 					   }
 
 					   result.setVariantNames(names);
-
-					   List<Integer> datasetIds = markerToDataset.get(m.getMarkerId());
-					   if (!CollectionUtils.isEmpty(datasetIds))
-					   {
-						   result.setVariantSetDbId(datasetIds.stream()
-															  .map(i -> Integer.toString(i))
-															  .collect(Collectors.toList()));
-					   }
+					   result.setVariantSetDbId(Collections.singletonList(Integer.toString(m.get(DATASETMEMBERS.DATASET_ID))));
 
 					   return result;
 				   })

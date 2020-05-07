@@ -4,6 +4,16 @@ import java.util.Objects;
 
 public class GenotypeEncodingUtils
 {
+	public static String getString(String allele, GenotypeEncodingParams params)
+	{
+		allele = fixAllele(allele, params.getUnknownString());
+
+		if (!params.isCollapse())
+			return allele + params.getSepUnphased() + allele;
+		else
+			return allele;
+	}
+
 	public static String getString(String allele1, String allele2, GenotypeEncodingParams params)
 	{
 		allele1 = fixAllele(allele1, params.getUnknownString()); // Replace empty string and dash with the unknownString
@@ -26,7 +36,7 @@ public class GenotypeEncodingUtils
 			return allele1 + params.getSepUnphased() + allele2;
 	}
 
-	private static String fixAllele(String input, String unknownString)
+	public static String fixAllele(String input, String unknownString)
 	{
 		if (Objects.equals(input, "") || Objects.equals(input, "-"))
 			return unknownString;

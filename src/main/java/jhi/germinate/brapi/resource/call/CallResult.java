@@ -1,11 +1,11 @@
-package jhi.germinate.brapi.resource.base;
+package jhi.germinate.brapi.resource.call;
 
 import java.util.List;
 
 /**
  * @author Sebastian Raubach
  */
-public class VariantCallResult<T>
+public class CallResult<T>
 {
 	private List<T> data;
 	private Boolean expandHomozygotes;
@@ -18,7 +18,7 @@ public class VariantCallResult<T>
 		return data;
 	}
 
-	public VariantCallResult<T> setData(List<T> data)
+	public CallResult<T> setData(List<T> data)
 	{
 		this.data = data;
 		return this;
@@ -29,7 +29,7 @@ public class VariantCallResult<T>
 		return expandHomozygotes;
 	}
 
-	public VariantCallResult<T> setExpandHomozygotes(Boolean expandHomozygotes)
+	public CallResult<T> setExpandHomozygotes(Boolean expandHomozygotes)
 	{
 		this.expandHomozygotes = expandHomozygotes;
 		return this;
@@ -40,7 +40,7 @@ public class VariantCallResult<T>
 		return sepPhased;
 	}
 
-	public VariantCallResult<T> setSepPhased(String sepPhased)
+	public CallResult<T> setSepPhased(String sepPhased)
 	{
 		this.sepPhased = sepPhased;
 		return this;
@@ -51,7 +51,7 @@ public class VariantCallResult<T>
 		return sepUnphased;
 	}
 
-	public VariantCallResult<T> setSepUnphased(String sepUnphased)
+	public CallResult<T> setSepUnphased(String sepUnphased)
 	{
 		this.sepUnphased = sepUnphased;
 		return this;
@@ -62,7 +62,7 @@ public class VariantCallResult<T>
 		return unknownString;
 	}
 
-	public VariantCallResult<T> setUnknownString(String unknownString)
+	public CallResult<T> setUnknownString(String unknownString)
 	{
 		this.unknownString = unknownString;
 		return this;
