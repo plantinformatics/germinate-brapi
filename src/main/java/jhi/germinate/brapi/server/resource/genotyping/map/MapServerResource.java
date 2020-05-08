@@ -89,6 +89,8 @@ public class MapServerResource extends BaseServerResource<ArrayResult<Map>>
 										 .leftJoin(DATASETS).on(DATASETS.ID.eq(DATASETMEMBERS.DATASET_ID))
 										 .where(DATASETMEMBERS.FOREIGN_ID.eq(MAPDEFINITIONS.MARKER_ID))
 										 .and(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1))
+										 .and(DATASETS.IS_EXTERNAL.eq(false))
+										 .and(DATASETS.DATASET_STATE_ID.eq(1))
 										 .and(DATASETS.EXPERIMENT_ID.cast(String.class).eq(trialDbId))));
 			}
 

@@ -22,6 +22,7 @@ public abstract class SeasonBaseServerResource<T> extends BaseServerResource<T>
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(DATASETS)
 											 .where(DATASETS.DATASET_STATE_ID.eq(1))
+											 .and(DATASETS.IS_EXTERNAL.eq(false))
 											 .and(DATASETS.DATE_START.isNotNull());
 
 		if (conditions != null)

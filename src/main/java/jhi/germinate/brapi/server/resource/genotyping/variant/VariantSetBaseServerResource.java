@@ -2,10 +2,13 @@ package jhi.germinate.brapi.server.resource.genotyping.variant;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.restlet.ext.servlet.ServletUtils;
 
-import java.util.List;
+import java.net.URI;
+import java.util.*;
 
-import jhi.germinate.brapi.resource.variant.VariantSet;
+import jhi.germinate.brapi.resource.variant.*;
+import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.resource.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
@@ -28,9 +31,8 @@ public abstract class VariantSetBaseServerResource<T> extends BaseServerResource
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(DATASETS)
 											 .where(DATASETS.DATASETTYPE_ID.eq(1))
+											 .and(DATASETS.IS_EXTERNAL.eq(false))
 											 .and(DATASETS.DATASET_STATE_ID.eq(1));
-
-		// TODO: Set availableFormats. Make links point to endpoints that dynamically create them.
 
 		if (conditions != null)
 		{
@@ -38,8 +40,26 @@ public abstract class VariantSetBaseServerResource<T> extends BaseServerResource
 				step.and(condition);
 		}
 
-		return step.limit(pageSize)
-				   .offset(pageSize * currentPage)
-				   .fetchInto(VariantSet.class);
+		List<VariantSet> result = step.limit(pageSize)
+									  .offset(pageSize * currentPage)
+									  .fetchInto(VariantSet.class);
+
+		result.forEach(vs -> {
+			try
+			{
+				String serverBase = Brapi.getServerBase(ServletUtils.getRequest(getRequest()));
+				URI uri = URI.create(serverBase + "/api" + Brapi.BRAPI.urlPrefix + "/files/genotypes/" + vs.getVariantSetDbId());
+				vs.setAvailableFormats(Collections.singletonList(new Format()
+					.setDataFormat("Flapjack")
+					.setFileFormat("text/tab-separated-values")
+					.setFileURL(uri)));
+			}
+			catch (IllegalArgumentException e)
+			{
+				e.printStackTrace();
+			}
+		});
+
+		return result;
 	}
 }

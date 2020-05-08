@@ -2,11 +2,14 @@ package jhi.germinate.brapi.server.resource;
 
 import org.restlet.resource.*;
 
+import java.io.*;
 import java.sql.*;
+import java.sql.Date;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.*;
 
 import jhi.germinate.brapi.resource.base.BaseResult;
+import jhi.germinate.server.util.*;
 
 /**
  * @author Sebastian Raubach
@@ -26,7 +29,7 @@ public abstract class BaseServerResource<T> extends ServerResource
 	}
 
 	@Override
-	public void doInit()
+	protected void doInit()
 	{
 		super.doInit();
 

@@ -83,6 +83,7 @@ public class VariantSetCallServerResource extends TokenBaseServerResource<CallRe
 
 			DatasetsRecord dataset = context.selectFrom(DATASETS)
 											.where(DATASETS.DATASET_STATE_ID.eq(1))
+											.and(DATASETS.IS_EXTERNAL.eq(false))
 											.and(DATASETS.ID.cast(String.class).eq(parts[0]))
 											.fetchAny();
 

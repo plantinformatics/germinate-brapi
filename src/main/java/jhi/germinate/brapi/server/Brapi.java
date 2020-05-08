@@ -3,6 +3,8 @@ package jhi.germinate.brapi.server;
 import org.restlet.resource.ServerResource;
 import org.restlet.routing.Router;
 
+import javax.servlet.http.HttpServletRequest;
+
 import jhi.germinate.brapi.server.resource.core.ServerInfoResource;
 import jhi.germinate.brapi.server.resource.core.crop.CropServerResource;
 import jhi.germinate.brapi.server.resource.core.list.*;
@@ -17,6 +19,7 @@ import jhi.germinate.brapi.server.resource.genotyping.variant.*;
 import jhi.germinate.brapi.server.resource.germplasm.attribute.*;
 import jhi.germinate.brapi.server.resource.germplasm.breedingmethod.*;
 import jhi.germinate.brapi.server.resource.germplasm.germplasm.*;
+import jhi.germinate.brapi.server.resource.other.GenotypeFileServerResource;
 
 /**
  * @author Sebastian Raubach
@@ -25,7 +28,7 @@ public class Brapi
 {
 	public static Brapi BRAPI;
 
-	private final String urlPrefix;
+	public final  String urlPrefix;
 	private final Router routerAuth;
 	private final Router routerUnauth;
 	public final  String hdf5BaseFolder;
@@ -83,7 +86,6 @@ public class Brapi
 		attachToRouter(routerAuth, "/search/variants", SearchVariantServerResource.class);
 		attachToRouter(routerAuth, "/variantsets", VariantSetServerResource.class);
 		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}", VariantSetIndividualServerResource.class);
-		// TODO: implement
 		attachToRouter(routerAuth, "/variantsets/{variantSetDbId}/calls", VariantSetCallServerResource.class);
 		attachToRouter(routerAuth, "/search/variantset", SearchVariantSetServerResource.class);
 
@@ -105,11 +107,27 @@ public class Brapi
 		attachToRouter(routerAuth, "/attributevalues", AttributeValueServerResource.class);
 		attachToRouter(routerAuth, "/attributevalues/{attributeValueDbId}", AttributeValueIndividualServerResource.class);
 		attachToRouter(routerAuth, "/search/attributevalues", SearchAttributeValueServerResource.class);
+
+		// NON-STANDARD
+		attachToRouter(routerAuth, "/files/genotypes/{datasetId}", GenotypeFileServerResource.class);
 	}
 
 	private void attachToRouter(Router router, String url, Class<? extends ServerResource> clazz)
 	{
 		router.attach(urlPrefix + url, clazz);
 		router.attach(urlPrefix + url + "/", clazz);
+	}
+
+	public static String getServerBase(HttpServletRequest req)
+	{
+		String scheme = req.getScheme(); // http or https
+		String serverName = req.getServerName(); // ics.hutton.ac.uk
+		int serverPort = req.getServerPort(); // 80 or 8080 or 443
+		String contextPath = req.getContextPath(); // /germinate-baz
+
+		if (serverPort == 80 || serverPort == 443)
+			return scheme + "://" + serverName + contextPath; // http://ics.hutton.ac.uk/germinate-baz
+		else
+			return scheme + "://" + serverName + ":" + serverPort + contextPath; // http://ics.hutton.ac.uk:8080/germinate-baz
 	}
 }
