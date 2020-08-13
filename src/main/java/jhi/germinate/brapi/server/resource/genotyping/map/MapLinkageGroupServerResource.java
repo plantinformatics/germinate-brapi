@@ -3,15 +3,15 @@ package jhi.germinate.brapi.server.resource.genotyping.map;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.*;
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.map.BrapiMapLinkageGroupServerResource;
 
 import static jhi.germinate.server.database.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.tables.Maps.*;
@@ -19,7 +19,7 @@ import static jhi.germinate.server.database.tables.Maps.*;
 /**
  * @author Sebastian Raubach
  */
-public class MapLinkageGroupServerResource extends BaseServerResource<ArrayResult<LinkageGroup>>
+public class MapLinkageGroupServerResource extends BaseServerResource implements BrapiMapLinkageGroupServerResource
 {
 	private String mapDbId;
 
@@ -31,8 +31,8 @@ public class MapLinkageGroupServerResource extends BaseServerResource<ArrayResul
 		this.mapDbId = getRequestAttributes().get("mapDbId").toString();
 	}
 
-	@Override
-	public BaseResult<ArrayResult<LinkageGroup>> getJson()
+	@Get
+	public BaseResult<ArrayResult<LinkageGroup>> getMapLinkageGroups()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

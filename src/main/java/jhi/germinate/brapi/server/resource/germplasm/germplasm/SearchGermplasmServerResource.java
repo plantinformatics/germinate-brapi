@@ -9,13 +9,13 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.Germinatebase;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
+import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiSearchGermplasmServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 import static jhi.germinate.server.database.tables.Synonyms.*;
@@ -24,11 +24,11 @@ import static jhi.germinate.server.database.tables.Taxonomies.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchGermplasmServerResource extends GermplasmBaseServerResource<ArrayResult<Germplasm>>
+public class SearchGermplasmServerResource extends GermplasmBaseServerResource implements BrapiSearchGermplasmServerResource
 {
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Germplasm>> postJson(GermplasmSearch search)
+	public BaseResult<ArrayResult<Germplasm>> postGermplasmSearch(GermplasmSearch search)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -84,8 +84,14 @@ public class SearchGermplasmServerResource extends GermplasmBaseServerResource<A
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Germplasm>> getJson()
+	@Post
+	public BaseResult<SearchResult> postGermplasmSearchAsync(GermplasmSearch germplasmSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public BaseResult<ArrayResult<Germplasm>> getGermplasmSearchAsync()
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}

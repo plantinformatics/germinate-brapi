@@ -7,19 +7,20 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.attribute.Attribute;
-import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.records.AttributesRecord;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.Attribute;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Attributes.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class AttributeIndividualServerResource extends AttributeBaseServerResource<Attribute>
+public class AttributeIndividualServerResource extends AttributeBaseServerResource implements BrapiAttributeIndividualServerResource
 {
 	private String attributeDbId;
 
@@ -39,7 +40,7 @@ public class AttributeIndividualServerResource extends AttributeBaseServerResour
 
 	@Put
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<Attribute> putJson(Attribute toUpdate)
+	public BaseResult<Attribute> putAttributeById(Attribute toUpdate)
 	{
 		if (StringUtils.isEmpty(attributeDbId) || toUpdate == null || toUpdate.getAttributeDbId() != null && !Objects.equals(toUpdate.getAttributeDbId(), attributeDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -61,7 +62,7 @@ public class AttributeIndividualServerResource extends AttributeBaseServerResour
 				record.setDescription(toUpdate.getAttributeDescription());
 				record.store();
 
-				return getJson();
+				return getAttributeById();
 			}
 		}
 		catch (SQLException e)
@@ -71,8 +72,8 @@ public class AttributeIndividualServerResource extends AttributeBaseServerResour
 		}
 	}
 
-	@Override
-	public BaseResult<Attribute> getJson()
+	@Get
+	public BaseResult<Attribute> getAttributeById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

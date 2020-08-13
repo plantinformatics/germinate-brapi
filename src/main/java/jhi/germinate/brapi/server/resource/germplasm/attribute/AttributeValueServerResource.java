@@ -8,14 +8,14 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.attribute.AttributeValue;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.enums.AttributesDatatype;
 import jhi.germinate.server.database.tables.records.*;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.AttributeValue;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeValueServerResource;
 
 import static jhi.germinate.server.database.tables.Attributedata.*;
 import static jhi.germinate.server.database.tables.Attributes.*;
@@ -25,7 +25,7 @@ import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.
 /**
  * @author Sebastian Raubach
  */
-public class AttributeValueServerResource extends AttributeValueBaseServerResource<ArrayResult<AttributeValue>>
+public class AttributeValueServerResource extends AttributeValueBaseServerResource implements BrapiAttributeValueServerResource
 {
 	private static final String PARAM_ATTRIBUTE_VALUE_DB_ID     = "attributeValueDbId";
 	private static final String PARAM_ATTRIBUTE_DB_ID           = "attributeDbId";
@@ -56,7 +56,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<AttributeValue>> postJson(AttributeValue[] newValues)
+	public BaseResult<ArrayResult<AttributeValue>> postAttributeValues(AttributeValue[] newValues)
 	{
 		if (CollectionUtils.isEmpty(newValues))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -133,8 +133,8 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<AttributeValue>> getJson()
+	@Get
+	public BaseResult<ArrayResult<AttributeValue>> getAttributeValues()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

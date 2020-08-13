@@ -7,12 +7,13 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.attribute.AttributeValue;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.records.AttributedataRecord;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.AttributeValue;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeValueIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Attributedata.*;
 import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.*;
@@ -20,7 +21,7 @@ import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.
 /**
  * @author Sebastian Raubach
  */
-public class AttributeValueIndividualServerResource extends AttributeValueBaseServerResource<AttributeValue>
+public class AttributeValueIndividualServerResource extends AttributeValueBaseServerResource implements BrapiAttributeValueIndividualServerResource
 {
 	private String attributeValueDbId;
 
@@ -40,7 +41,7 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 
 	@Put
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<AttributeValue> putJson(AttributeValue toUpdate)
+	public BaseResult<AttributeValue> putAttributeValueById(AttributeValue toUpdate)
 	{
 		if (StringUtils.isEmpty(attributeValueDbId) || toUpdate == null || toUpdate.getAttributeValueDbId() != null && !Objects.equals(toUpdate.getAttributeValueDbId(), attributeValueDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -62,7 +63,7 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 				record.setCreatedOn(toUpdate.getDeterminedDate());
 				record.store();
 
-				return getJson();
+				return getAttributeValueById();
 			}
 		}
 		catch (SQLException e)
@@ -72,8 +73,8 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 		}
 	}
 
-	@Override
-	public BaseResult<AttributeValue> getJson()
+	@Get
+	public BaseResult<AttributeValue> getAttributeValueById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

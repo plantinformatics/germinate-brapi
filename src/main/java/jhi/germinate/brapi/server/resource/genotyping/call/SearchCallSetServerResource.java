@@ -8,10 +8,11 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.call.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiSearchCallSetServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -19,16 +20,10 @@ import static jhi.germinate.server.database.tables.Germinatebase.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchCallSetServerResource extends CallSetBaseServerResource<ArrayResult<CallSet>>
+public class SearchCallSetServerResource extends CallSetBaseServerResource implements BrapiSearchCallSetServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<CallSet>> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
-	public BaseResult<ArrayResult<CallSet>> postJson(CallSetSearch search)
+	public BaseResult<ArrayResult<CallSet>> postCallSetSearch(CallSetSearch search)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -57,5 +52,17 @@ public class SearchCallSetServerResource extends CallSetBaseServerResource<Array
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Post
+	public BaseResult<SearchResult> postCallSetSearchAsync(CallSetSearch callSetSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public BaseResult<ArrayResult<CallSet>> getCallSetSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

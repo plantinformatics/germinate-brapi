@@ -7,21 +7,21 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.attribute.*;
-import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.server.Database;
-import jhi.germinate.server.util.*;
+import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.*;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiSearchAttributeValueServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class SearchAttributeValueServerResource extends AttributeValueBaseServerResource<ArrayResult<AttributeValue>>
+public class SearchAttributeValueServerResource extends AttributeValueBaseServerResource implements BrapiSearchAttributeValueServerResource
 {
 	@Post
-	public BaseResult<ArrayResult<AttributeValue>> postJson(AttributeValueSearch search)
+	public BaseResult<ArrayResult<AttributeValue>> postAttributeValueSearch(AttributeValueSearch search)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -55,9 +55,17 @@ public class SearchAttributeValueServerResource extends AttributeValueBaseServer
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<AttributeValue>> getJson()
+	@Post
+	public BaseResult<SearchResult> postAttributeValueSearchAsync(AttributeValueSearch attributeValueSearch)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
+
+	@Get
+	public BaseResult<ArrayResult<AttributeValue>> getAttributeValueSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+
 }

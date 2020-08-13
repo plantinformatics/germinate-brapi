@@ -8,10 +8,11 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.variant.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiSearchVariantServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Markers.*;
@@ -20,16 +21,10 @@ import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchVariantServerResource extends VariantBaseServerResource<ArrayResult<Variant>>
+public class SearchVariantServerResource extends VariantBaseServerResource implements BrapiSearchVariantServerResource
 {
-	@Override
-	public TokenBaseResult<ArrayResult<Variant>> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
-	public TokenBaseResult<ArrayResult<Variant>> postJson(VariantSearch search)
+	public TokenBaseResult<ArrayResult<Variant>> postVariantSearch(VariantSearch search)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -44,7 +39,7 @@ public class SearchVariantServerResource extends VariantBaseServerResource<Array
 											 .and(DATASETMEMBERS.DATASET_ID.cast(String.class).in(search.getVariantSetDbIds()))
 											 .and(DATASETMEMBERS.FOREIGN_ID.eq(VIEW_TABLE_MARKERS.MARKER_ID))));
 
-			List<Variant> variants = getVariants(context, conditions);
+			List<Variant> variants = getVariantsInternal(context, conditions);
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new TokenBaseResult<>(new ArrayResult<Variant>()
 				.setData(variants), currentPage, pageSize, totalCount);
@@ -54,5 +49,17 @@ public class SearchVariantServerResource extends VariantBaseServerResource<Array
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Post
+	public BaseResult<SearchResult> postVariantSearchAsync(VariantSearch variantSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public TokenBaseResult<ArrayResult<Variant>> getVariantSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

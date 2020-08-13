@@ -3,16 +3,16 @@ package jhi.germinate.brapi.server.resource.genotyping.variant;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.variant.VariantSet;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.VariantSet;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Datasets.*;
@@ -20,7 +20,7 @@ import static jhi.germinate.server.database.tables.Datasets.*;
 /**
  * @author Sebastian Raubach
  */
-public class VariantSetServerResource extends VariantSetBaseServerResource<ArrayResult<VariantSet>>
+public class VariantSetServerResource extends VariantSetBaseServerResource implements BrapiVariantSetServerResource
 {
 	public static final String PARAM_VARIANT_SET_DB_ID = "variantSetDbId";
 	public static final String PARAM_VARIANT_DB_ID     = "variantDbId";
@@ -46,8 +46,8 @@ public class VariantSetServerResource extends VariantSetBaseServerResource<Array
 		this.studyName = getQueryValue(PARAM_STUDY_NAME);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<VariantSet>> getJson()
+	@Get
+	public BaseResult<ArrayResult<VariantSet>> getVariantSets()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

@@ -9,14 +9,14 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.attribute.Attribute;
-import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.enums.AttributesDatatype;
 import jhi.germinate.server.database.tables.records.AttributesRecord;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.Attribute;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeServerResource;
 
 import static jhi.germinate.server.database.tables.Attributedata.*;
 import static jhi.germinate.server.database.tables.Attributes.*;
@@ -25,7 +25,7 @@ import static jhi.germinate.server.database.tables.Germinatebase.*;
 /**
  * @author Sebastian Raubach
  */
-public class AttributeServerResource extends AttributeBaseServerResource<ArrayResult<Attribute>>
+public class AttributeServerResource extends AttributeBaseServerResource implements BrapiAttributeServerResource
 {
 	private static final String PARAM_ATTRIBUTE_CATEGORY        = "attributeCategory";
 	private static final String PARAM_ATTRIBUTE_DB_ID           = "attributeDbId";
@@ -56,7 +56,7 @@ public class AttributeServerResource extends AttributeBaseServerResource<ArrayRe
 
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Attribute>> postJson(Attribute[] newAttributes)
+	public BaseResult<ArrayResult<Attribute>> postAttributes(Attribute[] newAttributes)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -92,8 +92,8 @@ public class AttributeServerResource extends AttributeBaseServerResource<ArrayRe
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Attribute>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Attribute>> getAttributes()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

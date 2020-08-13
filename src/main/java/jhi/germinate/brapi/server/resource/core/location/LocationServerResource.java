@@ -8,18 +8,18 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.location.Location;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.location.Location;
+import uk.ac.hutton.ics.brapi.server.core.location.BrapiLocationServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class LocationServerResource extends LocationBaseResource<ArrayResult<Location>>
+public class LocationServerResource extends LocationBaseResource implements BrapiLocationServerResource
 {
 	public static final String PARAM_LOCATION_TYPE = "locationType";
 
@@ -35,13 +35,13 @@ public class LocationServerResource extends LocationBaseResource<ArrayResult<Loc
 
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Location>> postJson(Location[] newLocations)
+	public BaseResult<ArrayResult<Location>> postLocations(Location[] newLocations)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Location>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Location>> getLocations()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

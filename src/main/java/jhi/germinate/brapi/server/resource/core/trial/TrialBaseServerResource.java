@@ -6,11 +6,12 @@ import org.jooq.impl.DSL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.Contact;
-import jhi.germinate.brapi.resource.trial.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import jhi.germinate.brapi.server.util.DateUtils;
 import jhi.germinate.server.database.tables.pojos.ViewTableExperiments;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.Contact;
+import uk.ac.hutton.ics.brapi.resource.core.trial.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasets.*;
 import static jhi.germinate.server.database.tables.Experiments.*;
@@ -21,7 +22,7 @@ import static jhi.germinate.server.database.tables.ViewTableLicenses.*;
 /**
  * @author Sebastian Raubach
  */
-public abstract class TrialBaseServerResource<T> extends BaseServerResource<T>
+public abstract class TrialBaseServerResource extends BaseServerResource
 {
 	protected List<Trial> getTrials(DSLContext context, List<Condition> conditions)
 	{
@@ -84,8 +85,8 @@ public abstract class TrialBaseServerResource<T> extends BaseServerResource<T>
 						   .setActive(false)
 						   .setContacts(collaborators.get(r.getExperimentId()))
 						   .setDatasetAuthorships(authorship.get(r.getExperimentId()))
-						   .setEndDate(getSimpleDate(r.getExperimentDate()))
-						   .setStartDate(getSimpleDate(r.getExperimentDate()))
+						   .setEndDate(DateUtils.getSimpleDate(r.getExperimentDate()))
+						   .setStartDate(DateUtils.getSimpleDate(r.getExperimentDate()))
 						   .setTrialDbId(Integer.toString(r.getExperimentId()))
 						   .setTrialDescription(r.getExperimentDescription())
 						   .setTrialName(r.getExperimentName())

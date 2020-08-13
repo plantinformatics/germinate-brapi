@@ -1,40 +1,33 @@
 package jhi.germinate.brapi.server.resource.genotyping.call;
 
-import org.jooq.DSLContext;
 import org.restlet.data.Status;
 import org.restlet.resource.*;
 
-import java.sql.*;
-
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.call.*;
-import jhi.germinate.brapi.server.resource.TokenBaseServerResource;
-import jhi.germinate.server.Database;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
+import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiSearchCallServerResource;
 
 /**
  * @author Sebastian Raubach
  */
-public class SearchCallServerResource extends TokenBaseServerResource<ArrayResult<Call>>
+public class SearchCallServerResource extends TokenBaseServerResource implements BrapiSearchCallServerResource
 {
-	@Override
-	public TokenBaseResult<ArrayResult<Call>> getJson()
+	@Post
+	public TokenBaseResult<CallResult<Call>> postCallSearch(CallSearch search)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
 	@Post
-	public TokenBaseResult<ArrayResult<Call>> postJson(CallSearch search)
+	public BaseResult<SearchResult> postCallSearchAsync(CallSearch callSearch)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
-		{
-			// TODO: implement
-			return null;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public TokenBaseResult<CallResult<Call>> getCallSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

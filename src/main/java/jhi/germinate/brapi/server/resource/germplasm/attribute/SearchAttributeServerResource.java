@@ -7,27 +7,21 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.attribute.*;
-import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.*;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiSearchAttributeServerResource;
 
 import static jhi.germinate.server.database.tables.Attributes.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class SearchAttributeServerResource extends AttributeBaseServerResource<ArrayResult<Attribute>>
+public class SearchAttributeServerResource extends AttributeBaseServerResource implements BrapiSearchAttributeServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<Attribute>> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
-	public BaseResult<ArrayResult<Attribute>> postJson(AttributeSearch search)
+	public BaseResult<ArrayResult<Attribute>> postAttributeSearch(AttributeSearch search)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -50,5 +44,17 @@ public class SearchAttributeServerResource extends AttributeBaseServerResource<A
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Post
+	public BaseResult<SearchResult> postAttributeSearchAsync(AttributeSearch attributeSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public BaseResult<ArrayResult<Attribute>> getAttributeSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

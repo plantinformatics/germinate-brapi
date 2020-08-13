@@ -3,16 +3,17 @@ package jhi.germinate.brapi.server.resource.genotyping.map;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.map.Map;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.genotyping.map.Map;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.map.BrapiMapIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.tables.Maps.*;
@@ -20,7 +21,7 @@ import static jhi.germinate.server.database.tables.Maps.*;
 /**
  * @author Sebastian Raubach
  */
-public class MapIndividualServerResource extends BaseServerResource<Map>
+public class MapIndividualServerResource extends BaseServerResource implements BrapiMapIndividualServerResource
 {
 	private String mapDbId;
 
@@ -32,8 +33,8 @@ public class MapIndividualServerResource extends BaseServerResource<Map>
 		this.mapDbId = getRequestAttributes().get("mapDbId").toString();
 	}
 
-	@Override
-	public BaseResult<Map> getJson()
+	@Get
+	public BaseResult<Map> getMapById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

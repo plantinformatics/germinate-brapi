@@ -2,16 +2,17 @@ package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
 import org.jooq.DSLContext;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
+import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmIndividualPedigreeServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 import static jhi.germinate.server.database.tables.Pedigreedefinitions.*;
@@ -20,7 +21,7 @@ import static jhi.germinate.server.database.tables.Pedigrees.*;
 /**
  * @author Sebastian Raubach
  */
-public class PedigreeServerResource extends GermplasmBaseServerResource<Pedigree>
+public class PedigreeServerResource extends GermplasmBaseServerResource implements BrapiGermplasmIndividualPedigreeServerResource
 {
 	private String germplasmDbId;
 
@@ -38,8 +39,8 @@ public class PedigreeServerResource extends GermplasmBaseServerResource<Pedigree
 		}
 	}
 
-	@Override
-	public BaseResult<Pedigree> getJson()
+	@Get
+	public BaseResult<Pedigree> getGermplasmPedigree()
 	{
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

@@ -3,16 +3,17 @@ package jhi.germinate.brapi.server.resource.genotyping.map;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.map.Map;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.map.Map;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.map.BrapiMapServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Datasets.*;
@@ -22,7 +23,7 @@ import static jhi.germinate.server.database.tables.Maps.*;
 /**
  * @author Sebastian Raubach
  */
-public class MapServerResource extends BaseServerResource<ArrayResult<Map>>
+public class MapServerResource extends BaseServerResource implements BrapiMapServerResource
 {
 	public static final String PARAM_COMMON_CROP_NAME = "commonCropName";
 	public static final String PARAM_MAP_PUI          = "mapPUI";
@@ -51,8 +52,8 @@ public class MapServerResource extends BaseServerResource<ArrayResult<Map>>
 		this.studyDbId = getQueryValue(PARAM_STUDY_DB_ID);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Map>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Map>> getMaps()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

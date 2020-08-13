@@ -1,23 +1,24 @@
 package jhi.germinate.brapi.server.resource.core.trial;
 
-import org.jooq.*;
+import org.jooq.DSLContext;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.trial.Trial;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.core.trial.Trial;
+import uk.ac.hutton.ics.brapi.server.core.trial.BrapiTrialIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableExperiments.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class TrialIndividualServerResource extends TrialBaseServerResource<Trial>
+public class TrialIndividualServerResource extends TrialBaseServerResource implements BrapiTrialIndividualServerResource
 {
 	private String trialDbId;
 
@@ -35,8 +36,8 @@ public class TrialIndividualServerResource extends TrialBaseServerResource<Trial
 		}
 	}
 
-	@Override
-	public BaseResult<Trial> getJson()
+	@Get
+	public BaseResult<Trial> getTrialById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -53,5 +54,11 @@ public class TrialIndividualServerResource extends TrialBaseServerResource<Trial
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Put
+	public BaseResult<Trial> putTrialById(Trial trial)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

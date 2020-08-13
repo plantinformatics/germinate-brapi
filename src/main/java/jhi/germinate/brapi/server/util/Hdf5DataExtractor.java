@@ -7,11 +7,10 @@ import ch.systemsx.cisd.hdf5.*;
 
 public class Hdf5DataExtractor implements AutoCloseable
 {
+	private final String[]     stateTable;
 	private IHDF5Reader reader;
-
 	private       List<String> hdf5Lines;
 	private       List<String> hdf5Markers;
-	private final String[]     stateTable;
 
 	public Hdf5DataExtractor(File hdf5File)
 	{

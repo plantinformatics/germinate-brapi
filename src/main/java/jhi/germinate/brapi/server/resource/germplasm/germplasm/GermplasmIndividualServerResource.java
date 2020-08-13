@@ -7,18 +7,19 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.Germplasm;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Germplasm;
+import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class GermplasmIndividualServerResource extends GermplasmBaseServerResource<Germplasm>
+public class GermplasmIndividualServerResource extends GermplasmBaseServerResource implements BrapiGermplasmIndividualServerResource
 {
 	private String germplasmDbId;
 
@@ -38,7 +39,7 @@ public class GermplasmIndividualServerResource extends GermplasmBaseServerResour
 
 	@Put
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<Germplasm> putJson(Germplasm newGermplasm)
+	public BaseResult<Germplasm> putGermplasmById(Germplasm newGermplasm)
 	{
 		if (StringUtils.isEmpty(germplasmDbId) || newGermplasm == null || newGermplasm.getGermplasmDbId() != null && !Objects.equals(newGermplasm.getGermplasmDbId(), germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -62,8 +63,8 @@ public class GermplasmIndividualServerResource extends GermplasmBaseServerResour
 		}
 	}
 
-	@Override
-	public BaseResult<Germplasm> getJson()
+	@Get
+	public BaseResult<Germplasm> getGermplasmById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

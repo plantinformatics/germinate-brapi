@@ -3,15 +3,16 @@ package jhi.germinate.brapi.server.resource.genotyping.call;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.call.CallSet;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.CallSet;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -19,7 +20,7 @@ import static jhi.germinate.server.database.tables.Germinatebase.*;
 /**
  * @author Sebastian Raubach
  */
-public class CallSetServerResource extends CallSetBaseServerResource<ArrayResult<CallSet>>
+public class CallSetServerResource extends CallSetBaseServerResource implements BrapiCallSetServerResource
 {
 	private static final String PARAM_CALL_SET_DB_ID    = "callSetDbId";
 	private static final String PARAM_CALL_SET_NAME     = "callSetName";
@@ -45,8 +46,8 @@ public class CallSetServerResource extends CallSetBaseServerResource<ArrayResult
 		this.germplasmDbId = getQueryValue(PARAM_GERMPLASM_DB_ID);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<CallSet>> getJson()
+	@Get
+	public BaseResult<ArrayResult<CallSet>> getCallsets()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

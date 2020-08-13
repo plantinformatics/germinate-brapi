@@ -29,9 +29,9 @@ public class Brapi
 	public static Brapi BRAPI;
 
 	public final  String urlPrefix;
+	public final  String hdf5BaseFolder;
 	private final Router routerAuth;
 	private final Router routerUnauth;
-	public final  String hdf5BaseFolder;
 
 	public Brapi(String urlPrefix, Router routerAuth, Router routerUnauth, String hdf5BaseFolder)
 	{
@@ -43,6 +43,19 @@ public class Brapi
 		BRAPI = this;
 
 		init();
+	}
+
+	public static String getServerBase(HttpServletRequest req)
+	{
+		String scheme = req.getScheme(); // http or https
+		String serverName = req.getServerName(); // ics.hutton.ac.uk
+		int serverPort = req.getServerPort(); // 80 or 8080 or 443
+		String contextPath = req.getContextPath(); // /germinate-baz
+
+		if (serverPort == 80 || serverPort == 443)
+			return scheme + "://" + serverName + contextPath; // http://ics.hutton.ac.uk/germinate-baz
+		else
+			return scheme + "://" + serverName + ":" + serverPort + contextPath; // http://ics.hutton.ac.uk:8080/germinate-baz
 	}
 
 	private void init()
@@ -116,18 +129,5 @@ public class Brapi
 	{
 		router.attach(urlPrefix + url, clazz);
 		router.attach(urlPrefix + url + "/", clazz);
-	}
-
-	public static String getServerBase(HttpServletRequest req)
-	{
-		String scheme = req.getScheme(); // http or https
-		String serverName = req.getServerName(); // ics.hutton.ac.uk
-		int serverPort = req.getServerPort(); // 80 or 8080 or 443
-		String contextPath = req.getContextPath(); // /germinate-baz
-
-		if (serverPort == 80 || serverPort == 443)
-			return scheme + "://" + serverName + contextPath; // http://ics.hutton.ac.uk/germinate-baz
-		else
-			return scheme + "://" + serverName + ":" + serverPort + contextPath; // http://ics.hutton.ac.uk:8080/germinate-baz
 	}
 }

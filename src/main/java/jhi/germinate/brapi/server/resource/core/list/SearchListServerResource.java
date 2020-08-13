@@ -8,26 +8,20 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.list.*;
 import jhi.germinate.server.Database;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.list.*;
+import uk.ac.hutton.ics.brapi.server.core.list.BrapiSearchListServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class SearchListServerResource extends ListBaseServerResource<ArrayResult<Lists>>
+public class SearchListServerResource extends ListBaseServerResource implements BrapiSearchListServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<Lists>> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
-	public BaseResult<ArrayResult<Lists>> postJson(ListSearch search)
+	public BaseResult<ArrayResult<Lists>> postListSearch(ListSearch search)
 	{
 		if (search == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -72,5 +66,17 @@ public class SearchListServerResource extends ListBaseServerResource<ArrayResult
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Post
+	public BaseResult<SearchResult> postListSearchAsync(ListSearch listSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public BaseResult<ArrayResult<Lists>> getListSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

@@ -3,15 +3,16 @@ package jhi.germinate.brapi.server.resource.genotyping.call;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.call.CallSet;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.CallSet;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -19,7 +20,7 @@ import static jhi.germinate.server.database.tables.Germinatebase.*;
 /**
  * @author Sebastian Raubach
  */
-public class CallSetIndividualServerResource extends CallSetBaseServerResource<CallSet>
+public class CallSetIndividualServerResource extends CallSetBaseServerResource implements BrapiCallSetIndividualServerResource
 {
 	private String callSetDbId;
 
@@ -37,8 +38,8 @@ public class CallSetIndividualServerResource extends CallSetBaseServerResource<C
 		}
 	}
 
-	@Override
-	public BaseResult<CallSet> getJson()
+	@Get
+	public BaseResult<CallSet> getCallSetById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

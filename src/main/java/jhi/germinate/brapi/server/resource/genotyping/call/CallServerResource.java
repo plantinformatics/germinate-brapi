@@ -1,22 +1,20 @@
 package jhi.germinate.brapi.server.resource.genotyping.call;
 
-import org.jooq.DSLContext;
+
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
-import java.sql.*;
-
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.call.Call;
-import jhi.germinate.brapi.server.resource.TokenBaseServerResource;
 import jhi.germinate.brapi.server.util.GenotypeEncodingParams;
-import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
+import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallServerResource;
 
 /**
  * @author Sebastian Raubach
  */
-public class CallServerResource extends TokenBaseServerResource<ArrayResult<Call>>
+public class CallServerResource extends TokenBaseServerResource implements BrapiCallServerResource
 {
 	private static final String PARAM_EXPAND_HOMOZYGOTES = "expandHomozygotes";
 	private static final String PARAM_UNKNOWN_STRING     = "unknownString";
@@ -62,19 +60,9 @@ public class CallServerResource extends TokenBaseServerResource<ArrayResult<Call
 		this.variantSetDbId = getQueryValue(PARAM_VARIANT_SET_DB_ID);
 	}
 
-	@Override
-	public TokenBaseResult<ArrayResult<Call>> getJson()
+	@Get
+	public TokenBaseResult<CallResult<Call>> getCalls()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
-		{
-			// TODO: implement
-			return null;
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

@@ -6,16 +6,17 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.location.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.database.tables.pojos.ViewTableLocations;
+import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.core.location.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach
  */
-public abstract class LocationBaseResource<T> extends BaseServerResource<T>
+public abstract class LocationBaseResource extends BaseServerResource
 {
 	protected List<Location> getLocations(DSLContext context, List<Condition> conditions)
 	{
@@ -38,10 +39,10 @@ public abstract class LocationBaseResource<T> extends BaseServerResource<T>
 							// Set all the easy fields
 							Location location = new Location()
 								.setAbbreviation(r.getLocationNameShort())
-								.setCoordinateUncertainty(toString(r.getLocationCoordinateUncertainty()))
+								.setCoordinateUncertainty(StringUtils.toString(r.getLocationCoordinateUncertainty()))
 								.setCountryCode(r.getCountryCode3())
 								.setCountryName(r.getCountryName())
-								.setLocationDbId(toString(r.getLocationId()))
+								.setLocationDbId(StringUtils.toString(r.getLocationId()))
 								.setLocationName(r.getLocationName())
 								.setLocationType(r.getLocationType());
 

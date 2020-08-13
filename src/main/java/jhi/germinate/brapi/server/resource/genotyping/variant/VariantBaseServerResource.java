@@ -7,9 +7,9 @@ import org.jooq.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.variant.Variant;
-import jhi.germinate.brapi.server.resource.TokenBaseServerResource;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
+import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
@@ -17,9 +17,9 @@ import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
 /**
  * @author Sebastian Raubach
  */
-public abstract class VariantBaseServerResource<T> extends TokenBaseServerResource<T>
+public abstract class VariantBaseServerResource extends TokenBaseServerResource
 {
-	protected List<Variant> getVariants(DSLContext context, List<Condition> conditions)
+	protected List<Variant> getVariantsInternal(DSLContext context, List<Condition> conditions)
 	{
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")

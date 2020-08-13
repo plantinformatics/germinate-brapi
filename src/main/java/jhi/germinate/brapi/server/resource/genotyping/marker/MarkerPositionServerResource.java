@@ -2,16 +2,16 @@ package jhi.germinate.brapi.server.resource.genotyping.marker;
 
 import org.jooq.*;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.map.MarkerPosition;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.map.MarkerPosition;
+import uk.ac.hutton.ics.brapi.server.genotyping.marker.BrapiMarkerPositionServerResource;
 
 import static jhi.germinate.server.database.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.tables.Maps.*;
@@ -20,7 +20,7 @@ import static jhi.germinate.server.database.tables.Markers.*;
 /**
  * @author Sebastian Raubach
  */
-public class MarkerPositionServerResource extends MarkerBaseServerResource<ArrayResult<MarkerPosition>>
+public class MarkerPositionServerResource extends MarkerBaseServerResource implements BrapiMarkerPositionServerResource
 {
 	private static final String PARAM_MAP_DB_ID          = "mapDbId";
 	private static final String PARAM_LINKAGE_GROUP_NAME = "linkageGroupName";
@@ -60,8 +60,8 @@ public class MarkerPositionServerResource extends MarkerBaseServerResource<Array
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<MarkerPosition>> getJson()
+	@Get
+	public BaseResult<ArrayResult<MarkerPosition>> getMarkerPositions()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

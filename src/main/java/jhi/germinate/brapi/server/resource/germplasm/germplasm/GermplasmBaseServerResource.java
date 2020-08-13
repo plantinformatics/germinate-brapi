@@ -11,11 +11,11 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.germplasm.*;
-import jhi.germinate.brapi.resource.location.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.database.tables.records.*;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.core.location.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Biologicalstatus.*;
 import static jhi.germinate.server.database.tables.Countries.*;
@@ -33,7 +33,7 @@ import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 /**
  * @author Sebastian Raubach
  */
-public abstract class GermplasmBaseServerResource<T> extends BaseServerResource<T>
+public abstract class GermplasmBaseServerResource extends BaseServerResource
 {
 	protected Integer addGermplasm(DSLContext context, Germplasm newGermplasm, boolean forceId)
 	{

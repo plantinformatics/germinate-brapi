@@ -3,15 +3,16 @@ package jhi.germinate.brapi.server.resource.genotyping.variant;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.variant.Variant;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
@@ -19,7 +20,7 @@ import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
 /**
  * @author Sebastian Raubach
  */
-public class VariantServerResource extends VariantBaseServerResource<ArrayResult<Variant>>
+public class VariantServerResource extends VariantBaseServerResource implements BrapiVariantServerResource
 {
 	private static final String PARAM_VARIANT_DB_ID     = "variantDbId";
 	private static final String PARAM_VARIANT_SET_DB_ID = "variantSetDbId";
@@ -36,8 +37,8 @@ public class VariantServerResource extends VariantBaseServerResource<ArrayResult
 		this.variantSetDbId = getQueryValue(PARAM_VARIANT_SET_DB_ID);
 	}
 
-	@Override
-	public TokenBaseResult<ArrayResult<Variant>> getJson()
+	@Get
+	public TokenBaseResult<ArrayResult<Variant>> getAllVariants()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -49,7 +50,7 @@ public class VariantServerResource extends VariantBaseServerResource<ArrayResult
 			if (!StringUtils.isEmpty(variantSetDbId))
 				conditions.add(DATASETMEMBERS.DATASET_ID.cast(String.class).eq(variantSetDbId));
 
-			List<Variant> variants = getVariants(context, conditions);
+			List<Variant> variants = getVariantsInternal(context, conditions);
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new TokenBaseResult<>(new ArrayResult<Variant>()
 				.setData(variants), currentPage, pageSize, totalCount);

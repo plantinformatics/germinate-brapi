@@ -9,13 +9,13 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.Germplasm;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.Germinatebase;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Germplasm;
+import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 import static jhi.germinate.server.database.tables.Synonyms.*;
@@ -24,7 +24,7 @@ import static jhi.germinate.server.database.tables.Taxonomies.*;
 /**
  * @author Sebastian Raubach
  */
-public class GermplasmServerResource extends GermplasmBaseServerResource<ArrayResult<Germplasm>>
+public class GermplasmServerResource extends GermplasmBaseServerResource implements BrapiGermplasmServerResource
 {
 	public static final String PARAM_GERMPLASM_PUI             = "germplasmPUI";
 	public static final String PARAM_GERMPLASM_DB_ID           = "germplasmDbId";
@@ -79,7 +79,7 @@ public class GermplasmServerResource extends GermplasmBaseServerResource<ArrayRe
 
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Germplasm>> postJson(Germplasm[] newGermplasm)
+	public BaseResult<ArrayResult<Germplasm>> postGermplasm(Germplasm[] newGermplasm)
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -100,8 +100,8 @@ public class GermplasmServerResource extends GermplasmBaseServerResource<ArrayRe
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Germplasm>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Germplasm>> getGermplasm()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

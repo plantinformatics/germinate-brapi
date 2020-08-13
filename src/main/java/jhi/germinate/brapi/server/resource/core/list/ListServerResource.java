@@ -9,12 +9,12 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.list.Lists;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.records.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
+import uk.ac.hutton.ics.brapi.server.core.list.BrapiListServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 import static jhi.germinate.server.database.tables.Groupmembers.*;
@@ -27,7 +27,7 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class ListServerResource extends ListBaseServerResource<ArrayResult<Lists>>
+public class ListServerResource extends ListBaseServerResource implements BrapiListServerResource
 {
 	public static final String PARAM_LIST_TYPE   = "listType";
 	public static final String PARAM_LIST_NAME   = "listName";
@@ -52,7 +52,7 @@ public class ListServerResource extends ListBaseServerResource<ArrayResult<Lists
 
 	@Post
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<ArrayResult<Lists>> postJson(Lists[] newLists)
+	public BaseResult<ArrayResult<Lists>> postLists(Lists[] newLists)
 	{
 		// TODO: Check if they're authorized to do this
 
@@ -127,8 +127,8 @@ public class ListServerResource extends ListBaseServerResource<ArrayResult<Lists
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Lists>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Lists>> getLists()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

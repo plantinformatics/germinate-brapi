@@ -5,16 +5,17 @@ import org.jooq.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.list.Lists;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
+import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 
 /**
  * @author Sebastian Raubach
  */
-public abstract class ListBaseServerResource<T> extends BaseServerResource<T>
+public abstract class ListBaseServerResource extends BaseServerResource
 {
 	protected List<Lists> getLists(DSLContext context, List<Condition> conditions)
 	{
@@ -34,16 +35,15 @@ public abstract class ListBaseServerResource<T> extends BaseServerResource<T>
 		List<ViewTableGroups> groups = step.limit(pageSize)
 										   .offset(pageSize * currentPage)
 										   .fetchInto(ViewTableGroups.class);
-
 		return groups.stream()
 					 .map(l -> new Lists()
 						 .setDateCreated(l.getCreatedOn())
 						 .setDateModified(l.getUpdatedOn())
-						 .setListDbId(toString(l.getGroupId()))
+						 .setListDbId(StringUtils.toString(l.getGroupId()))
 						 .setListDescription(l.getGroupDescription())
 						 .setListName(l.getGroupName())
-						 .setListOwnerName(toString(l.getUserName()))
-						 .setListOwnerPersonDbId(toString(l.getUserId()))
+						 .setListOwnerName(StringUtils.toString(l.getUserName()))
+						 .setListOwnerPersonDbId(StringUtils.toString(l.getUserId()))
 						 .setListSize(l.getCount())
 						 .setListType(l.getGroupType()))
 					 .collect(Collectors.toList());

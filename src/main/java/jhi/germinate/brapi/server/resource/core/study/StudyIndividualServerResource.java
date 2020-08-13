@@ -7,18 +7,19 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.study.Study;
-import jhi.germinate.brapi.resource.base.BaseResult;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.core.study.Study;
+import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class StudyIndividualServerResource extends StudyBaseResource<Study>
+public class StudyIndividualServerResource extends StudyBaseResource implements BrapiStudyIndividualServerResource
 {
 	private String studyDbId;
 
@@ -38,13 +39,13 @@ public class StudyIndividualServerResource extends StudyBaseResource<Study>
 
 	@Put
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<Study> putJson(Study newStudy)
+	public BaseResult<Study> putStudyById(Study newStudy)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
-	@Override
-	public BaseResult<Study> getJson()
+	@Get
+	public BaseResult<Study> getStudyById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

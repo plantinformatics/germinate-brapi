@@ -5,9 +5,9 @@ import org.jooq.impl.DSL;
 
 import java.util.*;
 
-import jhi.germinate.brapi.resource.call.CallSet;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.CallSet;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -15,7 +15,7 @@ import static jhi.germinate.server.database.tables.Germinatebase.*;
 /**
  * @author Sebastian Raubach
  */
-public abstract class CallSetBaseServerResource<T> extends BaseServerResource<T>
+public abstract class CallSetBaseServerResource extends BaseServerResource
 {
 	protected List<CallSet> getCallSets(DSLContext context, List<Condition> conditions)
 	{

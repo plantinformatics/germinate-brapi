@@ -1,23 +1,24 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
-import org.jooq.*;
+import org.jooq.DSLContext;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.variant.VariantSet;
 import jhi.germinate.server.Database;
-import jhi.germinate.server.util.*;
+import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.VariantSet;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Datasets.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class VariantSetIndividualServerResource extends VariantSetBaseServerResource<VariantSet>
+public class VariantSetIndividualServerResource extends VariantSetBaseServerResource implements BrapiVariantSetIndividualServerResource
 {
 	private String variantSetDbId;
 
@@ -35,8 +36,8 @@ public class VariantSetIndividualServerResource extends VariantSetBaseServerReso
 		}
 	}
 
-	@Override
-	public BaseResult<VariantSet> getJson()
+	@Get
+	public BaseResult<VariantSet> getVariantSetById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

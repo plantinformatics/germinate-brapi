@@ -9,21 +9,21 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.study.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.study.*;
+import uk.ac.hutton.ics.brapi.server.core.study.BrapiSearchStudyServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class SearchStudyServerResource extends StudyBaseResource<ArrayResult<Study>>
+public class SearchStudyServerResource extends StudyBaseResource implements BrapiSearchStudyServerResource
 {
 	@Post
-	public BaseResult<ArrayResult<Study>> postJson(StudySearch search)
+	public BaseResult<ArrayResult<Study>> postStudySearch(StudySearch search)
 	{
 		if (search == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -64,9 +64,16 @@ public class SearchStudyServerResource extends StudyBaseResource<ArrayResult<Stu
 		}
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Study>> getJson()
+	@Post
+	public BaseResult<SearchResult> postStudySearchAsync(StudySearch studySearch)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
+
+	@Get
+	public BaseResult<ArrayResult<Study>> getStudySearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
 }

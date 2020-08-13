@@ -4,16 +4,16 @@ import org.jooq.*;
 
 import java.util.List;
 
-import jhi.germinate.brapi.resource.attribute.AttributeValue;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.AttributeValue;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.*;
 
 /**
  * @author Sebastian Raubach
  */
-public abstract class AttributeValueBaseServerResource<T> extends BaseServerResource<T>
+public abstract class AttributeValueBaseServerResource extends BaseServerResource
 {
 	protected List<AttributeValue> getAttributeValues(DSLContext context, List<Condition> conditions)
 	{

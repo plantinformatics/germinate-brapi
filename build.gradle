@@ -35,3 +35,11 @@ dependencies {
 
     implementation 'javax.servlet:javax.servlet-api:3.0.1'
 }
+
+// Generate a .jar file that other applications can use to communicate with the API
+task jarClient (type: Jar, dependsOn: classes) {
+    from sourceSets.main.output
+    archiveFileName = "brapi-client-${project.version}.jar"
+    includeEmptyDirs = false
+    include '**/germinate/brapi/resource/**'
+}

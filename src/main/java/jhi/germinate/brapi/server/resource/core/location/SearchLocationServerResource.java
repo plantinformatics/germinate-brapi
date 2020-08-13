@@ -9,27 +9,50 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.location.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.location.*;
+import uk.ac.hutton.ics.brapi.server.core.location.BrapiSearchLocationServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class SearchLocationServerResource extends LocationBaseResource<ArrayResult<Location>>
+public class SearchLocationServerResource extends LocationBaseResource implements BrapiSearchLocationServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<Location>> getJson()
+	public static String buildSqlPolygon(Double[][][] points)
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("MULTIPOLYGON(");
+
+		if (!CollectionUtils.isEmpty(points))
+		{
+			builder.append("((");
+
+			List<List<Double[]>> bounds = Arrays.stream(points)
+												.map(p -> new ArrayList<>(Arrays.asList(p)))
+												.collect(Collectors.toList());
+
+			// Add the start as end point
+			bounds.forEach(l -> l.add(l.get(0)));
+
+			builder.append(bounds.stream()
+								 .map(p -> p.stream().map(l -> l[0] + " " + l[1]).collect(Collectors.joining(", ")))
+								 .collect(Collectors.joining(")), ((")));
+
+			builder.append("))");
+		}
+
+		builder.append(")");
+
+		return builder.toString();
 	}
 
 	@Post
-	public BaseResult<ArrayResult<Location>> postJson(LocationSearch search)
+	public BaseResult<ArrayResult<Location>> postLocationSearch(LocationSearch search)
 	{
 		if (search == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -71,32 +94,15 @@ public class SearchLocationServerResource extends LocationBaseResource<ArrayResu
 		}
 	}
 
-	public static String buildSqlPolygon(Double[][][] points)
+	@Post
+	public BaseResult<SearchResult> postLocationSearchAsync(LocationSearch locationSearch)
 	{
-		StringBuilder builder = new StringBuilder();
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
 
-		builder.append("MULTIPOLYGON(");
-
-		if (!CollectionUtils.isEmpty(points))
-		{
-			builder.append("((");
-
-			List<List<Double[]>> bounds = Arrays.stream(points)
-												.map(p -> new ArrayList<>(Arrays.asList(p)))
-												.collect(Collectors.toList());
-
-			// Add the start as end point
-			bounds.forEach(l -> l.add(l.get(0)));
-
-			builder.append(bounds.stream()
-								 .map(p -> p.stream().map(l -> l[0] + " " + l[1]).collect(Collectors.joining(", ")))
-								 .collect(Collectors.joining(")), ((")));
-
-			builder.append("))");
-		}
-
-		builder.append(")");
-
-		return builder.toString();
+	@Get
+	public BaseResult<ArrayResult<Location>> getLocationSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

@@ -9,18 +9,19 @@ import java.sql.Date;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.study.Study;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
-import jhi.germinate.server.util.*;
+import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.study.Study;
+import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class StudyServerResource extends StudyBaseResource<ArrayResult<Study>>
+public class StudyServerResource extends StudyBaseResource implements BrapiStudyServerResource
 {
 	public static final String PARAM_CROP_COMMON_NAME           = "cropCommonName";
 	public static final String PARAM_STUDY_TYPE                 = "studyType";
@@ -75,14 +76,14 @@ public class StudyServerResource extends StudyBaseResource<ArrayResult<Study>>
 
 	@Post
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<ArrayResult<Study>> postJson(Study[] newStudies)
+	public BaseResult<ArrayResult<Study>> postStudies(Study[] newStudies)
 	{
 
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Study>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Study>> getStudies()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

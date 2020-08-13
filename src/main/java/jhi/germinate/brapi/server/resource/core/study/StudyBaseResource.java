@@ -5,11 +5,12 @@ import org.jooq.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.*;
-import jhi.germinate.brapi.resource.study.Study;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import jhi.germinate.brapi.server.util.DateUtils;
 import jhi.germinate.server.database.tables.pojos.ViewTableDatasets;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.study.Study;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableCollaborators.*;
 import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
@@ -17,7 +18,7 @@ import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
 /**
  * @author Sebastian Raubach
  */
-public abstract class StudyBaseResource<T> extends BaseServerResource<T>
+public abstract class StudyBaseResource extends BaseServerResource
 {
 	protected List<Study> getStudies(DSLContext context, List<Condition> conditions)
 	{
@@ -44,7 +45,8 @@ public abstract class StudyBaseResource<T> extends BaseServerResource<T>
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(VIEW_TABLE_DATASETS)
-											 .where(VIEW_TABLE_DATASETS.DATASET_STATE.eq("public"));
+											 .where(VIEW_TABLE_DATASETS.DATASET_STATE.eq("public")) // TODO: Check user permissions
+											 .and(VIEW_TABLE_DATASETS.IS_EXTERNAL.eq(false));
 
 		if (conditions != null)
 		{
@@ -61,14 +63,14 @@ public abstract class StudyBaseResource<T> extends BaseServerResource<T>
 					   .map(r -> new Study()
 						   .setActive(r.getEndDate() != null && r.getEndDate().getTime() < System.currentTimeMillis())
 						   .setContacts(collaborators.get(r.getDatasetId()))
-						   .setEndDate(getTimestamp(r.getEndDate()))
+						   .setEndDate(DateUtils.getTimestamp(r.getEndDate()))
 						   .setLastUpdate(new LastUpdate()
 							   .setTimestamp(r.getUpdatedOn())
 							   .setVersion(r.getVersion()))
 						   .setLicense(r.getLicenseName())
 						   .setLocationDbId(!CollectionUtils.isEmpty(r.getLocations()) ? Integer.toString(r.getLocations()[0].getLocationId()) : null)
 						   .setLocationName(!CollectionUtils.isEmpty(r.getLocations()) ? r.getLocations()[0].getLocationName() : null)
-						   .setStartDate(getTimestamp(r.getStartDate()))
+						   .setStartDate(DateUtils.getTimestamp(r.getStartDate()))
 						   .setStudyDbId(Integer.toString(r.getDatasetId()))
 						   .setStudyDescription(r.getDatasetDescription())
 						   .setStudyName(r.getDatasetName())

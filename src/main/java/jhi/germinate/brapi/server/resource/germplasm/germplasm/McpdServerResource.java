@@ -5,19 +5,20 @@ import com.google.gson.JsonArray;
 import org.jooq.DSLContext;
 import org.jooq.impl.*;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.Collection;
-import jhi.germinate.brapi.resource.germplasm.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.database.tables.records.ViewTableLocationsRecord;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Collection;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmIndividualMcpdServerResource;
 
 import static jhi.germinate.server.database.tables.Biologicalstatus.*;
 import static jhi.germinate.server.database.tables.Countries.*;
@@ -34,7 +35,7 @@ import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 /**
  * @author Sebastian Raubach
  */
-public class McpdServerResource extends BaseServerResource<Mcpd>
+public class McpdServerResource extends BaseServerResource implements BrapiGermplasmIndividualMcpdServerResource
 {
 	private String germplasmDbId;
 
@@ -52,8 +53,8 @@ public class McpdServerResource extends BaseServerResource<Mcpd>
 		}
 	}
 
-	@Override
-	public BaseResult<Mcpd> getJson()
+	@Get
+	public BaseResult<Mcpd> getGermplasmMcpd()
 	{
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

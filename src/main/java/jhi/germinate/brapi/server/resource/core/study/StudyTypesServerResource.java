@@ -2,25 +2,25 @@ package jhi.germinate.brapi.server.resource.core.study;
 
 import org.jooq.DSLContext;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyTypesServerResource;
 
 import static jhi.germinate.server.database.tables.Datasettypes.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class StudyTypesServerResource extends BaseServerResource<ArrayResult<String>>
+public class StudyTypesServerResource extends BaseServerResource implements BrapiStudyTypesServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<String>> getJson()
+	@Get
+	public BaseResult<ArrayResult<String>> getStudyTypes()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

@@ -7,11 +7,11 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.map.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.map.*;
+import uk.ac.hutton.ics.brapi.server.genotyping.marker.BrapiSearchMarkerPositionServerResource;
 
 import static jhi.germinate.server.database.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.tables.Maps.*;
@@ -20,16 +20,10 @@ import static jhi.germinate.server.database.tables.Markers.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchMarkerPositionServerResource extends MarkerBaseServerResource<ArrayResult<MarkerPosition>>
+public class SearchMarkerPositionServerResource extends MarkerBaseServerResource implements BrapiSearchMarkerPositionServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<MarkerPosition>> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
-	public BaseResult<ArrayResult<MarkerPosition>> postJson(MarkerPositionSearch search)
+	public BaseResult<ArrayResult<MarkerPosition>> postMarkerPositionSearch(MarkerPositionSearch search)
 	{
 		if (search == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -62,4 +56,18 @@ public class SearchMarkerPositionServerResource extends MarkerBaseServerResource
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
+
+	@Post
+	public BaseResult<SearchResult> postMarkerPositionSearchAsync(MarkerPositionSearch markerPositionSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public BaseResult<ArrayResult<MarkerPosition>> getMarkerPositionSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+
 }

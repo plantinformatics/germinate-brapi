@@ -2,19 +2,19 @@ package jhi.germinate.brapi.server.resource.core.list;
 
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-import org.jooq.tools.StringUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.list.Lists;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
+import uk.ac.hutton.ics.brapi.server.core.list.BrapiListIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 import static jhi.germinate.server.database.tables.Groupmembers.*;
@@ -25,7 +25,7 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class ListIndividualServerResource extends ListBaseServerResource<Lists>
+public class ListIndividualServerResource extends ListBaseServerResource implements BrapiListIndividualServerResource
 {
 	protected String listDbId;
 
@@ -45,7 +45,7 @@ public class ListIndividualServerResource extends ListBaseServerResource<Lists>
 
 	@Put
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<Lists> putJson(Lists updatedLists)
+	public BaseResult<Lists> putListById(Lists updatedLists)
 	{
 		// TODO: Check if they're authorized to do this!
 
@@ -92,7 +92,7 @@ public class ListIndividualServerResource extends ListBaseServerResource<Lists>
 
 				this.listDbId = Integer.toString(result.getGroupId());
 
-				return getJson();
+				return getListsById();
 			}
 			else
 			{
@@ -106,13 +106,14 @@ public class ListIndividualServerResource extends ListBaseServerResource<Lists>
 		}
 	}
 
-	@Override
-	public BaseResult<Lists> getJson()
+	@Get
+	public BaseResult<Lists> getListsById()
 	{
 		return getList(listDbId, pageSize, currentPage);
 	}
 
-	protected BaseResult<Lists> getList(String listDbId, int pageSize, int currentPage) {
+	protected BaseResult<Lists> getList(String listDbId, int pageSize, int currentPage)
+	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
 		{

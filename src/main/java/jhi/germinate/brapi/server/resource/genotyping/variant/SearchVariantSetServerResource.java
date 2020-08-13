@@ -8,11 +8,11 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.variant.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiSearchVariantSetServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Datasets.*;
@@ -20,16 +20,10 @@ import static jhi.germinate.server.database.tables.Datasets.*;
 /**
  * @author Sebastian Raubach
  */
-public class SearchVariantSetServerResource extends VariantSetBaseServerResource<ArrayResult<VariantSet>>
+public class SearchVariantSetServerResource extends VariantSetBaseServerResource implements BrapiSearchVariantSetServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<VariantSet>> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
-	public BaseResult<ArrayResult<VariantSet>> postJson(VariantSetSearch search)
+	public BaseResult<ArrayResult<VariantSet>> postVariantSetSearch(VariantSetSearch search)
 	{
 		if (search == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
@@ -61,5 +55,17 @@ public class SearchVariantSetServerResource extends VariantSetBaseServerResource
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Post
+	public BaseResult<SearchResult> postVariantSetSearchAsync(VariantSetSearch variantSetSearch)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+	}
+
+	@Get
+	public BaseResult<ArrayResult<VariantSet>> getVariantSetSearchAsync()
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

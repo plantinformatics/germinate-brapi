@@ -2,22 +2,23 @@ package jhi.germinate.brapi.server.resource.genotyping.call;
 
 import org.jooq.DSLContext;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.io.File;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.*;
 
-import jhi.germinate.brapi.resource.base.TokenBaseResult;
-import jhi.germinate.brapi.resource.call.*;
-import jhi.germinate.brapi.resource.variant.Genotype;
 import jhi.germinate.brapi.server.Brapi;
-import jhi.germinate.brapi.server.resource.TokenBaseServerResource;
 import jhi.germinate.brapi.server.util.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.database.tables.records.*;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
+import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetIndividualCallServerResource;
 
 import static jhi.germinate.server.database.tables.Datasets.*;
 import static jhi.germinate.server.database.tables.Germinatebase.*;
@@ -26,7 +27,7 @@ import static jhi.germinate.server.database.tables.Markers.*;
 /**
  * @author Sebastian Raubach
  */
-public class CallSetCallServerResource extends TokenBaseServerResource<CallResult<Call>>
+public class CallSetCallServerResource extends TokenBaseServerResource implements BrapiCallSetIndividualCallServerResource
 {
 	private static final String PARAM_EXPAND_HOMOZYGOTES = "expandHomozygotes";
 	private static final String PARAM_UNKNOWN_STRING     = "unknownString";
@@ -71,8 +72,8 @@ public class CallSetCallServerResource extends TokenBaseServerResource<CallResul
 		}
 	}
 
-	@Override
-	public TokenBaseResult<CallResult<Call>> getJson()
+	@Get
+	public TokenBaseResult<CallResult<Call>> getCallSetCalls()
 	{
 		if (StringUtils.isEmpty(callSetDbId) || !callSetDbId.contains("-"))
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);

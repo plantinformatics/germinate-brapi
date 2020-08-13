@@ -7,26 +7,26 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.season.Season;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.season.Season;
+import uk.ac.hutton.ics.brapi.server.core.season.BrapiSeasonServerResource;
 
 /**
  * @author Sebastian Raubach
  */
-public class SeasonServerResource extends SeasonBaseServerResource<ArrayResult<Season>>
+public class SeasonServerResource extends SeasonBaseServerResource implements BrapiSeasonServerResource
 {
 	@Post
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Season>> postJson(Season newSeason)
+	public BaseResult<ArrayResult<Season>> postSeasons(Season[] newSeason)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Season>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Season>> getSeasons()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

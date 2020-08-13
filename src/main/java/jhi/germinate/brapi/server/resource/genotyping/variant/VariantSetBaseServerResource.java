@@ -7,9 +7,9 @@ import org.restlet.ext.servlet.ServletUtils;
 import java.net.URI;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.variant.*;
 import jhi.germinate.brapi.server.Brapi;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.tables.Datasets.*;
@@ -17,7 +17,7 @@ import static jhi.germinate.server.database.tables.Datasets.*;
 /**
  * @author Sebastian Raubach
  */
-public abstract class VariantSetBaseServerResource<T> extends BaseServerResource<T>
+public abstract class VariantSetBaseServerResource extends BaseServerResource
 {
 	protected List<VariantSet> getVariantSets(DSLContext context, List<Condition> conditions)
 	{

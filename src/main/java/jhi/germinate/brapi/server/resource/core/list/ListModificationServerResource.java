@@ -8,11 +8,12 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.list.Lists;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
+import uk.ac.hutton.ics.brapi.server.core.list.BrapiListIndividualItemServerResource;
 
 import static jhi.germinate.server.database.tables.Germinatebase.*;
 import static jhi.germinate.server.database.tables.Groupmembers.*;
@@ -23,23 +24,11 @@ import static jhi.germinate.server.database.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
-public class ListModificationServerResource extends ListIndividualServerResource
+public class ListModificationServerResource extends ListIndividualServerResource implements BrapiListIndividualItemServerResource
 {
-	@Override
-	public BaseResult<Lists> getJson()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Override
-	public BaseResult<Lists> putJson(Lists updatedLists)
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 	@Post
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<Lists> postJson(String[] ids)
+	public BaseResult<Lists> postListItems(String[] ids)
 	{
 		if (ids == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

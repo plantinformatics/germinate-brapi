@@ -1,17 +1,19 @@
 package jhi.germinate.brapi.server.resource.germplasm.breedingmethod;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.germplasm.BreedingMethod;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import org.restlet.resource.Get;
+
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.BreedingMethod;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.germplasm.breedingmethod.BrapiBreedingMethodServerResource;
 
 /**
  * @author Sebastian Raubach
  */
-public class BreedingMethodServerResource extends BaseServerResource<ArrayResult<BreedingMethod>>
+public class BreedingMethodServerResource extends BaseServerResource implements BrapiBreedingMethodServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<BreedingMethod>> getJson()
+	@Get
+	public BaseResult<ArrayResult<BreedingMethod>> getBreedingMethods()
 	{
 		return new BaseResult<>(new ArrayResult<>(), currentPage, pageSize, 0);
 	}

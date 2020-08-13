@@ -6,15 +6,15 @@ import org.jooq.impl.DSL;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.season.Season;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import uk.ac.hutton.ics.brapi.resource.core.season.Season;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.tables.Datasets.*;
 
 /**
  * @author Sebastian Raubach
  */
-public abstract class SeasonBaseServerResource<T> extends BaseServerResource<T>
+public abstract class SeasonBaseServerResource extends BaseServerResource
 {
 	protected List<Season> getSeasons(DSLContext context, List<Condition> conditions)
 	{

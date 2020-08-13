@@ -2,25 +2,25 @@ package jhi.germinate.brapi.server.resource.core.crop;
 
 import org.jooq.DSLContext;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.*;
 import java.util.List;
 
-import jhi.germinate.brapi.resource.base.ArrayResult;
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
 import jhi.germinate.server.Database;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.core.crop.BrapiCropServerResource;
 
 import static jhi.germinate.server.database.tables.Taxonomies.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class CropServerResource extends BaseServerResource<ArrayResult<String>>
+public class CropServerResource extends BaseServerResource implements BrapiCropServerResource
 {
-	@Override
-	public BaseResult<ArrayResult<String>> getJson()
+	@Get
+	public BaseResult<ArrayResult<String>> getCommonCropNames()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))

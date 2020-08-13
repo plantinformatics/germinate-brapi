@@ -3,17 +3,18 @@ package jhi.germinate.brapi.server.resource.core.trial;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
+import org.restlet.resource.*;
 
 import java.sql.Date;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.resource.trial.Trial;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.StringUtils;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.trial.Trial;
+import uk.ac.hutton.ics.brapi.server.core.trial.BrapiTrialServerResource;
 
 import static jhi.germinate.server.database.tables.Datasets.*;
 import static jhi.germinate.server.database.tables.ViewTableExperiments.*;
@@ -21,7 +22,7 @@ import static jhi.germinate.server.database.tables.ViewTableExperiments.*;
 /**
  * @author Sebastian Raubach
  */
-public class TrialServerResource extends TrialBaseServerResource<ArrayResult<Trial>>
+public class TrialServerResource extends TrialBaseServerResource implements BrapiTrialServerResource
 {
 	private static final String PARAM_ACTIVE                    = "active";
 	private static final String PARAM_COMMON_CROP_NAME          = "commonCropName";
@@ -89,8 +90,8 @@ public class TrialServerResource extends TrialBaseServerResource<ArrayResult<Tri
 		this.externalReferenceSource = getQueryValue(PARAM_EXTERNAL_REFERENCE_SOURCE);
 	}
 
-	@Override
-	public BaseResult<ArrayResult<Trial>> getJson()
+	@Get
+	public BaseResult<ArrayResult<Trial>> getTrials()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -119,5 +120,11 @@ public class TrialServerResource extends TrialBaseServerResource<ArrayResult<Tri
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
+	}
+
+	@Post
+	public BaseResult<ArrayResult<Trial>> postTrials(Trial[] trials)
+	{
+		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 }

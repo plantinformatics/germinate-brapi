@@ -1,16 +1,19 @@
 package jhi.germinate.brapi.server.resource.core;
 
+import org.restlet.resource.Get;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.brapi.resource.ServerInfo;
-import jhi.germinate.brapi.resource.base.*;
-import jhi.germinate.brapi.server.resource.BaseServerResource;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.core.serverinfo.ServerInfo;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.core.serverinfo.BrapiServerInfoResource;
 
 /**
  * @author Sebastian Raubach
  */
-public class ServerInfoResource extends BaseServerResource<ServerInfo>
+public class ServerInfoResource extends BaseServerResource implements BrapiServerInfoResource
 {
 	public static final  String          PARAM_DATA_TYPE = "dataType";
 	private static final List<BrapiCall> CALLS           = new ArrayList<>();
@@ -251,8 +254,8 @@ public class ServerInfoResource extends BaseServerResource<ServerInfo>
 		}
 	}
 
-	@Override
-	public BaseResult<ServerInfo> getJson()
+	@Get
+	public BaseResult<ServerInfo> getServerinfo()
 	{
 		List<BrapiCall> calls = CALLS;
 

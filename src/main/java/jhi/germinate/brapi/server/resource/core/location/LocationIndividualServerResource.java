@@ -7,18 +7,19 @@ import org.restlet.resource.*;
 import java.sql.*;
 import java.util.*;
 
-import jhi.germinate.brapi.resource.base.BaseResult;
-import jhi.germinate.brapi.resource.location.Location;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
-import jhi.germinate.server.util.*;
+import jhi.germinate.server.util.CollectionUtils;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.core.location.Location;
+import uk.ac.hutton.ics.brapi.server.core.location.BrapiLocationIndividualServerResource;
 
 import static jhi.germinate.server.database.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach
  */
-public class LocationIndividualServerResource extends LocationBaseResource<Location>
+public class LocationIndividualServerResource extends LocationBaseResource implements BrapiLocationIndividualServerResource
 {
 	private String locationDbId;
 
@@ -38,13 +39,13 @@ public class LocationIndividualServerResource extends LocationBaseResource<Locat
 
 	@Put
 	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<Location> postJson(Location newLocation)
+	public BaseResult<Location> putLocationById(Location newLocation)
 	{
 		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
 	}
 
-	@Override
-	public BaseResult<Location> getJson()
+	@Get
+	public BaseResult<Location> getLocationById()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
