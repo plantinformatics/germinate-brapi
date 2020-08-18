@@ -20,6 +20,7 @@ import jhi.germinate.brapi.server.resource.germplasm.attribute.*;
 import jhi.germinate.brapi.server.resource.germplasm.breedingmethod.*;
 import jhi.germinate.brapi.server.resource.germplasm.germplasm.*;
 import jhi.germinate.brapi.server.resource.other.GenotypeFileServerResource;
+import jhi.germinate.server.auth.CustomVerifier;
 
 /**
  * @author Sebastian Raubach
@@ -32,12 +33,14 @@ public class Brapi
 	public final  String hdf5BaseFolder;
 	private final Router routerAuth;
 	private final Router routerUnauth;
+	private final CustomVerifier verifier;
 
-	public Brapi(String urlPrefix, Router routerAuth, Router routerUnauth, String hdf5BaseFolder)
+	public Brapi(String urlPrefix, Router routerAuth, Router routerUnauth, CustomVerifier verifier, String hdf5BaseFolder)
 	{
 		this.urlPrefix = urlPrefix;
 		this.routerAuth = routerAuth;
 		this.routerUnauth = routerUnauth;
+		this.verifier = verifier;
 		this.hdf5BaseFolder = hdf5BaseFolder;
 
 		BRAPI = this;
