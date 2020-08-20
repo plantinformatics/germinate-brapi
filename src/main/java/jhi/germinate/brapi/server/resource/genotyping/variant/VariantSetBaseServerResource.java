@@ -44,21 +44,21 @@ public abstract class VariantSetBaseServerResource extends BaseServerResource
 									  .offset(pageSize * currentPage)
 									  .fetchInto(VariantSet.class);
 
-		result.forEach(vs -> {
-			try
-			{
-				String serverBase = Brapi.getServerBase(ServletUtils.getRequest(getRequest()));
-				URI uri = URI.create(serverBase + "/api" + Brapi.BRAPI.urlPrefix + "/files/genotypes/" + vs.getVariantSetDbId());
-				vs.setAvailableFormats(Collections.singletonList(new Format()
-					.setDataFormat("Flapjack")
-					.setFileFormat("text/tab-separated-values")
-					.setFileURL(uri)));
-			}
-			catch (IllegalArgumentException e)
-			{
-				e.printStackTrace();
-			}
-		});
+		// TODO: Put this back in once we can configure the proxy reverse to actually forward the context path
+//		result.forEach(vs -> {
+//			try
+//			{
+//				URI uri = URI.create(Brapi.getServerBase(ServletUtils.getRequest(getRequest())) + "/api" + Brapi.BRAPI.urlPrefix + "/files/genotypes/" + vs.getVariantSetDbId());
+//				vs.setAvailableFormats(Collections.singletonList(new Format()
+//					.setDataFormat("Flapjack")
+//					.setFileFormat("text/tab-separated-values")
+//					.setFileURL(uri)));
+//			}
+//			catch (IllegalArgumentException e)
+//			{
+//				e.printStackTrace();
+//			}
+//		});
 
 		return result;
 	}

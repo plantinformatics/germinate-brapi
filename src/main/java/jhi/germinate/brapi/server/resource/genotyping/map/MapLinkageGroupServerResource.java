@@ -21,18 +21,25 @@ import static jhi.germinate.server.database.tables.Maps.*;
  */
 public class MapLinkageGroupServerResource extends BaseServerResource implements BrapiMapLinkageGroupServerResource
 {
-	private String mapDbId;
+	private Integer mapDbId;
 
 	@Override
 	public void doInit()
 	{
 		super.doInit();
 
-		this.mapDbId = getRequestAttributes().get("mapDbId").toString();
+		try
+		{
+			this.mapDbId = Integer.parseInt(getRequestAttributes().get("mapDbId").toString());
+		}
+		catch (NullPointerException | NumberFormatException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Get
-	public BaseResult<ArrayResult<LinkageGroup>> getMapLinkageGroups()
+	public BaseResult<ArrayResult<LinkageGroup>> getMapByIdLinkageGroups()
 	{
 		try (Connection conn = Database.getConnection();
 			 DSLContext context = Database.getContext(conn))
@@ -46,7 +53,8 @@ public class MapLinkageGroupServerResource extends BaseServerResource implements
 											.from(MAPS)
 											.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID));
 
-			step.where(MAPS.VISIBILITY.eq(true));
+			step.where(MAPS.VISIBILITY.eq(true))
+				.and(MAPS.ID.eq(mapDbId));
 
 			List<LinkageGroup> result = step.groupBy(MAPDEFINITIONS.CHROMOSOME)
 											.limit(pageSize)

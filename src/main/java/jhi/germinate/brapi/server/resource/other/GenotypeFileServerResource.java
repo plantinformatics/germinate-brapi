@@ -3,11 +3,13 @@ package jhi.germinate.brapi.server.resource.other;
 import org.jooq.DSLContext;
 import org.restlet.data.Status;
 import org.restlet.data.*;
+import org.restlet.ext.servlet.ServletUtils;
 import org.restlet.representation.FileRepresentation;
 import org.restlet.resource.*;
 
 import java.io.*;
 import java.sql.*;
+import java.util.*;
 
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.server.Database;
@@ -59,7 +61,21 @@ public class GenotypeFileServerResource extends FileServerResource
 			File resultFile = createTempFile(null, "genotypes-" + ds.getId(), ".txt", true);
 
 			Hdf5ToFJTabbedConverter converter = new Hdf5ToFJTabbedConverter(new File(Brapi.BRAPI.hdf5BaseFolder, ds.getSourceFile()), null, null, resultFile.getAbsolutePath(), false);
-			converter.extractData("");
+			// TODO: Generate header links
+			String clientBase = Brapi.getServerBase(ServletUtils.getRequest(getRequest()));
+
+			List<String> result = new ArrayList<>();
+
+			if (!StringUtils.isEmpty(clientBase))
+			{
+				if (clientBase.endsWith("/"))
+					clientBase = clientBase.substring(0, clientBase.length() - 1);
+				result.add("# fjDatabaseLineSearch = " + clientBase + "/#/data/germplasm/$LINE");
+				result.add("# fjDatabaseGroupPreview = " + clientBase + "/#/groups/upload/$GROUP");
+				result.add("# fjDatabaseMarkerSearch = " + clientBase + "/#/data/genotypes/marker/$MARKER");
+				result.add("# fjDatabaseGroupUpload = " + clientBase + "/api/group/upload");
+			}
+			converter.extractData(CollectionUtils.join(result, "\n"));
 
 			FileRepresentation representation = new FileRepresentation(resultFile, MediaType.TEXT_TSV);
 			representation.setSize(resultFile.length());

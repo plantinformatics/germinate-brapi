@@ -28,7 +28,7 @@ public class ListModificationServerResource extends ListIndividualServerResource
 {
 	@Post
 	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<Lists> postListItems(String[] ids)
+	public BaseResult<Lists> postListByIdItems(String[] ids)
 	{
 		if (ids == null)
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

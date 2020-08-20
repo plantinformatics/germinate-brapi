@@ -40,7 +40,7 @@ public class PedigreeServerResource extends GermplasmBaseServerResource implemen
 	}
 
 	@Get
-	public BaseResult<Pedigree> getGermplasmPedigree()
+	public BaseResult<Pedigree> getGermplasmByIdPedigree()
 	{
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

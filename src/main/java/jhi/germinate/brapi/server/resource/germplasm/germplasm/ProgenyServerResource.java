@@ -39,7 +39,7 @@ public class ProgenyServerResource extends GermplasmBaseServerResource implement
 	}
 
 	@Get
-	public BaseResult<Progeny> getGermplasmProgeny()
+	public BaseResult<Progeny> getGermplasmByIdProgeny()
 	{
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);

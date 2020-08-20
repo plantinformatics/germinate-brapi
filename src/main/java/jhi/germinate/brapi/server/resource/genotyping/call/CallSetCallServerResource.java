@@ -73,7 +73,7 @@ public class CallSetCallServerResource extends TokenBaseServerResource implement
 	}
 
 	@Get
-	public TokenBaseResult<CallResult<Call>> getCallSetCalls()
+	public TokenBaseResult<CallResult<Call>> getCallSetByIdCalls()
 	{
 		if (StringUtils.isEmpty(callSetDbId) || !callSetDbId.contains("-"))
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
