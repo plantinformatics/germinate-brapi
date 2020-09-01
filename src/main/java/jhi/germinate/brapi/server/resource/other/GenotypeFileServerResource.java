@@ -75,7 +75,7 @@ public class GenotypeFileServerResource extends FileServerResource
 				result.add("# fjDatabaseMarkerSearch = " + clientBase + "/#/data/genotypes/marker/$MARKER");
 				result.add("# fjDatabaseGroupUpload = " + clientBase + "/api/group/upload");
 			}
-			converter.extractData(CollectionUtils.join(result, "\n"));
+			converter.extractData(CollectionUtils.join(result, "\n") + "\n");
 
 			FileRepresentation representation = new FileRepresentation(resultFile, MediaType.TEXT_TSV);
 			representation.setSize(resultFile.length());

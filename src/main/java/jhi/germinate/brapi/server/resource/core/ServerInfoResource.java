@@ -104,6 +104,16 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
+		// CALLS
+		CALLS.add(new BrapiCall("calls")
+			 .addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/calls")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
 		// CALLSETS
 		CALLS.add(new BrapiCall("callsets")
 			.addDataType(BrapiCall.DataType.json)
@@ -116,6 +126,10 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 		CALLS.add(new BrapiCall("callsets/{callSetDbId}/calls")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/callsets")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 
 		// MAPS
@@ -162,6 +176,10 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("variantsets/{variantSetDbId}")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("variantsets/{variantSetDbId}/calls")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
@@ -235,6 +253,10 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 		CALLS.add(new BrapiCall("attributevalues/{attributeValueDbId}")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.PUT)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+		CALLS.add(new BrapiCall("search/attributevalues")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 	}
 

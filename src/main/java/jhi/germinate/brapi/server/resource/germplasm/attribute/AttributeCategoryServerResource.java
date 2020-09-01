@@ -15,6 +15,6 @@ public class AttributeCategoryServerResource extends BaseServerResource implemen
 	@Get
 	public BaseResult<ArrayResult<Category>> getAttributeCategories()
 	{
-		return null;
+		return new BaseResult<>(null, currentPage, pageSize, 0);
 	}
 }
