@@ -80,9 +80,9 @@ public class Hdf5DataExtractor implements AutoCloseable
 		if (lineIndex != -1)
 		{
 			byte[] genotypes = reader.int8().readMatrixBlock("DataMatrix", 1, hdf5Markers.size(), lineIndex, 0)[0];
-			for (int i = 0; i < genotypes.length; i++)
+			for (byte genotype : genotypes)
 			{
-				String alleleValue = stateTable[genotypes[i]];
+				String alleleValue = stateTable[genotype];
 				alleleValue = encodeAllele(alleleValue, params);
 				alleles.add(alleleValue);
 			}
@@ -100,9 +100,9 @@ public class Hdf5DataExtractor implements AutoCloseable
 		if (markerIndex != -1)
 		{
 			byte[][] genotypes = reader.int8().readMatrixBlock("DataMatrix", hdf5Lines.size(), 1, 0, markerIndex);
-			for (int i = 0; i < genotypes.length; i++)
+			for (byte[] genotype : genotypes)
 			{
-				String alleleValue = stateTable[genotypes[i][0]];
+				String alleleValue = stateTable[genotype[0]];
 				alleleValue = encodeAllele(alleleValue, params);
 				alleles.add(alleleValue);
 			}
