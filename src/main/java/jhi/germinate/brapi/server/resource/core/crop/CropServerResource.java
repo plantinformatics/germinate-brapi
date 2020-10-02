@@ -12,7 +12,7 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.core.crop.BrapiCropServerResource;
 
-import static jhi.germinate.server.database.tables.Taxonomies.*;
+import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 
 /**
  * @author Sebastian Raubach

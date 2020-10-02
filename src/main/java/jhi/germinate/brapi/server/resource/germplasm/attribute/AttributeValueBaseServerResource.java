@@ -8,7 +8,7 @@ import jhi.germinate.server.util.CollectionUtils;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.AttributeValue;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableGermplasmAttributes.*;
 
 /**
  * @author Sebastian Raubach

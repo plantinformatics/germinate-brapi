@@ -7,9 +7,9 @@ import java.util.List;
 import uk.ac.hutton.ics.brapi.resource.genotyping.map.MarkerPosition;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import static jhi.germinate.server.database.tables.Mapdefinitions.*;
-import static jhi.germinate.server.database.tables.Maps.*;
-import static jhi.germinate.server.database.tables.Markers.*;
+import static jhi.germinate.server.database.codegen.tables.Mapdefinitions.*;
+import static jhi.germinate.server.database.codegen.tables.Maps.*;
+import static jhi.germinate.server.database.codegen.tables.Markers.*;
 
 /**
  * @author Sebastian Raubach

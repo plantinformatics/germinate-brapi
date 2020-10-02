@@ -6,14 +6,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.server.util.DateUtils;
-import jhi.germinate.server.database.tables.pojos.ViewTableDatasets;
+import jhi.germinate.server.database.codegen.tables.pojos.ViewTableDatasets;
 import jhi.germinate.server.util.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.Study;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import static jhi.germinate.server.database.tables.ViewTableCollaborators.*;
-import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableCollaborators.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach

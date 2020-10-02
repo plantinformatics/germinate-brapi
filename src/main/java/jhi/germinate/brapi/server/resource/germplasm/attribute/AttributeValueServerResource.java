@@ -10,17 +10,17 @@ import java.util.stream.Collectors;
 
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.enums.AttributesDatatype;
-import jhi.germinate.server.database.tables.records.*;
+import jhi.germinate.server.database.codegen.enums.AttributesDatatype;
+import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.util.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.AttributeValue;
 import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeValueServerResource;
 
-import static jhi.germinate.server.database.tables.Attributedata.*;
-import static jhi.germinate.server.database.tables.Attributes.*;
-import static jhi.germinate.server.database.tables.Germinatebase.*;
-import static jhi.germinate.server.database.tables.ViewTableGermplasmAttributes.*;
+import static jhi.germinate.server.database.codegen.tables.Attributedata.*;
+import static jhi.germinate.server.database.codegen.tables.Attributes.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableGermplasmAttributes.*;
 
 /**
  * @author Sebastian Raubach

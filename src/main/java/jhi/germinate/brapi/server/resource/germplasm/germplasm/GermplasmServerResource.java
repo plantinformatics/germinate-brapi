@@ -11,15 +11,15 @@ import java.util.stream.Collectors;
 
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.tables.Germinatebase;
+import jhi.germinate.server.database.codegen.tables.Germinatebase;
 import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Germplasm;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmServerResource;
 
-import static jhi.germinate.server.database.tables.Germinatebase.*;
-import static jhi.germinate.server.database.tables.Synonyms.*;
-import static jhi.germinate.server.database.tables.Taxonomies.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Synonyms.*;
+import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 
 /**
  * @author Sebastian Raubach

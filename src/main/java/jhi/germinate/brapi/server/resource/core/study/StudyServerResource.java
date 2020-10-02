@@ -16,7 +16,7 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.Study;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyServerResource;
 
-import static jhi.germinate.server.database.tables.ViewTableDatasets.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach

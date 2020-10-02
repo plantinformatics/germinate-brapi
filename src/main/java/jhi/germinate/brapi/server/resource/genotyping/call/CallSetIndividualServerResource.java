@@ -14,8 +14,8 @@ import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.CallSet;
 import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetIndividualServerResource;
 
-import static jhi.germinate.server.database.tables.Datasetmembers.*;
-import static jhi.germinate.server.database.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 
 /**
  * @author Sebastian Raubach

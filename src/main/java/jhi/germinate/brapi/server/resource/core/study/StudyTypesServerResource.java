@@ -12,7 +12,7 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyTypesServerResource;
 
-import static jhi.germinate.server.database.tables.Datasettypes.*;
+import static jhi.germinate.server.database.codegen.tables.Datasettypes.*;
 
 /**
  * @author Sebastian Raubach

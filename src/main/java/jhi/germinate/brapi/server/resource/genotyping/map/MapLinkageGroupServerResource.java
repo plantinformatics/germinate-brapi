@@ -13,8 +13,8 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.map.BrapiMapLinkageGroupServerResource;
 
-import static jhi.germinate.server.database.tables.Mapdefinitions.*;
-import static jhi.germinate.server.database.tables.Maps.*;
+import static jhi.germinate.server.database.codegen.tables.Mapdefinitions.*;
+import static jhi.germinate.server.database.codegen.tables.Maps.*;
 
 /**
  * @author Sebastian Raubach

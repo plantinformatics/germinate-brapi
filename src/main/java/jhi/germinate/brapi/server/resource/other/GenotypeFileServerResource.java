@@ -13,10 +13,10 @@ import java.util.*;
 
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.server.Database;
-import jhi.germinate.server.database.tables.records.DatasetsRecord;
+import jhi.germinate.server.database.codegen.tables.records.DatasetsRecord;
 import jhi.germinate.server.util.*;
 
-import static jhi.germinate.server.database.tables.Datasets.*;
+import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 
 /**
  * @author Sebastian Raubach

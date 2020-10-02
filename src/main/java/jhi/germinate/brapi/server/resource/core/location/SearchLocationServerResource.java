@@ -15,7 +15,7 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.location.*;
 import uk.ac.hutton.ics.brapi.server.core.location.BrapiSearchLocationServerResource;
 
-import static jhi.germinate.server.database.tables.ViewTableLocations.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach

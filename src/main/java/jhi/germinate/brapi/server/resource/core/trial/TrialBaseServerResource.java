@@ -7,17 +7,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.server.util.DateUtils;
-import jhi.germinate.server.database.tables.pojos.ViewTableExperiments;
+import jhi.germinate.server.database.codegen.tables.pojos.ViewTableExperiments;
 import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.Contact;
 import uk.ac.hutton.ics.brapi.resource.core.trial.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import static jhi.germinate.server.database.tables.Datasets.*;
-import static jhi.germinate.server.database.tables.Experiments.*;
-import static jhi.germinate.server.database.tables.ViewTableCollaborators.*;
-import static jhi.germinate.server.database.tables.ViewTableExperiments.*;
-import static jhi.germinate.server.database.tables.ViewTableLicenses.*;
+import static jhi.germinate.server.database.codegen.tables.Datasets.*;
+import static jhi.germinate.server.database.codegen.tables.Experiments.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableCollaborators.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableExperiments.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableLicenses.*;
 
 /**
  * @author Sebastian Raubach

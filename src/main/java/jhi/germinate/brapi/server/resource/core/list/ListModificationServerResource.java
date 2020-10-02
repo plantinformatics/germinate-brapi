@@ -10,16 +10,16 @@ import java.util.*;
 
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
+import jhi.germinate.server.database.codegen.tables.pojos.ViewTableGroups;
 import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
 import uk.ac.hutton.ics.brapi.server.core.list.BrapiListIndividualItemServerResource;
 
-import static jhi.germinate.server.database.tables.Germinatebase.*;
-import static jhi.germinate.server.database.tables.Groupmembers.*;
-import static jhi.germinate.server.database.tables.Locations.*;
-import static jhi.germinate.server.database.tables.Markers.*;
-import static jhi.germinate.server.database.tables.ViewTableGroups.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Groupmembers.*;
+import static jhi.germinate.server.database.codegen.tables.Locations.*;
+import static jhi.germinate.server.database.codegen.tables.Markers.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableGroups.*;
 
 /**
  * @author Sebastian Raubach

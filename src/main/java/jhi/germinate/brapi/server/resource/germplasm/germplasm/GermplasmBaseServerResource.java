@@ -11,24 +11,24 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.server.database.tables.records.*;
+import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.util.*;
 import uk.ac.hutton.ics.brapi.resource.core.location.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import static jhi.germinate.server.database.tables.Biologicalstatus.*;
-import static jhi.germinate.server.database.tables.Countries.*;
-import static jhi.germinate.server.database.tables.Germinatebase.*;
-import static jhi.germinate.server.database.tables.Institutions.*;
-import static jhi.germinate.server.database.tables.Locations.*;
-import static jhi.germinate.server.database.tables.Pedigreedefinitions.*;
-import static jhi.germinate.server.database.tables.Pedigreenotations.*;
-import static jhi.germinate.server.database.tables.Storage.*;
-import static jhi.germinate.server.database.tables.Storagedata.*;
-import static jhi.germinate.server.database.tables.Synonyms.*;
-import static jhi.germinate.server.database.tables.Taxonomies.*;
-import static jhi.germinate.server.database.tables.ViewTableLocations.*;
+import static jhi.germinate.server.database.codegen.tables.Biologicalstatus.*;
+import static jhi.germinate.server.database.codegen.tables.Countries.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Institutions.*;
+import static jhi.germinate.server.database.codegen.tables.Locations.*;
+import static jhi.germinate.server.database.codegen.tables.Pedigreedefinitions.*;
+import static jhi.germinate.server.database.codegen.tables.Pedigreenotations.*;
+import static jhi.germinate.server.database.codegen.tables.Storage.*;
+import static jhi.germinate.server.database.codegen.tables.Storagedata.*;
+import static jhi.germinate.server.database.codegen.tables.Synonyms.*;
+import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach

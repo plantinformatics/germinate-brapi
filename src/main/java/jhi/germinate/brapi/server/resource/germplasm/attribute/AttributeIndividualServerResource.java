@@ -9,13 +9,13 @@ import java.util.*;
 
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.tables.records.AttributesRecord;
+import jhi.germinate.server.database.codegen.tables.records.AttributesRecord;
 import jhi.germinate.server.util.*;
 import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.Attribute;
 import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeIndividualServerResource;
 
-import static jhi.germinate.server.database.tables.Attributes.*;
+import static jhi.germinate.server.database.codegen.tables.Attributes.*;
 
 /**
  * @author Sebastian Raubach

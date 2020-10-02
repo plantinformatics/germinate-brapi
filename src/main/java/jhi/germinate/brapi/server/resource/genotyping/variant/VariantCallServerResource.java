@@ -12,7 +12,7 @@ import java.util.stream.*;
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.util.*;
 import jhi.germinate.server.Database;
-import jhi.germinate.server.database.tables.records.*;
+import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
@@ -20,9 +20,9 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantIndividualCallServerResource;
 
-import static jhi.germinate.server.database.tables.Datasets.*;
-import static jhi.germinate.server.database.tables.Germinatebase.*;
-import static jhi.germinate.server.database.tables.Markers.*;
+import static jhi.germinate.server.database.codegen.tables.Datasets.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Markers.*;
 
 /**
  * @author Sebastian Raubach

@@ -13,7 +13,7 @@ import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.VariantSet;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetIndividualServerResource;
 
-import static jhi.germinate.server.database.tables.Datasets.*;
+import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 
 /**
  * @author Sebastian Raubach

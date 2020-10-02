@@ -14,7 +14,7 @@ import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Germplasm;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmIndividualServerResource;
 
-import static jhi.germinate.server.database.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 
 /**
  * @author Sebastian Raubach

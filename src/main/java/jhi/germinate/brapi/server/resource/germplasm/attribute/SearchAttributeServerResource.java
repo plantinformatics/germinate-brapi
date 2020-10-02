@@ -13,7 +13,7 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.*;
 import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiSearchAttributeServerResource;
 
-import static jhi.germinate.server.database.tables.Attributes.*;
+import static jhi.germinate.server.database.codegen.tables.Attributes.*;
 
 /**
  * @author Sebastian Raubach

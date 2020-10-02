@@ -5,12 +5,12 @@ import org.jooq.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jhi.germinate.server.database.tables.pojos.ViewTableGroups;
+import jhi.germinate.server.database.codegen.tables.pojos.ViewTableGroups;
 import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import static jhi.germinate.server.database.tables.ViewTableGroups.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableGroups.*;
 
 /**
  * @author Sebastian Raubach

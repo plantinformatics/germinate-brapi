@@ -15,7 +15,7 @@ import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.core.season.Season;
 import uk.ac.hutton.ics.brapi.server.core.season.BrapiSeasonIndividualServerResource;
 
-import static jhi.germinate.server.database.tables.Datasets.*;
+import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 
 /**
  * @author Sebastian Raubach

@@ -13,9 +13,9 @@ import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmIndividualProgenyServerResource;
 
-import static jhi.germinate.server.database.tables.Germinatebase.*;
-import static jhi.germinate.server.database.tables.Pedigreedefinitions.*;
-import static jhi.germinate.server.database.tables.Pedigrees.*;
+import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Pedigreedefinitions.*;
+import static jhi.germinate.server.database.codegen.tables.Pedigrees.*;
 
 /**
  * @author Sebastian Raubach

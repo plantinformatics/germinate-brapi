@@ -11,8 +11,8 @@ import jhi.germinate.server.util.CollectionUtils;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 
-import static jhi.germinate.server.database.tables.Datasetmembers.*;
-import static jhi.germinate.server.database.tables.ViewTableMarkers.*;
+import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
+import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
 
 /**
  * @author Sebastian Raubach
