@@ -97,7 +97,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 													 attribute.setName(v.getAttributeName());
 													 attribute.setDescription(v.getAttributeName());
 													 attribute.setTargetTable("germinatebase");
-													 attribute.setDatatype(AttributesDatatype.char_);
+													 attribute.setDatatype(AttributesDatatype.text);
 													 attribute.store();
 												 }
 											 }

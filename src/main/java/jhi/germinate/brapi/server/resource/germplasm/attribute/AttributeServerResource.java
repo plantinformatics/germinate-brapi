@@ -69,7 +69,7 @@ public class AttributeServerResource extends AttributeBaseServerResource impleme
 											 AttributesRecord attribute = context.newRecord(ATTRIBUTES);
 											 attribute.setName(a.getAttributeName());
 											 attribute.setDescription(a.getAttributeDescription());
-											 attribute.setDatatype(AttributesDatatype.char_);
+											 attribute.setDatatype(AttributesDatatype.text);
 											 attribute.setTargetTable("germinatebase");
 											 attribute.setCreatedOn(new Timestamp(System.currentTimeMillis()));
 											 attribute.store();
