@@ -144,9 +144,7 @@ public class McpdServerResource extends BaseServerResource implements BrapiGermp
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
 		}
-		catch (
-			SQLException e)
-
+		catch (SQLException e)
 		{
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);

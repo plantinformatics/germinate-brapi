@@ -1,5 +1,6 @@
 package jhi.germinate.brapi.server;
 
+import jhi.germinate.brapi.server.resource.phenotyping.observation.ObservationVariableServerResource;
 import org.jooq.tools.StringUtils;
 import org.restlet.resource.ServerResource;
 import org.restlet.routing.Router;
@@ -152,6 +153,9 @@ public class Brapi
 		attachToRouter(routerAuth, "/attributevalues", AttributeValueServerResource.class);
 		attachToRouter(routerAuth, "/attributevalues/{attributeValueDbId}", AttributeValueIndividualServerResource.class);
 		attachToRouter(routerAuth, "/search/attributevalues", SearchAttributeValueServerResource.class);
+
+		// PHENOTYPING
+		attachToRouter(routerAuth, "/variables", ObservationVariableServerResource.class);
 
 		// NON-STANDARD
 		attachToRouter(routerAuth, "/files/genotypes/{datasetId}", GenotypeFileServerResource.class);
