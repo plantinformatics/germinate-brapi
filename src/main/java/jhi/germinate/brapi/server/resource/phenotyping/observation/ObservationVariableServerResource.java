@@ -61,6 +61,7 @@ public class ObservationVariableServerResource extends BaseServerResource implem
 																		 break;
 																	 case categorical:
 																		 scale.setDataType("Ordinal");
+																		 break;
 																	 case text:
 																	 default:
 																		 scale.setDataType("Text");
