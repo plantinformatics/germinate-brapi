@@ -106,7 +106,7 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 
 		// CALLS
 		CALLS.add(new BrapiCall("calls")
-			 .addDataType(BrapiCall.DataType.json)
+			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 		CALLS.add(new BrapiCall("search/calls")
@@ -257,6 +257,12 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 		CALLS.add(new BrapiCall("search/attributevalues")
 			.addDataType(BrapiCall.DataType.json)
 			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ZERO));
+
+		// OBSERVATION VARIABLES
+		CALLS.add(new BrapiCall("variables")
+			.addDataType(BrapiCall.DataType.json)
+			.addMethod(BrapiCall.Method.GET)
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 	}
 
