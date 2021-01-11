@@ -26,8 +26,7 @@ public class SearchVariantServerResource extends VariantBaseServerResource imple
 	@Post
 	public TokenBaseResult<ArrayResult<Variant>> postVariantSearch(VariantSearch search)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -43,11 +42,6 @@ public class SearchVariantServerResource extends VariantBaseServerResource imple
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new TokenBaseResult<>(new ArrayResult<Variant>()
 				.setData(variants), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

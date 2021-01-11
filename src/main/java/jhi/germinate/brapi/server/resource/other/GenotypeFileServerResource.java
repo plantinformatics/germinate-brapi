@@ -46,8 +46,7 @@ public class GenotypeFileServerResource extends FileServerResource
 		if (StringUtils.isEmpty(datasetId))
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			DatasetsRecord ds = context.selectFrom(DATASETS)
 									   .where(DATASETS.DATASET_STATE_ID.eq(1))
@@ -88,7 +87,7 @@ public class GenotypeFileServerResource extends FileServerResource
 			representation.setDisposition(disp);
 			return representation;
 		}
-		catch (SQLException | IOException e)
+		catch (IOException e)
 		{
 			e.printStackTrace();
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);

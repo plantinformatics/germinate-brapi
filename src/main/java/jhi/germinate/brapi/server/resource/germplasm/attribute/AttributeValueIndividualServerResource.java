@@ -46,8 +46,7 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 		if (StringUtils.isEmpty(attributeValueDbId) || toUpdate == null || toUpdate.getAttributeValueDbId() != null && !Objects.equals(toUpdate.getAttributeValueDbId(), attributeValueDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			AttributedataRecord record = context.selectFrom(ATTRIBUTEDATA)
 												.where(ATTRIBUTEDATA.ID.cast(String.class).eq(toUpdate.getAttributeValueDbId()))
@@ -66,18 +65,12 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 				return getAttributeValueById();
 			}
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<AttributeValue> getAttributeValueById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<AttributeValue> av = getAttributeValues(context, Collections.singletonList(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_VALUE_ID.cast(String.class).eq(attributeValueDbId)));
 
@@ -85,11 +78,6 @@ public class AttributeValueIndividualServerResource extends AttributeValueBaseSe
 				return new BaseResult<>(av.get(0), currentPage, pageSize, 1);
 			else
 				return new BaseResult<>(null, currentPage, pageSize, 0);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

@@ -41,8 +41,7 @@ public class VariantIndividualServerResource extends VariantBaseServerResource i
 	@Get
 	public BaseResult<Variant> getVariantById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Variant> variants = getVariantsInternal(context, Collections.singletonList(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId)));
 
@@ -50,11 +49,6 @@ public class VariantIndividualServerResource extends VariantBaseServerResource i
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 			else
 				return new BaseResult<>(variants.get(0), currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

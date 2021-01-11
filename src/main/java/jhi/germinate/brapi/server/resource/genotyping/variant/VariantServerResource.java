@@ -40,8 +40,7 @@ public class VariantServerResource extends VariantBaseServerResource implements 
 	@Get
 	public TokenBaseResult<ArrayResult<Variant>> getAllVariants()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -54,11 +53,6 @@ public class VariantServerResource extends VariantBaseServerResource implements 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new TokenBaseResult<>(new ArrayResult<Variant>()
 				.setData(variants), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

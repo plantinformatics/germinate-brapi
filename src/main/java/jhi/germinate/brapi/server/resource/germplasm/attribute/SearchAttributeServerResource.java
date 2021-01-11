@@ -23,8 +23,7 @@ public class SearchAttributeServerResource extends AttributeBaseServerResource i
 	@Post
 	public BaseResult<ArrayResult<Attribute>> postAttributeSearch(AttributeSearch search)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -38,11 +37,6 @@ public class SearchAttributeServerResource extends AttributeBaseServerResource i
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Attribute>()
 				.setData(av), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

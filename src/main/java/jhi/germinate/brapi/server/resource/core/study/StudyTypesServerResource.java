@@ -22,8 +22,7 @@ public class StudyTypesServerResource extends BaseServerResource implements Brap
 	@Get
 	public BaseResult<ArrayResult<String>> getStudyTypes()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<String> result = context.select(DATASETTYPES.DESCRIPTION)
 										 .hint("SQL_CALC_FOUND_ROWS")
@@ -35,11 +34,6 @@ public class StudyTypesServerResource extends BaseServerResource implements Brap
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<String>()
 				.setData(result), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

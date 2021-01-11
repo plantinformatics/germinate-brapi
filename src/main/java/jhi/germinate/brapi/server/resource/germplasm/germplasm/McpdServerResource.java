@@ -59,8 +59,7 @@ public class McpdServerResource extends BaseServerResource implements BrapiGermp
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			Mcpd result = context.select(
 				GERMINATEBASE.NAME.as("accessionNumber"),
@@ -143,11 +142,6 @@ public class McpdServerResource extends BaseServerResource implements BrapiGermp
 			}
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

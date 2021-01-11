@@ -45,8 +45,7 @@ public class PedigreeServerResource extends GermplasmBaseServerResource implemen
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			Pedigree result = context.select(
 				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
@@ -82,11 +81,6 @@ public class PedigreeServerResource extends GermplasmBaseServerResource implemen
 				  .setSiblings(siblings);
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

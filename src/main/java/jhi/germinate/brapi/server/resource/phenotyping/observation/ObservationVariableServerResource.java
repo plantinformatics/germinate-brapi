@@ -26,8 +26,7 @@ public class ObservationVariableServerResource extends BaseServerResource implem
 	@Override
 	public BaseResult<ArrayResult<ObservationVariable>> getObservationVariables()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<ObservationVariable> variables = context.select()
 														 .from(PHENOTYPES)
@@ -109,11 +108,6 @@ public class ObservationVariableServerResource extends BaseServerResource implem
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<ObservationVariable>()
 				.setData(variables), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

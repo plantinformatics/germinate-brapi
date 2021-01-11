@@ -77,8 +77,7 @@ public class VariantSetCallServerResource extends TokenBaseServerResource implem
 		if (StringUtils.isEmpty(variantSetDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			String[] parts = variantSetDbId.split("-");
 
@@ -170,11 +169,6 @@ public class VariantSetCallServerResource extends TokenBaseServerResource implem
 				.setSepUnphased(params.getSepUnphased())
 				.setUnknownString(params.getUnknownString());
 			return new TokenBaseResult<>(callResult, currentPage, pageSize, markerCount * germplasmCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

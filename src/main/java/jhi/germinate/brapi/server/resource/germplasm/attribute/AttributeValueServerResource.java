@@ -61,8 +61,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 		if (CollectionUtils.isEmpty(newValues))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Integer> newIds = Arrays.stream(newValues)
 										 .map(v -> {
@@ -126,18 +125,12 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 			return new BaseResult<>(new ArrayResult<AttributeValue>()
 				.setData(av), currentPage, pageSize, totalCount);
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<ArrayResult<AttributeValue>> getAttributeValues()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -155,11 +148,6 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<AttributeValue>()
 				.setData(av), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

@@ -41,8 +41,7 @@ public class MapLinkageGroupServerResource extends BaseServerResource implements
 	@Get
 	public BaseResult<ArrayResult<LinkageGroup>> getMapByIdLinkageGroups()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			SelectJoinStep<?> step = context.select(
 				MAPDEFINITIONS.CHROMOSOME.as("linkageGroupName"),
@@ -63,11 +62,6 @@ public class MapLinkageGroupServerResource extends BaseServerResource implements
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<LinkageGroup>().setData(result), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

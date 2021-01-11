@@ -39,8 +39,7 @@ public class TrialIndividualServerResource extends TrialBaseServerResource imple
 	@Get
 	public BaseResult<Trial> getTrialById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Trial> result = getTrials(context, Collections.singletonList(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID.cast(String.class).eq(trialDbId)));
 
@@ -48,11 +47,6 @@ public class TrialIndividualServerResource extends TrialBaseServerResource imple
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 			else
 				return new BaseResult<>(result.get(0), currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

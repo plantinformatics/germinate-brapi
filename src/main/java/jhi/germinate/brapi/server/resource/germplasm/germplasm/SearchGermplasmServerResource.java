@@ -30,8 +30,7 @@ public class SearchGermplasmServerResource extends GermplasmBaseServerResource i
 	@MinUserType(UserType.DATA_CURATOR)
 	public BaseResult<ArrayResult<Germplasm>> postGermplasmSearch(GermplasmSearch search)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -76,11 +75,6 @@ public class SearchGermplasmServerResource extends GermplasmBaseServerResource i
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Germplasm>()
 				.setData(lists), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

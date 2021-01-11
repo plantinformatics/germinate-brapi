@@ -49,8 +49,7 @@ public class ListIndividualServerResource extends ListBaseServerResource impleme
 	{
 		// TODO: Check if they're authorized to do this!
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			ViewTableGroups result = context.selectFrom(VIEW_TABLE_GROUPS)
 											.where(VIEW_TABLE_GROUPS.GROUP_VISIBILITY.eq(true))
@@ -99,11 +98,6 @@ public class ListIndividualServerResource extends ListBaseServerResource impleme
 				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 			}
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
@@ -114,8 +108,7 @@ public class ListIndividualServerResource extends ListBaseServerResource impleme
 
 	protected BaseResult<Lists> getList(String listDbId, int pageSize, int currentPage)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Lists> results = getLists(context, Collections.singletonList(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId)));
 			Lists result = CollectionUtils.isEmpty(results) ? null : results.get(0);
@@ -162,11 +155,6 @@ public class ListIndividualServerResource extends ListBaseServerResource impleme
 			{
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 			}
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

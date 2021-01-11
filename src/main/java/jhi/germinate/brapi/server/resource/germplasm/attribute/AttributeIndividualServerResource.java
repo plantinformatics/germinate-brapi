@@ -45,8 +45,7 @@ public class AttributeIndividualServerResource extends AttributeBaseServerResour
 		if (StringUtils.isEmpty(attributeDbId) || toUpdate == null || toUpdate.getAttributeDbId() != null && !Objects.equals(toUpdate.getAttributeDbId(), attributeDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			AttributesRecord record = context.selectFrom(ATTRIBUTES)
 											 .where(ATTRIBUTES.ID.cast(String.class).eq(toUpdate.getAttributeDbId()))
@@ -65,18 +64,12 @@ public class AttributeIndividualServerResource extends AttributeBaseServerResour
 				return getAttributeById();
 			}
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<Attribute> getAttributeById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Attribute> attributes = getAttributes(context, Collections.singletonList(ATTRIBUTES.ID.cast(String.class).eq(attributeDbId)));
 
@@ -84,11 +77,6 @@ public class AttributeIndividualServerResource extends AttributeBaseServerResour
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 			else
 				return new BaseResult<>(attributes.get(0), currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

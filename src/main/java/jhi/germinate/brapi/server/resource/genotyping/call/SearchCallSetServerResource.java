@@ -25,8 +25,7 @@ public class SearchCallSetServerResource extends CallSetBaseServerResource imple
 	@Post
 	public BaseResult<ArrayResult<CallSet>> postCallSetSearch(CallSetSearch search)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -46,11 +45,6 @@ public class SearchCallSetServerResource extends CallSetBaseServerResource imple
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<CallSet>()
 				.setData(callSets), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

@@ -22,8 +22,7 @@ public class CropServerResource extends BaseServerResource implements BrapiCropS
 	@Get
 	public BaseResult<ArrayResult<String>> getCommonCropNames()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<String> crops = context.selectDistinct(TAXONOMIES.CROPNAME)
 										.hint("SQL_CALC_FOUND_ROWS")
@@ -35,11 +34,6 @@ public class CropServerResource extends BaseServerResource implements BrapiCropS
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<String>()
 				.setData(crops), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

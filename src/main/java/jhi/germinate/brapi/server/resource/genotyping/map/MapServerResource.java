@@ -55,8 +55,7 @@ public class MapServerResource extends BaseServerResource implements BrapiMapSer
 	@Get
 	public BaseResult<ArrayResult<Map>> getMaps()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			SelectJoinStep<?> step = context.select(
 				MAPS.ID.as("mapDbId"),
@@ -106,11 +105,6 @@ public class MapServerResource extends BaseServerResource implements BrapiMapSer
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Map>()
 				.setData(result), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

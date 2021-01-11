@@ -48,17 +48,11 @@ public class SeasonIndividualServerResource extends SeasonBaseServerResource imp
 	@Get
 	public BaseResult<Season> getSeasonById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Season> seasons = getSeasons(context, Collections.singletonList(DSL.year(DATASETS.DATE_START).cast(String.class).eq(seasonDbId)));
 
 			return new BaseResult<>(CollectionUtils.isEmpty(seasons) ? null : seasons.get(0), currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

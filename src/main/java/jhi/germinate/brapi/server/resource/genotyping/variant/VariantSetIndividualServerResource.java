@@ -39,18 +39,12 @@ public class VariantSetIndividualServerResource extends VariantSetBaseServerReso
 	@Get
 	public BaseResult<VariantSet> getVariantSetById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<VariantSet> results = getVariantSets(context, Collections.singletonList(DATASETS.ID.cast(String.class).eq(variantSetDbId)));
 			VariantSet result = CollectionUtils.isEmpty(results) ? null : results.get(0);
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

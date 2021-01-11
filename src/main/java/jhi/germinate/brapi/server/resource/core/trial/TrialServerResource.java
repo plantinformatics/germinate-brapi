@@ -93,8 +93,7 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 	@Get
 	public BaseResult<ArrayResult<Trial>> getTrials()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -114,11 +113,6 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Trial>()
 				.setData(result), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 

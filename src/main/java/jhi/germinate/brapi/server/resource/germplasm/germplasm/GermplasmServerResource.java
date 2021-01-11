@@ -81,8 +81,7 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 	@MinUserType(UserType.DATA_CURATOR)
 	public BaseResult<ArrayResult<Germplasm>> postGermplasm(Germplasm[] newGermplasm)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Integer> newIds = Arrays.stream(newGermplasm)
 										 .map(g -> addGermplasm(context, g, false))
@@ -93,18 +92,12 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			return new BaseResult<>(new ArrayResult<Germplasm>()
 				.setData(list), currentPage, pageSize, list.size());
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<ArrayResult<Germplasm>> getGermplasm()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -140,11 +133,6 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Germplasm>()
 				.setData(lists), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

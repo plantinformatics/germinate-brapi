@@ -41,8 +41,7 @@ public class CallSetIndividualServerResource extends CallSetBaseServerResource i
 	@Get
 	public BaseResult<CallSet> getCallSetById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<CallSet> callSets = getCallSets(context, Collections.singletonList(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), GERMINATEBASE.ID).eq(callSetDbId)));
 
@@ -50,11 +49,6 @@ public class CallSetIndividualServerResource extends CallSetBaseServerResource i
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 			else
 				return new BaseResult<>(callSets.get(0), currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

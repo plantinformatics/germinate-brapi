@@ -47,18 +47,12 @@ public class StudyIndividualServerResource extends StudyBaseResource implements 
 	@Get
 	public BaseResult<Study> getStudyById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Study> results = getStudies(context, Collections.singletonList(VIEW_TABLE_DATASETS.DATASET_ID.cast(String.class).eq(studyDbId)));
 			Study result = CollectionUtils.isEmpty(results) ? null : results.get(0);
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

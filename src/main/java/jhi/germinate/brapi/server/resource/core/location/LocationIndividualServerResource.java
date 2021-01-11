@@ -47,17 +47,11 @@ public class LocationIndividualServerResource extends LocationBaseResource imple
 	@Get
 	public BaseResult<Location> getLocationById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Location> result = getLocations(context, Collections.singletonList(VIEW_TABLE_LOCATIONS.LOCATION_ID.cast(String.class).eq(locationDbId)));
 
 			return new BaseResult<>(CollectionUtils.isEmpty(result) ? null : result.get(0), currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

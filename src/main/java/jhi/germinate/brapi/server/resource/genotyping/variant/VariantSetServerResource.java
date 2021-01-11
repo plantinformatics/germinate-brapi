@@ -49,8 +49,7 @@ public class VariantSetServerResource extends VariantSetBaseServerResource imple
 	@Get
 	public BaseResult<ArrayResult<VariantSet>> getVariantSets()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -70,11 +69,6 @@ public class VariantSetServerResource extends VariantSetBaseServerResource imple
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<VariantSet>()
 				.setData(result), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

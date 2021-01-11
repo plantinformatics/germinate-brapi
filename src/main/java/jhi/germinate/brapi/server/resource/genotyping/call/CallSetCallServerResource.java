@@ -78,8 +78,7 @@ public class CallSetCallServerResource extends TokenBaseServerResource implement
 		if (StringUtils.isEmpty(callSetDbId) || !callSetDbId.contains("-"))
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			String[] parts = callSetDbId.split("-");
 
@@ -121,11 +120,6 @@ public class CallSetCallServerResource extends TokenBaseServerResource implement
 				.setSepUnphased(params.getSepUnphased())
 				.setUnknownString(params.getUnknownString());
 			return new TokenBaseResult<>(callResult, currentPage, pageSize, alleles.size());
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

@@ -44,8 +44,7 @@ public class GermplasmIndividualServerResource extends GermplasmBaseServerResour
 		if (StringUtils.isEmpty(germplasmDbId) || newGermplasm == null || newGermplasm.getGermplasmDbId() != null && !Objects.equals(newGermplasm.getGermplasmDbId(), germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			addGermplasm(context, newGermplasm, true);
 
@@ -56,28 +55,17 @@ public class GermplasmIndividualServerResource extends GermplasmBaseServerResour
 			else
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<Germplasm> getGermplasmById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Germplasm> germplasms = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId)));
 
 			Germplasm germplasm = CollectionUtils.isEmpty(germplasms) ? null : germplasms.get(0);
 			return new BaseResult<>(germplasm, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

@@ -56,8 +56,7 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 	{
 		// TODO: Check if they're authorized to do this
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Integer> groupIds = new ArrayList<>();
 			for (Lists lists : newLists)
@@ -120,18 +119,12 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 			return new BaseResult<>(new ArrayResult<Lists>()
 				.setData(lists), currentPage, pageSize, totalCount);
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<ArrayResult<Lists>> getLists()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -147,11 +140,6 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Lists>()
 				.setData(result), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

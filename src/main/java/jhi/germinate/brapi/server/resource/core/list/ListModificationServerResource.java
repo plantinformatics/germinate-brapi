@@ -36,8 +36,7 @@ public class ListModificationServerResource extends ListIndividualServerResource
 		// TODO: Check if they're authorized to do this
 
 		List<String> stringIds = Arrays.asList(ids);
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			ViewTableGroups result = context.selectFrom(VIEW_TABLE_GROUPS)
 											.where(VIEW_TABLE_GROUPS.GROUP_VISIBILITY.eq(true))
@@ -83,11 +82,6 @@ public class ListModificationServerResource extends ListIndividualServerResource
 			{
 				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
 			}
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

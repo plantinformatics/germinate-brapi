@@ -58,8 +58,7 @@ public class AttributeServerResource extends AttributeBaseServerResource impleme
 	@MinUserType(UserType.DATA_CURATOR)
 	public BaseResult<ArrayResult<Attribute>> postAttributes(Attribute[] newAttributes)
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Integer> newIds = Arrays.stream(newAttributes)
 										 .map(a -> {
@@ -85,18 +84,12 @@ public class AttributeServerResource extends AttributeBaseServerResource impleme
 			return new BaseResult<>(new ArrayResult<Attribute>()
 				.setData(av), currentPage, pageSize, totalCount);
 		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
-		}
 	}
 
 	@Get
 	public BaseResult<ArrayResult<Attribute>> getAttributes()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Condition> conditions = new ArrayList<>();
 
@@ -112,11 +105,6 @@ public class AttributeServerResource extends AttributeBaseServerResource impleme
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Attribute>()
 				.setData(av), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

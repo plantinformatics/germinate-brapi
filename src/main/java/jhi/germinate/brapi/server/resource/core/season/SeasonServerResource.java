@@ -28,19 +28,13 @@ public class SeasonServerResource extends SeasonBaseServerResource implements Br
 	@Get
 	public BaseResult<ArrayResult<Season>> getSeasons()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			List<Season> seasons = getSeasons(context, null);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Season>()
 				.setData(seasons), currentPage, pageSize, totalCount);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

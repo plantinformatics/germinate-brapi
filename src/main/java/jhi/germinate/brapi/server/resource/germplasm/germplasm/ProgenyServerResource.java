@@ -44,8 +44,7 @@ public class ProgenyServerResource extends GermplasmBaseServerResource implement
 		if (StringUtils.isEmpty(germplasmDbId))
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
 
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			Progeny result = context.select(
 				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
@@ -68,11 +67,6 @@ public class ProgenyServerResource extends GermplasmBaseServerResource implement
 			result.setProgeny(children);
 
 			return new BaseResult<>(result, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }

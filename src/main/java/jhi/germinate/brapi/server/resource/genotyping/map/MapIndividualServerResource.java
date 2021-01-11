@@ -36,8 +36,7 @@ public class MapIndividualServerResource extends BaseServerResource implements B
 	@Get
 	public BaseResult<Map> getMapById()
 	{
-		try (Connection conn = Database.getConnection();
-			 DSLContext context = Database.getContext(conn))
+		try (DSLContext context = Database.getContext())
 		{
 			SelectJoinStep<?> step = context.select(
 				MAPS.ID.as("mapDbId"),
@@ -61,11 +60,6 @@ public class MapIndividualServerResource extends BaseServerResource implements B
 
 			Map map = CollectionUtils.isEmpty(maps) ? null : maps.get(0);
 			return new BaseResult<>(map, currentPage, pageSize, 1);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
 		}
 	}
 }
