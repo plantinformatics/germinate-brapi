@@ -70,11 +70,7 @@ public class SearchGermplasmServerResource extends GermplasmBaseServerResource i
 				conditions.add(DSL.exists(DSL.selectOne().from(g).where(g.ENTITYPARENT_ID.in(GERMINATEBASE.ID).and(g.ID.cast(String.class).in(search.getProgenyDbIds())))));
 			}
 
-			List<Germplasm> lists = getGermplasm(context, conditions);
-
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<Germplasm>()
-				.setData(lists), currentPage, pageSize, totalCount);
+			return getGermplasm(context, conditions);
 		}
 	}
 

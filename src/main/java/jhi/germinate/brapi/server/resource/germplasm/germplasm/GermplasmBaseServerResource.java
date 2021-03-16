@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.location.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
@@ -251,7 +252,7 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		}
 	}
 
-	protected List<Germplasm> getGermplasm(DSLContext context, List<Condition> conditions)
+	protected BaseResult<ArrayResult<Germplasm>> getGermplasm(DSLContext context, List<Condition> conditions)
 	{
 		SelectJoinStep<?> step = context.select(
 			GERMINATEBASE.NAME.as("accessionNumber"),
@@ -292,6 +293,8 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		List<Germplasm> result = step.limit(pageSize)
 									 .offset(pageSize * currentPage)
 									 .fetchInto(Germplasm.class);
+
+		long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 
 		List<String> ids = result.stream().map(Germplasm::getGermplasmDbId).collect(Collectors.toList());
 
@@ -351,6 +354,7 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 			g.setStorageTypes(storage.get(id));
 		});
 
-		return result;
+		return new BaseResult<>(new ArrayResult<Germplasm>()
+			.setData(result), currentPage, pageSize, totalCount);
 	}
 }

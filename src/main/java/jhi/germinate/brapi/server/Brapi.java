@@ -105,7 +105,7 @@ public class Brapi
 		attachToRouter(routerAuth, "/trials", TrialServerResource.class);
 		attachToRouter(routerAuth, "/trials/{trialDbId}", TrialIndividualServerResource.class);
 
-		//GENOTYPING
+		// GENOTYPING
 		// TODO: write implementation
 		attachToRouter(routerAuth, "/calls", CallServerResource.class);
 		// TODO: write implementation

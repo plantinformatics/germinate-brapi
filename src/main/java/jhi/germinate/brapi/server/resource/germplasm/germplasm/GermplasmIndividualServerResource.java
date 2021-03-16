@@ -10,7 +10,7 @@ import java.util.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.auth.*;
 import jhi.germinate.server.util.*;
-import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Germplasm;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmIndividualServerResource;
 
@@ -48,10 +48,10 @@ public class GermplasmIndividualServerResource extends GermplasmBaseServerResour
 		{
 			addGermplasm(context, newGermplasm, true);
 
-			List<Germplasm> germplasm = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId)));
+			BaseResult<ArrayResult<Germplasm>> tempResult = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId)));
 
-			if (!CollectionUtils.isEmpty(germplasm))
-				return new BaseResult<>(germplasm.get(0), currentPage, pageSize, 1);
+			if (!CollectionUtils.isEmpty(tempResult.getResult().getData()))
+				return new BaseResult<>(tempResult.getResult().getData().get(0), currentPage, pageSize, 1);
 			else
 				return new BaseResult<>(null, currentPage, pageSize, 0);
 		}
@@ -62,9 +62,9 @@ public class GermplasmIndividualServerResource extends GermplasmBaseServerResour
 	{
 		try (DSLContext context = Database.getContext())
 		{
-			List<Germplasm> germplasms = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId)));
+			BaseResult<ArrayResult<Germplasm>> tempResult = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId)));
 
-			Germplasm germplasm = CollectionUtils.isEmpty(germplasms) ? null : germplasms.get(0);
+			Germplasm germplasm = CollectionUtils.isEmpty(tempResult.getResult().getData()) ? null : tempResult.getResult().getData().get(0);
 			return new BaseResult<>(germplasm, currentPage, pageSize, 1);
 		}
 	}

@@ -87,10 +87,7 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 										 .map(g -> addGermplasm(context, g, false))
 										 .collect(Collectors.toList());
 
-			List<Germplasm> list = getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.in(newIds)));
-
-			return new BaseResult<>(new ArrayResult<Germplasm>()
-				.setData(list), currentPage, pageSize, list.size());
+			return getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.in(newIds)));
 		}
 	}
 
@@ -128,11 +125,7 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 				conditions.add(DSL.exists(DSL.selectOne().from(g).where(g.ENTITYPARENT_ID.eq(GERMINATEBASE.ID).and(g.ID.cast(String.class).eq(progenyDbId)))));
 			}
 
-			List<Germplasm> lists = getGermplasm(context, conditions);
-
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<Germplasm>()
-				.setData(lists), currentPage, pageSize, totalCount);
+			return getGermplasm(context, conditions);
 		}
 	}
 }
