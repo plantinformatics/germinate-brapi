@@ -2,10 +2,8 @@ package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
 import org.restlet.resource.*;
 
-import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 

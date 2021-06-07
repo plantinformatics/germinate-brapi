@@ -160,6 +160,7 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		}
 
 		existing.setName(newGermplasm.getAccessionNumber());
+		existing.setGeneralIdentifier(newGermplasm.getAccessionNumber());
 		existing.setAcqdate(newGermplasm.getAcquisitionDate());
 		if (!StringUtils.isEmpty(newGermplasm.getBiologicalStatusOfAccessionCode()))
 		{
