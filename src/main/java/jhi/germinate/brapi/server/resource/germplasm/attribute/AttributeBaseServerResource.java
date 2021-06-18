@@ -1,19 +1,15 @@
 package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
+import jhi.germinate.server.util.CollectionUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-
-import java.util.List;
-
-import jhi.germinate.server.util.CollectionUtils;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.Attribute;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
+import java.util.List;
+
 import static jhi.germinate.server.database.codegen.tables.Attributes.*;
 
-/**
- * @author Sebastian Raubach
- */
 public abstract class AttributeBaseServerResource extends BaseServerResource
 {
 	protected List<Attribute> getAttributes(DSLContext context, List<Condition> conditions)
@@ -36,7 +32,7 @@ public abstract class AttributeBaseServerResource extends BaseServerResource
 		}
 
 		return step.limit(pageSize)
-				   .offset(pageSize * currentPage)
+				   .offset(pageSize * page)
 				   .fetchInto(Attribute.class);
 	}
 }

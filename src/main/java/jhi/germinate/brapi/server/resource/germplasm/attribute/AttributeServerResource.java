@@ -1,65 +1,74 @@
 package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.Database;
+import jhi.germinate.server.database.codegen.enums.AttributesDatatype;
+import jhi.germinate.server.database.codegen.tables.records.AttributesRecord;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.*;
+import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeServerResource;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.codegen.enums.AttributesDatatype;
-import jhi.germinate.server.database.codegen.tables.records.AttributesRecord;
-import jhi.germinate.server.util.StringUtils;
-import uk.ac.hutton.ics.brapi.resource.base.*;
-import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.Attribute;
-import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeServerResource;
 
 import static jhi.germinate.server.database.codegen.tables.Attributedata.*;
 import static jhi.germinate.server.database.codegen.tables.Attributes.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 
-/**
- * @author Sebastian Raubach
- */
+@Path("brapi/v2/attributes")
 public class AttributeServerResource extends AttributeBaseServerResource implements BrapiAttributeServerResource
 {
-	private static final String PARAM_ATTRIBUTE_CATEGORY        = "attributeCategory";
-	private static final String PARAM_ATTRIBUTE_DB_ID           = "attributeDbId";
-	private static final String PARAM_ATTRIBUTE_NAME            = "attributeName";
-	private static final String PARAM_GERMPLASM_DB_ID           = "germplasmDbId";
-	private static final String PARAM_EXTERNAL_REFERENCE_ID     = "externalReferenceID";
-	private static final String PARAM_EXTERNAL_REFERENCE_SOURCE = "externalReferenceSource";
-
-	private String attributeCategory;
-	private String attributeDbId;
-	private String attributeName;
-	private String germplasmDbId;
-	private String externalReferenceID;
-	private String externalReferenceSource;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<Attribute>> getAttributes(@QueryParam("attributeCategory") String attributeCategory,
+															@QueryParam("attributeDbId") String attributeDbId,
+															@QueryParam("attributeName") String attributeName,
+															@QueryParam("germplasmDbId") String germplasmDbId,
+															@QueryParam("externalReferenceID") String externalReferenceID,
+															@QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws IOException, SQLException
 	{
-		super.doInit();
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Condition> conditions = new ArrayList<>();
 
-		this.attributeCategory = getQueryValue(PARAM_ATTRIBUTE_CATEGORY);
-		this.attributeDbId = getQueryValue(PARAM_ATTRIBUTE_DB_ID);
-		this.attributeName = getQueryValue(PARAM_ATTRIBUTE_NAME);
-		this.germplasmDbId = getQueryValue(PARAM_GERMPLASM_DB_ID);
-		this.externalReferenceID = getQueryValue(PARAM_EXTERNAL_REFERENCE_ID);
-		this.externalReferenceSource = getQueryValue(PARAM_EXTERNAL_REFERENCE_SOURCE);
+			if (!StringUtils.isEmpty(attributeDbId))
+				conditions.add(ATTRIBUTES.ID.cast(String.class).eq(attributeDbId));
+			if (!StringUtils.isEmpty(attributeName))
+				conditions.add(ATTRIBUTES.NAME.eq(attributeName));
+			if (!StringUtils.isEmpty(germplasmDbId))
+				conditions.add(DSL.exists(DSL.selectOne().from(ATTRIBUTEDATA).leftJoin(GERMINATEBASE).on(ATTRIBUTEDATA.FOREIGN_ID.eq(GERMINATEBASE.ID)).where(ATTRIBUTEDATA.ATTRIBUTE_ID.eq(ATTRIBUTES.ID)).and(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId))));
+
+			List<Attribute> av = getAttributes(context, conditions);
+
+			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
+			return new BaseResult<>(new ArrayResult<Attribute>()
+				.setData(av), page, pageSize, totalCount);
+		}
 	}
 
-	@Post
-	@MinUserType(UserType.DATA_CURATOR)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
 	public BaseResult<ArrayResult<Attribute>> postAttributes(Attribute[] newAttributes)
+		throws IOException, SQLException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Integer> newIds = Arrays.stream(newAttributes)
 										 .map(a -> {
 											 if (StringUtils.isEmpty(a.getAttributeName()))
@@ -82,29 +91,77 @@ public class AttributeServerResource extends AttributeBaseServerResource impleme
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Attribute>()
-				.setData(av), currentPage, pageSize, totalCount);
+				.setData(av), page, pageSize, totalCount);
 		}
 	}
 
-	@Get
-	public BaseResult<ArrayResult<Attribute>> getAttributes()
+	@GET
+	@Path("/{attributeDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<Attribute> getAttributeById(@QueryParam("attributeDbId") String attributeDbId)
+		throws IOException, SQLException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
-			List<Condition> conditions = new ArrayList<>();
+			DSLContext context = Database.getContext(conn);
+			List<Attribute> attributes = getAttributes(context, Collections.singletonList(ATTRIBUTES.ID.cast(String.class).eq(attributeDbId)));
 
-			if (!StringUtils.isEmpty(attributeDbId))
-				conditions.add(ATTRIBUTES.ID.cast(String.class).eq(attributeDbId));
-			if (!StringUtils.isEmpty(attributeName))
-				conditions.add(ATTRIBUTES.NAME.eq(attributeName));
-			if (!StringUtils.isEmpty(germplasmDbId))
-				conditions.add(DSL.exists(DSL.selectOne().from(ATTRIBUTEDATA).leftJoin(GERMINATEBASE).on(ATTRIBUTEDATA.FOREIGN_ID.eq(GERMINATEBASE.ID)).where(ATTRIBUTEDATA.ATTRIBUTE_ID.eq(ATTRIBUTES.ID)).and(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId))));
-
-			List<Attribute> av = getAttributes(context, conditions);
-
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<Attribute>()
-				.setData(av), currentPage, pageSize, totalCount);
+			if (CollectionUtils.isEmpty(attributes))
+				return new BaseResult<>(null, page, pageSize, 0);
+			else
+				return new BaseResult<>(attributes.get(0), page, pageSize, 1);
 		}
+	}
+
+	@PUT
+	@Path("/{attributeDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<Attribute> putAttributeById(@QueryParam("attributeDbId") String attributeDbId, Attribute toUpdate)
+		throws IOException, SQLException
+	{
+		if (StringUtils.isEmpty(attributeDbId) || toUpdate == null || toUpdate.getAttributeDbId() != null && !Objects.equals(toUpdate.getAttributeDbId(), attributeDbId))
+		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			AttributesRecord record = context.selectFrom(ATTRIBUTES)
+											 .where(ATTRIBUTES.ID.cast(String.class).eq(toUpdate.getAttributeDbId()))
+											 .fetchAny();
+
+			if (record == null)
+			{
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+				return null;
+			}
+			else
+			{
+				record.setName(toUpdate.getAttributeName());
+				record.setDescription(toUpdate.getAttributeDescription());
+				record.store();
+
+				return getAttributeById(attributeDbId);
+			}
+		}
+	}
+
+	@GET
+	@Path("/categories")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<Category>> getAttributeCategories()
+		throws IOException, SQLException
+	{
+		return new BaseResult<>(null, page, pageSize, 0);
 	}
 }

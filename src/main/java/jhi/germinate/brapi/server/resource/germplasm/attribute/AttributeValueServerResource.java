@@ -1,69 +1,83 @@
 package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
-import org.jooq.*;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
+import jhi.germinate.resource.enums.UserType;
 import jhi.germinate.server.Database;
-import jhi.germinate.server.auth.*;
 import jhi.germinate.server.database.codegen.enums.AttributesDatatype;
 import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.util.*;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.AttributeValue;
 import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiAttributeValueServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.Attributedata.*;
 import static jhi.germinate.server.database.codegen.tables.Attributes.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableGermplasmAttributes.*;
 
-/**
- * @author Sebastian Raubach
- */
+@Path("brapi/v2/attributevalues")
 public class AttributeValueServerResource extends AttributeValueBaseServerResource implements BrapiAttributeValueServerResource
 {
-	private static final String PARAM_ATTRIBUTE_VALUE_DB_ID     = "attributeValueDbId";
-	private static final String PARAM_ATTRIBUTE_DB_ID           = "attributeDbId";
-	private static final String PARAM_ATTRIBUTE_NAME            = "attributeName";
-	private static final String PARAM_GERMPLASM_DB_ID           = "germplasmDbId";
-	private static final String PARAM_EXTERNAL_REFERENCE_ID     = "externalReferenceID";
-	private static final String PARAM_EXTERNAL_REFERENCE_SOURCE = "externalReferenceSource";
-
-	private String attributeValueDbId;
-	private String attributeDbId;
-	private String attributeName;
-	private String germplasmDbId;
-	private String externalReferenceID;
-	private String externalReferenceSource;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<AttributeValue>> getAttributeValues(@QueryParam("attributeValueDbId") String attributeValueDbId,
+																	  @QueryParam("attributeDbId") String attributeDbId,
+																	  @QueryParam("attributeName") String attributeName,
+																	  @QueryParam("germplasmDbId") String germplasmDbId,
+																	  @QueryParam("externalReferenceID") String externalReferenceID,
+																	  @QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws IOException, SQLException
 	{
-		super.doInit();
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Condition> conditions = new ArrayList<>();
 
-		this.attributeValueDbId = getQueryValue(PARAM_ATTRIBUTE_VALUE_DB_ID);
-		this.attributeDbId = getQueryValue(PARAM_ATTRIBUTE_DB_ID);
-		this.attributeName = getQueryValue(PARAM_ATTRIBUTE_NAME);
-		this.germplasmDbId = getQueryValue(PARAM_GERMPLASM_DB_ID);
-		this.externalReferenceID = getQueryValue(PARAM_EXTERNAL_REFERENCE_ID);
-		this.externalReferenceSource = getQueryValue(PARAM_EXTERNAL_REFERENCE_SOURCE);
+			if (!StringUtils.isEmpty(attributeValueDbId))
+				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_VALUE_ID.cast(String.class).eq(attributeValueDbId));
+			if (!StringUtils.isEmpty(attributeDbId))
+				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_ID.cast(String.class).eq(attributeDbId));
+			if (!StringUtils.isEmpty(attributeName))
+				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_NAME.eq(attributeName));
+			if (!StringUtils.isEmpty(germplasmDbId))
+				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.GERMPLASM_ID.cast(String.class).eq(germplasmDbId));
+
+			List<AttributeValue> av = getAttributeValues(context, conditions);
+
+			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
+			return new BaseResult<>(new ArrayResult<AttributeValue>()
+				.setData(av), page, pageSize, totalCount);
+		}
 	}
 
-	@Post
-	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<AttributeValue>> postAttributeValues(AttributeValue[] newValues)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<ArrayResult<AttributeValue>> postAttributeValues(AttributeValue[] newAttributeValues)
+		throws IOException, SQLException
 	{
-		if (CollectionUtils.isEmpty(newValues))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
-		try (DSLContext context = Database.getContext())
+		if (CollectionUtils.isEmpty(newAttributeValues))
 		{
-			List<Integer> newIds = Arrays.stream(newValues)
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Integer> newIds = Arrays.stream(newAttributeValues)
 										 .map(v -> {
 											 // Get germplasm based on id
 											 GerminatebaseRecord germplasm = context.selectFrom(GERMINATEBASE)
@@ -72,7 +86,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 
 											 // If it doesn't exist fail
 											 if (germplasm == null)
-												 throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Invalid germplasmDbId");
+												 return null;
 
 											 AttributesRecord attribute;
 											 // Get attribute for id
@@ -82,7 +96,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 
 												 // If it doesn't exist, fail
 												 if (attribute == null)
-													 throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Invalid attribute id");
+													 return null;
 											 }
 											 // Get attribute for name
 											 else if (!StringUtils.isEmpty(v.getAttributeName()))
@@ -102,7 +116,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 											 }
 											 else
 											 {
-												 throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "No attribute id or name specified");
+												 return null;
 											 }
 
 											 // Create a new attribute data record
@@ -123,31 +137,65 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<AttributeValue>()
-				.setData(av), currentPage, pageSize, totalCount);
+				.setData(av), page, pageSize, totalCount);
 		}
 	}
 
-	@Get
-	public BaseResult<ArrayResult<AttributeValue>> getAttributeValues()
+	@GET
+	@Path("/{attributeValueDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<AttributeValue> getAttributeValueById(@PathParam("attributeValueDbId") String attributeValueDbId)
+		throws IOException, SQLException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
-			List<Condition> conditions = new ArrayList<>();
+			DSLContext context = Database.getContext(conn);
+			List<AttributeValue> av = getAttributeValues(context, Collections.singletonList(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_VALUE_ID.cast(String.class).eq(attributeValueDbId)));
 
-			if (!StringUtils.isEmpty(attributeValueDbId))
-				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_VALUE_ID.cast(String.class).eq(attributeValueDbId));
-			if (!StringUtils.isEmpty(attributeDbId))
-				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_ID.cast(String.class).eq(attributeDbId));
-			if (!StringUtils.isEmpty(attributeName))
-				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.ATTRIBUTE_NAME.eq(attributeName));
-			if (!StringUtils.isEmpty(germplasmDbId))
-				conditions.add(VIEW_TABLE_GERMPLASM_ATTRIBUTES.GERMPLASM_ID.cast(String.class).eq(germplasmDbId));
+			if (!CollectionUtils.isEmpty(av))
+				return new BaseResult<>(av.get(0), page, pageSize, 1);
+			else
+				return new BaseResult<>(null, page, pageSize, 0);
+		}
+	}
 
-			List<AttributeValue> av = getAttributeValues(context, conditions);
+	@PUT
+	@Path("/{attributeValueDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<AttributeValue> putAttributeValueById(@PathParam("attributeValueDbId") String attributeValueDbId, AttributeValue attributeValue)
+		throws IOException, SQLException
+	{
+		if (StringUtils.isEmpty(attributeValueDbId) || attributeValue == null || attributeValue.getAttributeValueDbId() != null && !Objects.equals(attributeValue.getAttributeValueDbId(), attributeValueDbId))
+		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
 
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<AttributeValue>()
-				.setData(av), currentPage, pageSize, totalCount);
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			AttributedataRecord record = context.selectFrom(ATTRIBUTEDATA)
+												.where(ATTRIBUTEDATA.ID.cast(String.class).eq(attributeValue.getAttributeValueDbId()))
+												.fetchAny();
+
+			if (record == null)
+			{
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+				return null;
+			}
+			else
+			{
+				record.setValue(attributeValue.getValue());
+				record.setCreatedOn(attributeValue.getDeterminedDate());
+				record.store();
+
+				return getAttributeValueById(attributeValueDbId);
+			}
 		}
 	}
 }
