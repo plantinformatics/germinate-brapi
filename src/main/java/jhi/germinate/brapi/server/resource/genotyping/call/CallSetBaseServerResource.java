@@ -38,7 +38,7 @@ public abstract class CallSetBaseServerResource extends BaseServerResource
 		}
 
 		List<CallSet> result = step.limit(pageSize)
-								   .offset(pageSize * currentPage)
+								   .offset(pageSize * page)
 								   .fetchInto(CallSet.class);
 
 		result.forEach(c -> {

@@ -1,18 +1,21 @@
 package jhi.germinate.brapi.server.resource.phenotyping.observation;
 
+import jhi.germinate.resource.enums.UserType;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.enums.PhenotypesDatatype;
-import jhi.germinate.server.database.pojo.*;
-import jhi.germinate.server.util.StringUtils;
+import jhi.germinate.server.database.pojo.TraitRestrictions;
+import jhi.germinate.server.util.*;
 import org.jooq.DSLContext;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.*;
-import uk.ac.hutton.ics.brapi.resource.phenotyping.observation.*;
+import uk.ac.hutton.ics.brapi.resource.phenotyping.observation.ObservationVariable;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
-import uk.ac.hutton.ics.brapi.server.phenotyping.observation.*;
+import uk.ac.hutton.ics.brapi.server.phenotyping.observation.BrapiObservationVariableServerResource;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,19 +23,29 @@ import java.util.stream.Collectors;
 import static jhi.germinate.server.database.codegen.tables.Phenotypes.*;
 import static jhi.germinate.server.database.codegen.tables.Units.*;
 
+@Path("brapi/v2/variables")
 public class ObservationVariableServerResource extends BaseServerResource implements BrapiObservationVariableServerResource
 {
-	@Get
-	@Override
-	public BaseResult<ArrayResult<ObservationVariable>> getObservationVariables()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<ObservationVariable>> getObservationVariables(@QueryParam("observationVariableDbId") String observationVariableDbId,
+																				@QueryParam("traitClass") String traitClass,
+																				@QueryParam("studyDbId") String studyDbId,
+																				@QueryParam("externalReferenceID") String externalReferenceID,
+																				@QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws IOException, SQLException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<ObservationVariable> variables = context.select()
 														 .from(PHENOTYPES)
 														 .leftJoin(UNITS).on(UNITS.ID.eq(PHENOTYPES.UNIT_ID))
 														 .limit(pageSize)
-														 .offset(pageSize * currentPage)
+														 .offset(pageSize * page)
 														 .stream()
 														 .map(t -> {
 															 ObservationVariable variable = new ObservationVariable()
@@ -107,14 +120,43 @@ public class ObservationVariableServerResource extends BaseServerResource implem
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<ObservationVariable>()
-				.setData(variables), currentPage, pageSize, totalCount);
+				.setData(variables), page, pageSize, totalCount);
 		}
 	}
 
-	@Post
-	@Override
-	public BaseResult<ArrayResult<ObservationVariable>> postObservationVariables(List<ObservationVariable> list)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<ArrayResult<ObservationVariable>> postObservationVariables(List<ObservationVariable> newObservationVariables)
+		throws IOException, SQLException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
+	@GET
+	@Path("/{observationVariableDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ObservationVariable> getObservationVariableById(@PathParam("observationVariableDbId") String observationVariableDbId)
+		throws IOException, SQLException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
+	@PUT
+	@Path("/{observationVariableDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<ObservationVariable> putObservationVariableById(@PathParam("observationVariableDbId") String observationVariableDbId, ObservationVariable observationVariable)
+		throws IOException, SQLException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

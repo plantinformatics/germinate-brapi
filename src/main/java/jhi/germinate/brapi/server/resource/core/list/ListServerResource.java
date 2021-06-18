@@ -1,20 +1,23 @@
 package jhi.germinate.brapi.server.resource.core.list;
 
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.Database;
+import jhi.germinate.server.database.codegen.tables.pojos.ViewTableGroups;
+import jhi.germinate.server.database.codegen.tables.records.*;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.tools.StringUtils;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.codegen.tables.records.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.list.Lists;
 import uk.ac.hutton.ics.brapi.server.core.list.BrapiListServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 import static jhi.germinate.server.database.codegen.tables.Groupmembers.*;
@@ -27,37 +30,21 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableGroups.*;
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/lists")
 public class ListServerResource extends ListBaseServerResource implements BrapiListServerResource
 {
-	public static final String PARAM_LIST_TYPE   = "listType";
-	public static final String PARAM_LIST_NAME   = "listName";
-	public static final String PARAM_LIST_DB_ID  = "listDbId";
-	public static final String PARAM_LIST_SOURCE = "listSource";
-
-	private String listType;
-	private String listName;
-	private String listDbId;
-	private String listSource;
-
 	@Override
-	public void doInit()
-	{
-		super.doInit();
-
-		this.listType = getQueryValue(PARAM_LIST_TYPE);
-		this.listName = getQueryValue(PARAM_LIST_NAME);
-		this.listDbId = getQueryValue(PARAM_LIST_DB_ID);
-		this.listSource = getQueryValue(PARAM_LIST_SOURCE);
-	}
-
-	@Post
-	@MinUserType(UserType.AUTH_USER)
+	@Secured(UserType.AUTH_USER)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public BaseResult<ArrayResult<Lists>> postLists(Lists[] newLists)
-	{
+		throws SQLException, IOException {
 		// TODO: Check if they're authorized to do this
 
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Integer> groupIds = new ArrayList<>();
 			for (Lists lists : newLists)
 			{
@@ -117,15 +104,170 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Lists>()
-				.setData(lists), currentPage, pageSize, totalCount);
+				.setData(lists), page, pageSize, totalCount);
 		}
 	}
 
-	@Get
-	public BaseResult<ArrayResult<Lists>> getLists()
+	@Override
+	@GET
+	@Path("/{listDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<Lists> getListsById(@PathParam("listDbId") String listDbId)
+		throws SQLException, IOException
 	{
-		try (DSLContext context = Database.getContext())
+		return getList(listDbId, pageSize, page);
+	}
+
+
+	@Override
+	@PUT
+	@Path("/{listDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.AUTH_USER)
+	public BaseResult<Lists> putListById(@PathParam("listDbId") String listDbId, Lists updatedLists)
+		throws SQLException, IOException
+	{
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
+			ViewTableGroups result = context.selectFrom(VIEW_TABLE_GROUPS)
+											.where(VIEW_TABLE_GROUPS.GROUP_VISIBILITY.eq(true))
+											.and(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId))
+											.fetchAnyInto(ViewTableGroups.class);
+
+			if (result != null)
+			{
+				// Remove all group members
+				context.deleteFrom(GROUPMEMBERS)
+					   .where(GROUPMEMBERS.GROUP_ID.eq(result.getGroupId()))
+					   .execute();
+
+				// Then set the new ones
+				switch (result.getGroupTypeId())
+				{
+					case 1:
+						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
+							   .select(DSL.select(LOCATIONS.ID, DSL.val(result.getGroupId()))
+										  .from(LOCATIONS)
+										  .where(LOCATIONS.ID.in(updatedLists.getData())))
+							   .execute();
+						break;
+					case 2:
+						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
+							   .select(DSL.select(MARKERS.ID, DSL.val(result.getGroupId()))
+										  .from(MARKERS)
+										  .where(MARKERS.ID.in(updatedLists.getData())))
+							   .execute();
+						break;
+					case 3:
+						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
+							   .select(DSL.select(GERMINATEBASE.ID, DSL.val(result.getGroupId()))
+										  .from(GERMINATEBASE)
+										  .where(GERMINATEBASE.ID.in(updatedLists.getData())))
+							   .execute();
+						break;
+				}
+
+				return getListsById(Integer.toString(result.getGroupId()));
+			}
+			else
+			{
+				resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+				return null;
+			}
+		}
+	}
+
+	@Override
+	@Secured(UserType.AUTH_USER)
+	@POST
+	@Path("/{listDbId}/items")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<Lists> postListByIdItems(@PathParam("listDbId") String listDbId, String[] ids)
+		throws SQLException, IOException
+	{
+		if (ids == null)
+		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		// TODO: Check if they're authorized to do this
+
+		List<String> stringIds = Arrays.asList(ids);
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			ViewTableGroups result = context.selectFrom(VIEW_TABLE_GROUPS)
+											.where(VIEW_TABLE_GROUPS.GROUP_VISIBILITY.eq(true))
+											.and(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId))
+											.fetchAnyInto(ViewTableGroups.class);
+
+			if (result != null)
+			{
+				// Remove all group members
+				context.deleteFrom(GROUPMEMBERS)
+					   .where(GROUPMEMBERS.GROUP_ID.eq(result.getGroupId()))
+					   .execute();
+
+				// Then set the new ones
+				switch (result.getGroupTypeId())
+				{
+					case 1:
+						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
+							   .select(DSL.select(LOCATIONS.ID, DSL.val(result.getGroupId()))
+										  .from(LOCATIONS)
+										  .where(LOCATIONS.ID.in(stringIds)))
+							   .execute();
+						break;
+					case 2:
+						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
+							   .select(DSL.select(MARKERS.ID, DSL.val(result.getGroupId()))
+										  .from(MARKERS)
+										  .where(MARKERS.ID.in(stringIds)))
+							   .execute();
+						break;
+					case 3:
+						context.insertInto(GROUPMEMBERS, GROUPMEMBERS.FOREIGN_ID, GROUPMEMBERS.GROUP_ID)
+							   .select(DSL.select(GERMINATEBASE.ID, DSL.val(result.getGroupId()))
+										  .from(GERMINATEBASE)
+										  .where(GERMINATEBASE.ID.in(stringIds)))
+							   .execute();
+						break;
+				}
+
+				return getList(Integer.toString(result.getGroupId()), pageSize, page);
+			}
+			else
+			{
+				resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+				return null;
+			}
+		}
+	}
+
+	@Override
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<Lists>> getLists(@QueryParam("listType") String listType,
+												   @QueryParam("listName") String listName,
+												   @QueryParam("listDbId") String listDbId,
+												   @QueryParam("listSource") String listSource,
+												   @QueryParam("externalReferenceID") String externalReferenceID,
+												   @QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws SQLException
+	{
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(listType))
@@ -139,7 +281,61 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Lists>()
-				.setData(result), currentPage, pageSize, totalCount);
+				.setData(result), page, pageSize, totalCount);
+		}
+	}
+
+	protected BaseResult<Lists> getList(String listDbId, int pageSize, int page)
+		throws SQLException
+	{
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Lists> results = getLists(context, Collections.singletonList(VIEW_TABLE_GROUPS.GROUP_ID.cast(String.class).eq(listDbId)));
+			Lists result = CollectionUtils.isEmpty(results) ? null : results.get(0);
+
+			if (result != null)
+			{
+				switch (result.getListType())
+				{
+					case "germinatebase":
+						result.setData(context.select(GERMINATEBASE.NAME)
+											  .hint("SQL_CALC_FOUND_ROWS")
+											  .from(GERMINATEBASE)
+											  .leftJoin(GROUPMEMBERS).on(GROUPMEMBERS.FOREIGN_ID.eq(GERMINATEBASE.ID))
+											  .where(GROUPMEMBERS.GROUP_ID.cast(String.class).eq(listDbId))
+											  .limit(pageSize)
+											  .offset(pageSize * page)
+											  .fetchInto(String.class));
+						break;
+					case "locations":
+						result.setData(context.select(LOCATIONS.SITE_NAME)
+											  .hint("SQL_CALC_FOUND_ROWS")
+											  .from(LOCATIONS)
+											  .leftJoin(GROUPMEMBERS).on(GROUPMEMBERS.FOREIGN_ID.eq(LOCATIONS.ID))
+											  .where(GROUPMEMBERS.GROUP_ID.cast(String.class).eq(listDbId))
+											  .limit(pageSize)
+											  .offset(pageSize * page)
+											  .fetchInto(String.class));
+						break;
+					case "markers":
+						result.setData(context.select(MARKERS.MARKER_NAME)
+											  .hint("SQL_CALC_FOUND_ROWS")
+											  .from(MARKERS)
+											  .leftJoin(GROUPMEMBERS).on(GROUPMEMBERS.FOREIGN_ID.eq(MARKERS.ID))
+											  .where(GROUPMEMBERS.GROUP_ID.cast(String.class).eq(listDbId))
+											  .limit(pageSize)
+											  .offset(pageSize * page)
+											  .fetchInto(String.class));
+						break;
+				}
+
+				return new BaseResult<>(result, page, pageSize, 1);
+			}
+			else
+			{
+				return new BaseResult<>(null, page, pageSize, 0);
+			}
 		}
 	}
 }

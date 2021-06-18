@@ -1,35 +1,43 @@
 package jhi.germinate.brapi.server.resource.core.study;
 
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.Date;
-import java.sql.*;
-import java.util.*;
-
 import jhi.germinate.server.Database;
 import jhi.germinate.server.util.CollectionUtils;
+import org.jooq.*;
+import org.jooq.impl.DSL;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.*;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiSearchStudyServerResource;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.Date;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/search/studies")
 public class SearchStudyServerResource extends StudyBaseResource implements BrapiSearchStudyServerResource
 {
-	@Post
-	public BaseResult<ArrayResult<Study>> postStudySearch(StudySearch search)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postStudySearch(StudySearch search)
+		throws SQLException, IOException
 	{
 		if (search == null)
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
-		try (DSLContext context = Database.getContext())
 		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!CollectionUtils.isEmpty(search.getStudyTypes()))
@@ -53,21 +61,20 @@ public class SearchStudyServerResource extends StudyBaseResource implements Brap
 			List<Study> result = getStudies(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<Study>()
-				.setData(result), currentPage, pageSize, totalCount);
+			return Response.ok(new BaseResult<>(new ArrayResult<Study>()
+				.setData(result), page, pageSize, totalCount))
+						   .build();
 		}
 	}
 
-	@Post
-	public BaseResult<SearchResult> postStudySearchAsync(StudySearch studySearch)
+	@GET
+	@Path("/{searchResultsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<Study>> getStudySearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
-
-	@Get
-	public BaseResult<ArrayResult<Study>> getStudySearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
 }

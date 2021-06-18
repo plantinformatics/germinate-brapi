@@ -1,9 +1,9 @@
 package jhi.germinate.brapi.server.resource.core.study;
 
+import jhi.germinate.server.util.Secured;
 import org.jooq.DSLContext;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 
@@ -12,28 +12,39 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyTypesServerResource;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+
 import static jhi.germinate.server.database.codegen.tables.Datasettypes.*;
 
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/studytypes")
+@Secured
+@PermitAll
 public class StudyTypesServerResource extends BaseServerResource implements BrapiStudyTypesServerResource
 {
-	@Get
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public BaseResult<ArrayResult<String>> getStudyTypes()
+		throws IOException, SQLException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<String> result = context.select(DATASETTYPES.DESCRIPTION)
 										 .hint("SQL_CALC_FOUND_ROWS")
 										 .from(DATASETTYPES)
 										 .limit(pageSize)
-										 .offset(pageSize * currentPage)
+										 .offset(pageSize * page)
 										 .fetchInto(String.class);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<String>()
-				.setData(result), currentPage, pageSize, totalCount);
+				.setData(result), page, pageSize, totalCount);
 		}
 	}
 }

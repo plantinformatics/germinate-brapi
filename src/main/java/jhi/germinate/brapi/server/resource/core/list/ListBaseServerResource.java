@@ -33,7 +33,7 @@ public abstract class ListBaseServerResource extends BaseServerResource
 		}
 
 		List<ViewTableGroups> groups = step.limit(pageSize)
-										   .offset(pageSize * currentPage)
+										   .offset(pageSize * page)
 										   .fetchInto(ViewTableGroups.class);
 		return groups.stream()
 					 .map(l -> new Lists()

@@ -1,29 +1,20 @@
 package jhi.germinate.brapi.server.resource.other;
 
-import org.restlet.resource.ServerResource;
+import jhi.germinate.resource.enums.ServerProperty;
+import jhi.germinate.server.util.*;
+import uk.ac.hutton.ics.brapi.server.base.ContextResource;
 
 import java.io.*;
-import java.util.*;
+import java.util.UUID;
 
-import jhi.germinate.server.util.*;
-
-/**
- * @author Sebastian Raubach
- */
-public abstract class FileServerResource extends ServerResource
+public abstract class FileServerResource extends ContextResource
 {
 	protected File createTempFile(String parentFolder, String filename, String extension, boolean create)
 		throws IOException
 	{
 		extension = extension.replace(".", "");
 
-		List<String> segments = getReference().getSegments(true);
-
-		String path;
-		if (CollectionUtils.isEmpty(segments))
-			path = "germinate-brapi";
-		else
-			path = segments.get(0);
+		String path = PropertyWatcher.get(ServerProperty.DATABASE_NAME);
 		File folder = new File(System.getProperty("java.io.tmpdir"), path);
 		folder.mkdirs();
 

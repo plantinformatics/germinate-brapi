@@ -1,25 +1,21 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
+import jhi.germinate.brapi.server.Brapi;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.ext.servlet.ServletUtils;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.*;
-
-import jhi.germinate.brapi.server.Brapi;
-import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
-import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 
-/**
- * @author Sebastian Raubach
- */
-public abstract class VariantSetBaseServerResource extends BaseServerResource
+public interface VariantSetBaseServerResource
 {
-	protected List<VariantSet> getVariantSets(DSLContext context, List<Condition> conditions)
+	default List<VariantSet> getVariantSets(DSLContext context, List<Condition> conditions, HttpServletRequest req, int page, int pageSize)
 	{
 		SelectConditionStep<?> step = context.select(
 			DATASETS.ID.as("studyDbId"),
@@ -41,14 +37,14 @@ public abstract class VariantSetBaseServerResource extends BaseServerResource
 		}
 
 		List<VariantSet> result = step.limit(pageSize)
-									  .offset(pageSize * currentPage)
+									  .offset(pageSize * page)
 									  .fetchInto(VariantSet.class);
 
 		// TODO: Put this back in once we can configure the proxy reverse to actually forward the context path
 		result.forEach(vs -> {
 			try
 			{
-				URI uri = URI.create(Brapi.getServerBase(ServletUtils.getRequest(getRequest())) + "/api" + Brapi.BRAPI.urlPrefix + "/files/genotypes/" + vs.getVariantSetDbId());
+				URI uri = URI.create(Brapi.getServerBase(req) + "/api" + Brapi.BRAPI.urlPrefix + "/files/genotypes/" + vs.getVariantSetDbId());
 				vs.setAvailableFormats(Collections.singletonList(new Format()
 					.setDataFormat("Flapjack")
 					.setFileFormat("text/tab-separated-values")

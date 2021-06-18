@@ -1,30 +1,35 @@
 package jhi.germinate.brapi.server.resource.germplasm.attribute;
 
-import org.jooq.*;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
 import jhi.germinate.server.Database;
-import jhi.germinate.server.util.CollectionUtils;
+import jhi.germinate.server.util.*;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.attribute.*;
 import uk.ac.hutton.ics.brapi.server.germplasm.attribute.BrapiSearchAttributeValueServerResource;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+
 import static jhi.germinate.server.database.codegen.tables.ViewTableGermplasmAttributes.*;
 
-/**
- * @author Sebastian Raubach
- */
+@Path("brapi/v2/search/attributevalues")
+@Secured
+@PermitAll
 public class SearchAttributeValueServerResource extends AttributeValueBaseServerResource implements BrapiSearchAttributeValueServerResource
 {
-	@Post
-	public BaseResult<ArrayResult<AttributeValue>> postAttributeValueSearch(AttributeValueSearch search)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postAttributeValueSearch(AttributeValueSearch search)
+		throws SQLException, IOException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!CollectionUtils.isEmpty(search.getAttributeValueDbIds()))
@@ -44,22 +49,16 @@ public class SearchAttributeValueServerResource extends AttributeValueBaseServer
 			List<AttributeValue> av = getAttributeValues(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<AttributeValue>()
-				.setData(av), currentPage, pageSize, totalCount);
+			return Response.ok(new BaseResult<>(new ArrayResult<AttributeValue>()
+				.setData(av), page, pageSize, totalCount))
+						   .build();
 		}
 	}
 
-	@Post
-	public BaseResult<SearchResult> postAttributeValueSearchAsync(AttributeValueSearch attributeValueSearch)
+	public BaseResult<ArrayResult<AttributeValue>> getAttributeValueSearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
-
-	@Get
-	public BaseResult<ArrayResult<AttributeValue>> getAttributeValueSearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-
 }

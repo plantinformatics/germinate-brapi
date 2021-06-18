@@ -1,35 +1,43 @@
 package jhi.germinate.brapi.server.resource.genotyping.marker;
 
-import org.jooq.*;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
 import jhi.germinate.server.Database;
-import jhi.germinate.server.util.CollectionUtils;
+import jhi.germinate.server.util.*;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.map.*;
 import uk.ac.hutton.ics.brapi.server.genotyping.marker.BrapiSearchMarkerPositionServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.codegen.tables.Maps.*;
 import static jhi.germinate.server.database.codegen.tables.Markers.*;
 
-/**
- * @author Sebastian Raubach
- */
+@Path("brapi/v2/search/markerpositions")
+@Secured
+@PermitAll
 public class SearchMarkerPositionServerResource extends MarkerBaseServerResource implements BrapiSearchMarkerPositionServerResource
 {
-	@Post
-	public BaseResult<ArrayResult<MarkerPosition>> postMarkerPositionSearch(MarkerPositionSearch search)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postMarkerPositionSearch(MarkerPositionSearch search)
+		throws SQLException, IOException
 	{
 		if (search == null)
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
-		try (DSLContext context = Database.getContext())
 		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!CollectionUtils.isEmpty(search.getMapDbIds()))
@@ -46,22 +54,21 @@ public class SearchMarkerPositionServerResource extends MarkerBaseServerResource
 			List<MarkerPosition> result = getMarkerPositions(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<MarkerPosition>()
-				.setData(result), currentPage, pageSize, totalCount);
+
+			return Response.ok(new BaseResult<>(new ArrayResult<MarkerPosition>()
+				.setData(result), page, pageSize, totalCount))
+						   .build();
 		}
 	}
 
-	@Post
-	public BaseResult<SearchResult> postMarkerPositionSearchAsync(MarkerPositionSearch markerPositionSearch)
+	@GET
+	@Path("/{searchResultsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<MarkerPosition>> getMarkerPositionSearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
-
-	@Get
-	public BaseResult<ArrayResult<MarkerPosition>> getMarkerPositionSearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-
 }

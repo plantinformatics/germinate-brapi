@@ -1,65 +1,40 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.util.CollectionUtils;
+import jhi.germinate.server.util.Secured;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiSearchVariantSetServerResource;
 
-import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
-import static jhi.germinate.server.database.codegen.tables.Datasets.*;
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.SQLException;
 
-/**
- * @author Sebastian Raubach
- */
-public class SearchVariantSetServerResource extends VariantSetBaseServerResource implements BrapiSearchVariantSetServerResource
+@Path("brapi/v2/search/variantsets")
+@Secured
+@PermitAll
+public class SearchVariantSetServerResource extends BaseServerResource implements BrapiSearchVariantSetServerResource
 {
-	@Post
-	public BaseResult<ArrayResult<VariantSet>> postVariantSetSearch(VariantSetSearch search)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postVariantSetSearch(VariantSetSearch search)
+		throws SQLException, IOException
 	{
-		if (search == null)
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
-		try (DSLContext context = Database.getContext())
-		{
-			List<Condition> conditions = new ArrayList<>();
-
-			if (!CollectionUtils.isEmpty(search.getVariantSetDbIds()))
-				conditions.add(DATASETS.ID.cast(String.class).in(search.getVariantSetDbIds()));
-			if (!CollectionUtils.isEmpty(search.getVariantDbIds()))
-				conditions.add(DSL.exists(DSL.selectOne().from(DATASETMEMBERS).where(DATASETMEMBERS.DATASET_ID.eq(DATASETS.ID)).and(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1)).and(DATASETMEMBERS.FOREIGN_ID.cast(String.class).in(search.getVariantDbIds()))));
-			if (!CollectionUtils.isEmpty(search.getCallSetDbIds()))
-				conditions.add(DSL.exists(DSL.selectOne().from(DATASETMEMBERS).where(DATASETMEMBERS.DATASET_ID.eq(DATASETS.ID)).and(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(2)).and(DATASETMEMBERS.FOREIGN_ID.cast(String.class).in(search.getCallSetDbIds()))));
-			if (!CollectionUtils.isEmpty(search.getStudyDbIds()))
-				conditions.add(DATASETS.ID.cast(String.class).in(search.getStudyDbIds()));
-			if (!CollectionUtils.isEmpty(search.getStudyNames()))
-				conditions.add(DATASETS.NAME.cast(String.class).in(search.getStudyNames()));
-
-			List<VariantSet> result = getVariantSets(context, conditions);
-
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<VariantSet>()
-				.setData(result), currentPage, pageSize, totalCount);
-		}
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 
-	@Post
-	public BaseResult<SearchResult> postVariantSetSearchAsync(VariantSetSearch variantSetSearch)
+	@GET
+	@Path("/{searchResultsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<VariantSet>> getVariantSetSearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<VariantSet>> getVariantSetSearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

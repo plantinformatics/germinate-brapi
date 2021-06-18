@@ -1,85 +1,54 @@
 package jhi.germinate.brapi.server.resource.genotyping.call;
 
-import org.jooq.DSLContext;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.io.File;
-import java.sql.*;
-import java.util.*;
-import java.util.stream.*;
-
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.util.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.records.*;
-import jhi.germinate.server.util.StringUtils;
+import jhi.germinate.server.util.*;
+import org.jooq.DSLContext;
 import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
-import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetIndividualCallServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetTokenServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 import static jhi.germinate.server.database.codegen.tables.Markers.*;
 
-/**
- * @author Sebastian Raubach
- */
-public class CallSetCallServerResource extends TokenBaseServerResource implements BrapiCallSetIndividualCallServerResource
+@Path("brapi/v2/callsets")
+@Secured
+@PermitAll
+public class CallSetTokenServerResource extends TokenBaseServerResource implements BrapiCallSetTokenServerResource
 {
-	private static final String PARAM_EXPAND_HOMOZYGOTES = "expandHomozygotes";
-	private static final String PARAM_UNKNOWN_STRING     = "unknownString";
-	private static final String PARAM_SEP_PHASED         = "sepPhased";
-	private static final String PARAM_SEP_UNPHASED       = "sepUnphased";
-
-	private String callSetDbId;
-
-	private GenotypeEncodingParams params = new GenotypeEncodingParams();
-
-	@Override
-	public void doInit()
-	{
-		super.doInit();
-
-		try
-		{
-			String expand = getQueryValue(PARAM_EXPAND_HOMOZYGOTES);
-
-			if (!StringUtils.isEmpty(expand))
-				params.setCollapse(!Boolean.parseBoolean(expand));
-		}
-		catch (Exception e)
-		{
-		}
-		String unknownString = getQueryValue(PARAM_UNKNOWN_STRING);
-		if (unknownString != null)
-			params.setUnknownString(unknownString);
-		String sepPhased = getQueryValue(PARAM_SEP_PHASED);
-		if (sepPhased != null)
-			params.setSepPhased(sepPhased);
-		String sepUnphased = getQueryValue(PARAM_SEP_UNPHASED);
-		if (sepUnphased != null)
-			params.setSepUnphased(sepUnphased);
-
-		try
-		{
-			this.callSetDbId = getRequestAttributes().get("callSetDbId").toString();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
-	@Get
-	public TokenBaseResult<CallResult<Call>> getCallSetByIdCalls()
+	@GET
+	@Path("/{callSetDbId}/calls")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TokenBaseResult<CallResult<Call>> getCallSetByIdCalls(@PathParam("callSetDbId") String callSetDbId,
+																 @QueryParam("expandHomozygotes") String expandHomozygotes,
+																 @QueryParam("unknownString") String unknownString,
+																 @QueryParam("sepPhased") String sepPhased,
+																 @QueryParam("sepUnphased") String sepUnphased)
+		throws IOException, SQLException
 	{
 		if (StringUtils.isEmpty(callSetDbId) || !callSetDbId.contains("-"))
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
-
-		try (DSLContext context = Database.getContext())
 		{
+			resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			String[] parts = callSetDbId.split("-");
 
 			DatasetsRecord dataset = context.selectFrom(DATASETS)
@@ -92,7 +61,23 @@ public class CallSetCallServerResource extends TokenBaseServerResource implement
 												   .fetchAny();
 
 			if (dataset == null || StringUtils.isEmpty(dataset.getSourceFile()) || germplasm == null)
-				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+			{
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+				return null;
+			}
+
+			GenotypeEncodingParams params = new GenotypeEncodingParams();
+			params.setUnknownString(unknownString);
+			params.setSepPhased(sepPhased);
+			params.setSepUnphased(sepUnphased);
+			params.setUnknownString(unknownString);
+			try
+			{
+				params.setCollapse(!Boolean.parseBoolean(expandHomozygotes));
+			}
+			catch (Exception e)
+			{
+			}
 
 			Hdf5DataExtractor extractor = new Hdf5DataExtractor(new File(Brapi.BRAPI.hdf5BaseFolder, dataset.getSourceFile()));
 			List<String> alleles = extractor.getAllelesForLine(germplasm.getName(), params);
@@ -102,7 +87,7 @@ public class CallSetCallServerResource extends TokenBaseServerResource implement
 														   .fetchMap(MARKERS.MARKER_NAME, MARKERS.ID);
 
 			List<Call> calls = IntStream.range(0, alleles.size())
-										.skip(pageSize * currentPage)
+										.skip(pageSize * page)
 										.limit(pageSize)
 										.mapToObj(i -> new Call()
 											.setCallSetDbId(callSetDbId)
@@ -119,7 +104,7 @@ public class CallSetCallServerResource extends TokenBaseServerResource implement
 				.setSepPhased(params.getSepPhased())
 				.setSepUnphased(params.getSepUnphased())
 				.setUnknownString(params.getUnknownString());
-			return new TokenBaseResult<>(callResult, currentPage, pageSize, alleles.size());
+			return new TokenBaseResult<>(callResult, page, pageSize, alleles.size());
 		}
 	}
 }

@@ -1,25 +1,18 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
-import com.google.gson.JsonElement;
-
+import jhi.germinate.server.util.CollectionUtils;
 import org.jooq.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import jhi.germinate.server.util.CollectionUtils;
-import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
-import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
-
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
 
-/**
- * @author Sebastian Raubach
- */
-public abstract class VariantBaseServerResource extends TokenBaseServerResource
+public interface VariantBaseServerResource
 {
-	protected List<Variant> getVariantsInternal(DSLContext context, List<Condition> conditions)
+	default List<Variant> getVariantsInternal(DSLContext context, List<Condition> conditions, int page, int pageSize)
 	{
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
@@ -34,7 +27,7 @@ public abstract class VariantBaseServerResource extends TokenBaseServerResource
 		}
 
 		return step.limit(pageSize)
-				   .offset(pageSize * currentPage)
+				   .offset(pageSize * page)
 				   .stream()
 				   .map(m -> {
 					   Variant result = new Variant()
@@ -48,8 +41,7 @@ public abstract class VariantBaseServerResource extends TokenBaseServerResource
 
 					   if (m.get(VIEW_TABLE_MARKERS.MARKER_SYNONYMS) != null)
 					   {
-						   for (JsonElement name : m.get(VIEW_TABLE_MARKERS.MARKER_SYNONYMS))
-							   names.add(name.getAsString());
+						   Collections.addAll(names, m.get(VIEW_TABLE_MARKERS.MARKER_SYNONYMS));
 					   }
 
 					   result.setVariantNames(names);

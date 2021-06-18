@@ -1,20 +1,32 @@
 package jhi.germinate.brapi.server.resource.germplasm.breedingmethod;
 
-import org.restlet.resource.Get;
-
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.BreedingMethod;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.germplasm.breedingmethod.BrapiBreedingMethodServerResource;
 
-/**
- * @author Sebastian Raubach
- */
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.sql.SQLException;
+
+@Path("brapi/v2/breedingmethods")
 public class BreedingMethodServerResource extends BaseServerResource implements BrapiBreedingMethodServerResource
 {
-	@Get
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public BaseResult<ArrayResult<BreedingMethod>> getBreedingMethods()
-	{
-		return new BaseResult<>(new ArrayResult<>(), currentPage, pageSize, 0);
+		throws IOException, SQLException {
+		return new BaseResult<>(new ArrayResult<>(), page, pageSize, 0);
+	}
+
+	@GET
+	@Path("/{breedingMethodDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<BreedingMethod> getBreedingMethodById(@PathParam("breedingMethodDbId") String breedingMethodDbId)
+		throws IOException, SQLException {
+		return new BaseResult<>(null, page, pageSize, 0);
 	}
 }

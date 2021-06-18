@@ -1,11 +1,10 @@
 package jhi.germinate.brapi.server.resource.genotyping.marker;
 
 import org.jooq.*;
-
-import java.util.List;
-
 import uk.ac.hutton.ics.brapi.resource.genotyping.map.MarkerPosition;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+
+import java.util.List;
 
 import static jhi.germinate.server.database.codegen.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.codegen.tables.Maps.*;
@@ -39,7 +38,7 @@ public abstract class MarkerBaseServerResource extends BaseServerResource
 		}
 
 		return step.limit(pageSize)
-				   .offset(pageSize * currentPage)
+				   .offset(pageSize * page)
 				   .fetchInto(MarkerPosition.class);
 	}
 }

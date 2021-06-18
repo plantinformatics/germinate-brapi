@@ -56,7 +56,7 @@ public abstract class StudyBaseResource extends BaseServerResource
 
 
 		List<ViewTableDatasets> datasets = step.limit(pageSize)
-											   .offset(pageSize * currentPage)
+											   .offset(pageSize * page)
 											   .fetchInto(ViewTableDatasets.class);
 
 		return datasets.stream()

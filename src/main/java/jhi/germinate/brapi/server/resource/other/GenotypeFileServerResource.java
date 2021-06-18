@@ -1,53 +1,45 @@
 package jhi.germinate.brapi.server.resource.other;
 
-import org.jooq.DSLContext;
-import org.restlet.data.Status;
-import org.restlet.data.*;
-import org.restlet.ext.servlet.ServletUtils;
-import org.restlet.representation.FileRepresentation;
-import org.restlet.resource.*;
-
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.records.DatasetsRecord;
 import jhi.germinate.server.util.*;
+import jhi.germinate.server.util.hdf5.Hdf5ToFJTabbedConverter;
+import org.jooq.DSLContext;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.*;
+import java.nio.file.Files;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 
-/**
- * @author Sebastian Raubach
- */
+@Path("brapi/v2/files/genotypes/{datasetId}")
+@Secured
+@PermitAll
 public class GenotypeFileServerResource extends FileServerResource
 {
+	@PathParam("datasetId")
 	private String datasetId;
 
-	@Override
-	public void doInit()
-		throws ResourceException
-	{
-		super.doInit();
-
-		try
-		{
-			this.datasetId = getRequestAttributes().get("datasetId").toString();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
-	@Get("text/tab-separated-values")
-	public FileRepresentation getJson()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces("text/tab-separated-values")
+	public Response getGenotypeFile()
+		throws IOException, SQLException
 	{
 		if (StringUtils.isEmpty(datasetId))
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
-
-		try (DSLContext context = Database.getContext())
 		{
+			resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			DatasetsRecord ds = context.selectFrom(DATASETS)
 									   .where(DATASETS.DATASET_STATE_ID.eq(1))
 									   .and(DATASETS.IS_EXTERNAL.eq(false))
@@ -55,13 +47,16 @@ public class GenotypeFileServerResource extends FileServerResource
 									   .and(DATASETS.ID.cast(String.class).eq(datasetId)).fetchAny();
 
 			if (ds == null || StringUtils.isEmpty(ds.getSourceFile()))
-				throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND);
+			{
+				resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+				return null;
+			}
 
 			File resultFile = createTempFile(null, "genotypes-" + ds.getId(), ".txt", true);
 
 			Hdf5ToFJTabbedConverter converter = new Hdf5ToFJTabbedConverter(new File(Brapi.BRAPI.hdf5BaseFolder, ds.getSourceFile()), null, null, resultFile.getAbsolutePath(), false);
 			// TODO: Generate header links
-			String clientBase = Brapi.getServerBase(ServletUtils.getRequest(getRequest()));
+			String clientBase = Brapi.getServerBase(req);
 
 			List<String> result = new ArrayList<>();
 
@@ -76,21 +71,21 @@ public class GenotypeFileServerResource extends FileServerResource
 			}
 			converter.extractData(CollectionUtils.join(result, "\n") + "\n");
 
-			FileRepresentation representation = new FileRepresentation(resultFile, MediaType.TEXT_TSV);
-			representation.setSize(resultFile.length());
-			representation.setAutoDeleting(true);
-
-			// TODO: Kick of deletion thread from here as well!
-			Disposition disp = new Disposition(Disposition.TYPE_ATTACHMENT);
-			disp.setFilename(resultFile.getName());
-			disp.setSize(resultFile.length());
-			representation.setDisposition(disp);
-			return representation;
+			java.nio.file.Path zipFilePath = resultFile.toPath();
+			return Response.ok((StreamingOutput) output -> {
+				Files.copy(zipFilePath, output);
+				Files.deleteIfExists(zipFilePath);
+			})
+						   .type("text/tab-separated-values")
+						   .header("content-disposition", "attachment;filename= \"" + resultFile.getName() + "\"")
+						   .header("content-length", resultFile.length())
+						   .build();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL);
+			resp.sendError(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			return null;
 		}
 	}
 }

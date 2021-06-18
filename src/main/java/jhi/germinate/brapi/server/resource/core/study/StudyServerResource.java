@@ -1,92 +1,57 @@
 package jhi.germinate.brapi.server.resource.core.study;
 
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.Database;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.Date;
-import java.sql.*;
-import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.auth.*;
-import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.Study;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.Date;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.ViewTableDatasets.*;
 
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/studies")
 public class StudyServerResource extends StudyBaseResource implements BrapiStudyServerResource
 {
-	public static final String PARAM_CROP_COMMON_NAME           = "cropCommonName";
-	public static final String PARAM_STUDY_TYPE                 = "studyType";
-	public static final String PARAM_PROGRAM_DB_ID              = "programDbId";
-	public static final String PARAM_LOCATION_DB_ID             = "locationDbId";
-	public static final String PARAM_SEASON_DB_ID               = "seasonDbId";
-	public static final String PARAM_TRIAL_DB_ID                = "trialDbId";
-	public static final String PARAM_STUDY_DB_ID                = "studyDbId";
-	public static final String PARAM_STUDY_NAME                 = "studyName";
-	public static final String PARAM_STUDY_CODE                 = "studyCode";
-	public static final String PARAM_STUDY_PUI                  = "studyPUI";
-	public static final String PARAM_GERMPLASM_DB_ID            = "germplasmDbId";
-	public static final String PARAM_OBSERVATION_VARIABLE_DB_ID = "observationVariableDbId";
-	public static final String PARAM_ACTIVE                     = "active";
-
-	private String  cropCommonName;
-	private String  studyType;
-	private String  programDbId;
-	private String  locationDbId;
-	private String  seasonDbId;
-	private String  trialDbId;
-	private String  studyDbId;
-	private String  studyName;
-	private String  studyCode;
-	private String  studyPUI;
-	private String  germplasmDbId;
-	private String  observationVariableDbId;
-	private Boolean active;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<Study>> getStudies(@QueryParam("commonCropName") String commonCropName,
+													 @QueryParam("studyType") String studyType,
+													 @QueryParam("programDbId") String programDbId,
+													 @QueryParam("locationDbId") String locationDbId,
+													 @QueryParam("seasonDbId") String seasonDbId,
+													 @QueryParam("trialDbId") String trialDbId,
+													 @QueryParam("studyDbId") String studyDbId,
+													 @QueryParam("studyName") String studyName,
+													 @QueryParam("studyCode") String studyCode,
+													 @QueryParam("studyPUI") String studyPUI,
+													 @QueryParam("germplasmDbId") String germplasmDbId,
+													 @QueryParam("observationVariableDbId") String observationVariableDbId,
+													 @QueryParam("active") String active,
+													 @QueryParam("sortBy") String sortBy,
+													 @QueryParam("sortOrder") String sortOrder,
+													 @QueryParam("externalReferenceID") String externalReferenceID,
+													 @QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws SQLException, IOException
 	{
-		super.doInit();
-
-		this.cropCommonName = getQueryValue(PARAM_CROP_COMMON_NAME);
-		this.studyType = getQueryValue(PARAM_STUDY_TYPE);
-		this.programDbId = getQueryValue(PARAM_PROGRAM_DB_ID);
-		this.locationDbId = getQueryValue(PARAM_LOCATION_DB_ID);
-		this.seasonDbId = getQueryValue(PARAM_SEASON_DB_ID);
-		this.trialDbId = getQueryValue(PARAM_TRIAL_DB_ID);
-		this.studyDbId = getQueryValue(PARAM_STUDY_DB_ID);
-		this.studyName = getQueryValue(PARAM_STUDY_NAME);
-		this.studyCode = getQueryValue(PARAM_STUDY_CODE);
-		this.studyPUI = getQueryValue(PARAM_STUDY_PUI);
-		this.germplasmDbId = getQueryValue(PARAM_GERMPLASM_DB_ID);
-		this.observationVariableDbId = getQueryValue(PARAM_OBSERVATION_VARIABLE_DB_ID);
-		String isActive = getQueryValue(PARAM_ACTIVE);
-
-		if (!StringUtils.isEmpty(isActive))
-			this.active = Boolean.parseBoolean(isActive);
-	}
-
-	@Post
-	@MinUserType(UserType.AUTH_USER)
-	public BaseResult<ArrayResult<Study>> postStudies(Study[] newStudies)
-	{
-
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<Study>> getStudies()
-	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(studyType))
@@ -101,7 +66,7 @@ public class StudyServerResource extends StudyBaseResource implements BrapiStudy
 				conditions.add(VIEW_TABLE_DATASETS.DATASET_NAME.eq(studyName));
 			if (active != null)
 			{
-				if (active)
+				if (Boolean.parseBoolean(active))
 					conditions.add(VIEW_TABLE_DATASETS.END_DATE.isNull().or(VIEW_TABLE_DATASETS.END_DATE.ge(new Date(System.currentTimeMillis()))));
 				else
 					conditions.add(VIEW_TABLE_DATASETS.END_DATE.isNotNull().and(VIEW_TABLE_DATASETS.END_DATE.le(new Date(System.currentTimeMillis()))));
@@ -111,7 +76,49 @@ public class StudyServerResource extends StudyBaseResource implements BrapiStudy
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Study>()
-				.setData(result), currentPage, pageSize, totalCount);
+				.setData(result), page, pageSize, totalCount);
 		}
+	}
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<ArrayResult<Study>> postStudies(Study[] newStudies)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
+	@GET
+	@Path("/{studyDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<Study> getStudyById(@PathParam("studyDbId") String studyDbId)
+		throws SQLException, IOException
+	{
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Study> results = getStudies(context, Collections.singletonList(VIEW_TABLE_DATASETS.DATASET_ID.cast(String.class).eq(studyDbId)));
+			Study result = CollectionUtils.isEmpty(results) ? null : results.get(0);
+
+			return new BaseResult<>(result, page, pageSize, 1);
+		}
+	}
+
+	@PUT
+	@Path("/{studyDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<Study> putStudyById(@PathParam("studyDbId") String studyDbId, Study newStudy)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

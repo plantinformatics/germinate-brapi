@@ -1,68 +1,35 @@
 package jhi.germinate.brapi.server.resource.genotyping.call;
 
-
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import jhi.germinate.brapi.server.util.GenotypeEncodingParams;
-import jhi.germinate.server.util.StringUtils;
+import jhi.germinate.server.util.Secured;
 import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
-import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallServerResource;
 
-/**
- * @author Sebastian Raubach
- */
-public class CallServerResource extends TokenBaseServerResource implements BrapiCallServerResource
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.SQLException;
+
+@Path("brapi/v2/calls")
+@Secured
+@PermitAll
+public class CallServerResource extends BaseServerResource implements BrapiCallServerResource
 {
-	private static final String PARAM_EXPAND_HOMOZYGOTES = "expandHomozygotes";
-	private static final String PARAM_UNKNOWN_STRING     = "unknownString";
-	private static final String PARAM_SEP_PHASED         = "sepPhased";
-	private static final String PARAM_SEP_UNPHASED       = "sepUnphased";
-	private static final String PARAM_CALL_SET_DB_ID     = "callSetDbId";
-	private static final String PARAM_VARIANT_DB_ID      = "variantDbId";
-	private static final String PARAM_VARIANT_SET_DB_ID  = "variantSetDbId";
-
-	private String callSetDbId;
-	private String variantDbId;
-	private String variantSetDbId;
-
-	private GenotypeEncodingParams params = new GenotypeEncodingParams();
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TokenBaseResult<CallResult<Call>> getCalls(@QueryParam("callSetDbId") String callSetDbId,
+													  @QueryParam("variantDbId") String variantDbId,
+													  @QueryParam("variantSetDbId") String variantSetDbId,
+													  @QueryParam("expandHomozygotes") String expandHomozygotes,
+													  @QueryParam("unknownString") String unknownString,
+													  @QueryParam("sepPhased") String sepPhased,
+													  @QueryParam("sepUnphased") String sepUnphased)
+		throws IOException, SQLException
 	{
-		super.doInit();
-
-		try
-		{
-			String expand = getQueryValue(PARAM_EXPAND_HOMOZYGOTES);
-
-			if (!StringUtils.isEmpty(expand))
-				params.setCollapse(!Boolean.parseBoolean(expand));
-		}
-		catch (Exception e)
-		{
-		}
-		String unknownString = getQueryValue(PARAM_UNKNOWN_STRING);
-		if (unknownString != null)
-			params.setUnknownString(unknownString);
-		String sepPhased = getQueryValue(PARAM_SEP_PHASED);
-		if (sepPhased != null)
-			params.setSepPhased(sepPhased);
-		String sepUnphased = getQueryValue(PARAM_SEP_UNPHASED);
-		if (sepUnphased != null)
-			params.setSepUnphased(sepUnphased);
-
-		this.callSetDbId = getQueryValue(PARAM_CALL_SET_DB_ID);
-		this.variantDbId = getQueryValue(PARAM_VARIANT_DB_ID);
-		this.variantSetDbId = getQueryValue(PARAM_VARIANT_SET_DB_ID);
-	}
-
-	@Get
-	public TokenBaseResult<CallResult<Call>> getCalls()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.SERVICE_UNAVAILABLE.getStatusCode());
+		return null;
 	}
 }

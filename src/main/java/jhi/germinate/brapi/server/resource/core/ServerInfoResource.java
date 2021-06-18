@@ -1,22 +1,25 @@
 package jhi.germinate.brapi.server.resource.core;
 
-import org.restlet.resource.Get;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.util.Secured;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.serverinfo.ServerInfo;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.core.serverinfo.BrapiServerInfoResource;
 
+import javax.ws.rs.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/serverinfo")
 public class ServerInfoResource extends BaseServerResource implements BrapiServerInfoResource
 {
-	public static final  String          PARAM_DATA_TYPE = "dataType";
-	private static final List<BrapiCall> CALLS           = new ArrayList<>();
+	private static final List<BrapiCall> CALLS = new ArrayList<>();
 
 	static
 	{
@@ -266,24 +269,11 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 			.addVersion(BrapiCall.Version.TWO_ZERO));
 	}
 
-	private BrapiCall.DataType dataType = null;
-
-	@Override
-	public void doInit()
-	{
-		super.doInit();
-
-		try
-		{
-			this.dataType = BrapiCall.DataType.valueOf(getQueryValue(PARAM_DATA_TYPE));
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
-	@Get
-	public BaseResult<ServerInfo> getServerinfo()
+	@GET
+	@Consumes({"application/json"})
+	@Produces({"application/json"})
+	public BaseResult<ServerInfo> getServerinfo(@QueryParam("dataType") String dataType)
+		throws SQLException, IOException
 	{
 		List<BrapiCall> calls = CALLS;
 
@@ -294,13 +284,12 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 						 .collect(Collectors.toCollection(ArrayList::new));
 		}
 
-		int start = currentPage * pageSize;
+		int start = page * pageSize;
 		int end = Math.min(start + pageSize, calls.size());
 
 		calls = calls.subList(start, end);
 
 		return new BaseResult<>(new ServerInfo() // TODO: Set other things.
-												 .setCalls(calls), currentPage, pageSize, calls.size());
-
+												 .setCalls(calls), page, pageSize, calls.size());
 	}
 }

@@ -31,7 +31,7 @@ public abstract class LocationBaseResource extends BaseServerResource
 		}
 
 		List<ViewTableLocations> locations = step.limit(pageSize)
-												 .offset(pageSize * currentPage)
+												 .offset(pageSize * page)
 												 .fetchInto(ViewTableLocations.class);
 
 		return locations.stream()

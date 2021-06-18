@@ -1,33 +1,46 @@
 package jhi.germinate.brapi.server.resource.core.list;
 
+import jhi.germinate.server.Database;
+import jhi.germinate.server.util.Secured;
 import org.jooq.*;
 import org.jooq.tools.StringUtils;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
-import jhi.germinate.server.Database;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.list.*;
 import uk.ac.hutton.ics.brapi.server.core.list.BrapiSearchListServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.ViewTableGroups.*;
 
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/search/lists")
+@Secured
+@PermitAll
 public class SearchListServerResource extends ListBaseServerResource implements BrapiSearchListServerResource
 {
-	@Post
-	public BaseResult<ArrayResult<Lists>> postListSearch(ListSearch search)
+	@Override
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postListSearch(ListSearch search)
+		throws IOException, SQLException
 	{
 		if (search == null)
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
-		try (DSLContext context = Database.getContext())
 		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (search.getDateCreatedRangeEnd() != null)
@@ -57,20 +70,22 @@ public class SearchListServerResource extends ListBaseServerResource implements 
 			List<Lists> lists = getLists(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new BaseResult<>(new ArrayResult<Lists>()
-				.setData(lists), currentPage, pageSize, totalCount);
+
+			return Response.ok(new BaseResult<>(new ArrayResult<Lists>()
+				.setData(lists), page, pageSize, totalCount))
+						   .build();
 		}
 	}
 
-	@Post
-	public BaseResult<SearchResult> postListSearchAsync(ListSearch listSearch)
+	@Override
+	@GET
+	@Path("/{searchResultsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<Lists>> getListSearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<Lists>> getListSearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

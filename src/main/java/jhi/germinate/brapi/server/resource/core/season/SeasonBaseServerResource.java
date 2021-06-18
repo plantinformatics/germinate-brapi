@@ -32,7 +32,7 @@ public abstract class SeasonBaseServerResource extends BaseServerResource
 		}
 
 		List<Integer> years = step.limit(pageSize)
-								  .offset(pageSize * currentPage)
+								  .offset(pageSize * page)
 								  .fetchInto(Integer.class);
 
 		return years.stream()

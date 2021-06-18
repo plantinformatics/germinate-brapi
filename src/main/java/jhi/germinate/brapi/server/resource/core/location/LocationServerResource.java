@@ -1,50 +1,43 @@
 package jhi.germinate.brapi.server.resource.core.location;
 
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.Database;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.tools.StringUtils;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.auth.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.location.Location;
 import uk.ac.hutton.ics.brapi.server.core.location.BrapiLocationServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.ViewTableLocations.*;
 
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/locations")
 public class LocationServerResource extends LocationBaseResource implements BrapiLocationServerResource
 {
-	public static final String PARAM_LOCATION_TYPE = "locationType";
-
-	private String locationType;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<Location>> getLocations(@QueryParam("locationType") String locationType,
+														  @QueryParam("locationDbId") String locationDbId,
+														  @QueryParam("externalReferenceID") String externalReferenceID,
+														  @QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws SQLException, IOException
 	{
-		super.doInit();
-
-		this.locationType = getQueryValue(PARAM_LOCATION_TYPE);
-	}
-
-	@Post
-	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Location>> postLocations(Location[] newLocations)
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<Location>> getLocations()
-	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(locationType))
@@ -54,7 +47,48 @@ public class LocationServerResource extends LocationBaseResource implements Brap
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Location>()
-				.setData(result), currentPage, pageSize, totalCount);
+				.setData(result), page, pageSize, totalCount);
+		}
+	}
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<ArrayResult<Location>> postLocations(Location[] newLocations)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
+	@PUT
+	@Path("/{locationDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<Location> putLocationById(@PathParam("locationDbId") String locationDbId, Location newLocation)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
+	@GET
+	@Path("/{locationDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<Location> getLocationById(@PathParam("locationDbId") String locationDbId)
+		throws SQLException, IOException
+	{
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Location> result = getLocations(context, Collections.singletonList(VIEW_TABLE_LOCATIONS.LOCATION_ID.cast(String.class).eq(locationDbId)));
+
+			return new BaseResult<>(CollectionUtils.isEmpty(result) ? null : result.get(0), page, pageSize, 1);
 		}
 	}
 }

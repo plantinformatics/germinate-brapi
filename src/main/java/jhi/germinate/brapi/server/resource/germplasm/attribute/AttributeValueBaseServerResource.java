@@ -36,7 +36,7 @@ public abstract class AttributeValueBaseServerResource extends BaseServerResourc
 		}
 
 		return step.limit(pageSize)
-				   .offset(pageSize * currentPage)
+				   .offset(pageSize * page)
 				   .fetchInto(AttributeValue.class);
 	}
 }

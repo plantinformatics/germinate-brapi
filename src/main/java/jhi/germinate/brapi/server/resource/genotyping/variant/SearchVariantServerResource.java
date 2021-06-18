@@ -1,59 +1,41 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.util.CollectionUtils;
+import jhi.germinate.server.util.Secured;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiSearchVariantServerResource;
 
-import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
-import static jhi.germinate.server.database.codegen.tables.Markers.*;
-import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.SQLException;
 
-/**
- * @author Sebastian Raubach
- */
-public class SearchVariantServerResource extends VariantBaseServerResource implements BrapiSearchVariantServerResource
+@Path("brapi/v2/search/variants")
+@Secured
+@PermitAll
+public class SearchVariantServerResource extends BaseServerResource implements BrapiSearchVariantServerResource
 {
-	@Post
-	public TokenBaseResult<ArrayResult<Variant>> postVariantSearch(VariantSearch search)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postVariantSearch(VariantSearch search)
+		throws SQLException, IOException
 	{
-		try (DSLContext context = Database.getContext())
-		{
-			List<Condition> conditions = new ArrayList<>();
-
-			if (!CollectionUtils.isEmpty(search.getVariantDbIds()))
-				conditions.add(MARKERS.ID.cast(String.class).in(search.getVariantDbIds()));
-			if (!CollectionUtils.isEmpty(search.getVariantSetDbIds()))
-				conditions.add(DSL.exists(DSL.selectOne().from(DATASETMEMBERS)
-											 .where(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1))
-											 .and(DATASETMEMBERS.DATASET_ID.cast(String.class).in(search.getVariantSetDbIds()))
-											 .and(DATASETMEMBERS.FOREIGN_ID.eq(VIEW_TABLE_MARKERS.MARKER_ID))));
-
-			List<Variant> variants = getVariantsInternal(context, conditions);
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new TokenBaseResult<>(new ArrayResult<Variant>()
-				.setData(variants), currentPage, pageSize, totalCount);
-		}
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 
-	@Post
-	public BaseResult<SearchResult> postVariantSearchAsync(VariantSearch variantSearch)
+	@GET
+	@Path("/{searchResultsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<Variant>> getVariantSearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Get
-	public TokenBaseResult<ArrayResult<Variant>> getVariantSearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

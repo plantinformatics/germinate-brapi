@@ -1,37 +1,40 @@
 package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
+import jhi.germinate.server.Database;
+import jhi.germinate.server.database.codegen.tables.Germinatebase;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.auth.*;
-import jhi.germinate.server.database.codegen.tables.Germinatebase;
-import jhi.germinate.server.util.CollectionUtils;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiSearchGermplasmServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 import static jhi.germinate.server.database.codegen.tables.Synonyms.*;
 import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 
-/**
- * @author Sebastian Raubach
- */
-public class SearchGermplasmServerResource extends GermplasmBaseServerResource implements BrapiSearchGermplasmServerResource
+@Path("brapi/v2/search/germplasm")
+@Secured
+@PermitAll
+public class SearchGermplasmPositionServerResource extends GermplasmBaseServerResource implements BrapiSearchGermplasmServerResource
 {
-	@Post
-	@MinUserType(UserType.DATA_CURATOR)
-	public BaseResult<ArrayResult<Germplasm>> postGermplasmSearch(GermplasmSearch search)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postGermplasmSearch(GermplasmSearch search)
+		throws SQLException, IOException
 	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!CollectionUtils.isEmpty(search.getGermplasmPUIs()))
@@ -70,19 +73,18 @@ public class SearchGermplasmServerResource extends GermplasmBaseServerResource i
 				conditions.add(DSL.exists(DSL.selectOne().from(g).where(g.ENTITYPARENT_ID.in(GERMINATEBASE.ID).and(g.ID.cast(String.class).in(search.getProgenyDbIds())))));
 			}
 
-			return getGermplasm(context, conditions);
+			return Response.ok(getGermplasm(context, conditions)).build();
 		}
 	}
 
-	@Post
-	public BaseResult<SearchResult> postGermplasmSearchAsync(GermplasmSearch germplasmSearch)
+	@GET
+	@Path("/{searchResultsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<Germplasm>> getGermplasmSearchAsync(@PathParam("searchResultsDbId") String searchResultsDbId)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<Germplasm>> getGermplasmSearchAsync()
-	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

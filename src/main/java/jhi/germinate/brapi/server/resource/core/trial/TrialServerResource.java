@@ -1,20 +1,21 @@
 package jhi.germinate.brapi.server.resource.core.trial;
 
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.Database;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.sql.Date;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.trial.Trial;
 import uk.ac.hutton.ics.brapi.server.core.trial.BrapiTrialServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.sql.Date;
+import java.sql.*;
+import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableExperiments.*;
@@ -22,85 +23,56 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableExperiments.
 /**
  * @author Sebastian Raubach
  */
+@Path("brapi/v2/trials")
 public class TrialServerResource extends TrialBaseServerResource implements BrapiTrialServerResource
 {
-	private static final String PARAM_ACTIVE                    = "active";
-	private static final String PARAM_COMMON_CROP_NAME          = "commonCropName";
-	private static final String PARAM_CONTACT_DB_ID             = "contactDbId";
-	private static final String PARAM_PROGRAM_DB_ID             = "programDbId";
-	private static final String PARAM_LOCATION_DB_ID            = "locationDbId";
-	private static final String PARAM_SEARCH_DATE_RANGE_START   = "searchDateRangeStart";
-	private static final String PARAM_SEARCH_DATE_RANGE_END     = "searchDateRangeEnd";
-	private static final String PARAM_STUDY_DB_ID               = "studyDbId";
-	private static final String PARAM_TRIAL_DB_ID               = "trialDbId";
-	private static final String PARAM_TRIAL_NAME                = "trialName";
-	private static final String PARAM_TRIAL_PUI                 = "trialPUI";
-	private static final String PARAM_EXTERNAL_REFERENCE_ID     = "externalReferenceID";
-	private static final String PARAM_EXTERNAL_REFERENCE_SOURCE = "externalReferenceSource";
-
-	private Boolean active;
-	private String  commonCropName;
-	private String  contactDbId;
-	private String  programDbId;
-	private String  locationDbId;
-	private Date    searchDateRangeStart;
-	private Date    searchDateRangeEnd;
-	private String  studyDbId;
-	private String  trialDbId;
-	private String  trialName;
-	private String  trialPUI;
-	private String  externalReferenceID;
-	private String  externalReferenceSource;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<ArrayResult<Trial>> getTrials(@QueryParam("active") String active,
+													@QueryParam("commonCropName") String commonCropName,
+													@QueryParam("contactDbId") String contactDbId,
+													@QueryParam("programDbId") String programDbId,
+													@QueryParam("locationDbId") String locationDbId,
+													@QueryParam("searchDateRangeStart") String searchDateRangeStart,
+													@QueryParam("searchDateRangeEnd") String searchDateRangeEnd,
+													@QueryParam("studyDbId") String studyDbId,
+													@QueryParam("trialDbId") String trialDbId,
+													@QueryParam("trialName") String trialName,
+													@QueryParam("trialPUI") String trialPUI,
+													@QueryParam("sortBy") String sortBy,
+													@QueryParam("sortOrder") String sortOrder,
+													@QueryParam("externalReferenceID") String externalReferenceID,
+													@QueryParam("externalReferenceSource") String externalReferenceSource)
+		throws SQLException, IOException
 	{
-		super.doInit();
-
-		String isActive = getQueryValue(PARAM_ACTIVE);
-
-		if (!StringUtils.isEmpty(isActive))
-			this.active = Boolean.parseBoolean(isActive);
-
-		this.commonCropName = getQueryValue(PARAM_COMMON_CROP_NAME);
-		this.contactDbId = getQueryValue(PARAM_CONTACT_DB_ID);
-		this.programDbId = getQueryValue(PARAM_PROGRAM_DB_ID);
-		this.locationDbId = getQueryValue(PARAM_LOCATION_DB_ID);
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		try
+		try (Connection conn = Database.getConnection())
 		{
-			this.searchDateRangeStart = new Date(sdf.parse(getQueryValue(PARAM_SEARCH_DATE_RANGE_START)).getTime());
-		}
-		catch (Exception e)
-		{
-		}
-		try
-		{
-			this.searchDateRangeEnd = new Date(sdf.parse(getQueryValue(PARAM_SEARCH_DATE_RANGE_END)).getTime());
-		}
-		catch (Exception e)
-		{
-		}
-		this.studyDbId = getQueryValue(PARAM_STUDY_DB_ID);
-		this.trialDbId = getQueryValue(PARAM_TRIAL_DB_ID);
-		this.trialName = getQueryValue(PARAM_TRIAL_NAME);
-		this.trialPUI = getQueryValue(PARAM_TRIAL_PUI);
-		this.externalReferenceID = getQueryValue(PARAM_EXTERNAL_REFERENCE_ID);
-		this.externalReferenceSource = getQueryValue(PARAM_EXTERNAL_REFERENCE_SOURCE);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<Trial>> getTrials()
-	{
-		try (DSLContext context = Database.getContext())
-		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (searchDateRangeStart != null)
-				conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_DATE.ge(searchDateRangeStart));
+			{
+				try
+				{
+					conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_DATE.ge(new Date(DateTimeUtils.parseDate(searchDateRangeStart).getTime())));
+				}
+				catch (Exception e)
+				{
+				}
+			}
 			if (searchDateRangeEnd != null)
-				conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_DATE.le(searchDateRangeEnd));
+			{
+				try
+				{
+					conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_DATE.le(new Date(DateTimeUtils.parseDate(searchDateRangeEnd).getTime())));
+				}
+				catch (Exception e)
+				{
+				}
+			}
 			if (!StringUtils.isEmpty(studyDbId))
 				conditions.add(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.EXPERIMENT_ID.eq(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID)).and(DATASETS.ID.cast(String.class).eq(studyDbId))));
 			if (!StringUtils.isEmpty(trialDbId))
@@ -112,13 +84,52 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<Trial>()
-				.setData(result), currentPage, pageSize, totalCount);
+				.setData(result), page, pageSize, totalCount);
 		}
 	}
 
-	@Post
-	public BaseResult<ArrayResult<Trial>> postTrials(Trial[] trials)
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<ArrayResult<Trial>> postTrials(Trial[] newTrials)
+		throws SQLException, IOException
 	{
-		throw new ResourceException(Status.SERVER_ERROR_NOT_IMPLEMENTED);
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
+
+	@GET
+	@Path("/{trialsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
+	public BaseResult<Trial> getTrialById(@QueryParam("trialsDbId") String trialsDbId)
+		throws SQLException, IOException
+	{
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Trial> result = getTrials(context, Collections.singletonList(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID.cast(String.class).eq(trialsDbId)));
+
+			if (CollectionUtils.isEmpty(result))
+				return new BaseResult<>(null, page, pageSize, 0);
+			else
+				return new BaseResult<>(result.get(0), page, pageSize, 1);
+		}
+	}
+
+	@PUT
+	@Path("/{trialsDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Secured(UserType.DATA_CURATOR)
+	public BaseResult<Trial> putTrialById(@QueryParam("trialsDbId") String trialsDbId, Trial trial)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
 }

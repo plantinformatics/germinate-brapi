@@ -1,58 +1,45 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
-import org.jooq.*;
+import jhi.germinate.server.Database;
+import jhi.germinate.server.util.*;
+import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
+import uk.ac.hutton.ics.brapi.resource.base.BaseResult;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantServerResource;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.util.StringUtils;
-import uk.ac.hutton.ics.brapi.resource.base.*;
-import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
-import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantServerResource;
 
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
 
-/**
- * @author Sebastian Raubach
- */
-public class VariantServerResource extends VariantBaseServerResource implements BrapiVariantServerResource
+@Path("brapi/v2/variants")
+@Secured
+@PermitAll
+public class VariantServerResource extends BaseServerResource implements BrapiVariantServerResource, VariantBaseServerResource
 {
-	private static final String PARAM_VARIANT_DB_ID     = "variantDbId";
-	private static final String PARAM_VARIANT_SET_DB_ID = "variantSetDbId";
-
-	private String variantDbId;
-	private String variantSetDbId;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{variantDbId}")
+	public BaseResult<Variant> getVariantById(@PathParam("variantDbId") String variantDbId)
+		throws IOException, SQLException
 	{
-		super.doInit();
-
-		this.variantDbId = getQueryValue(PARAM_VARIANT_DB_ID);
-		this.variantSetDbId = getQueryValue(PARAM_VARIANT_SET_DB_ID);
-	}
-
-	@Get
-	public TokenBaseResult<ArrayResult<Variant>> getAllVariants()
-	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
-			List<Condition> conditions = new ArrayList<>();
+			DSLContext context = Database.getContext(conn);
+			List<Variant> variants = getVariantsInternal(context, Collections.singletonList(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId)), page, pageSize);
 
-			if (!StringUtils.isEmpty(variantDbId))
-				conditions.add(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId));
-			if (!StringUtils.isEmpty(variantSetDbId))
-				conditions.add(DATASETMEMBERS.DATASET_ID.cast(String.class).eq(variantSetDbId));
-
-			List<Variant> variants = getVariantsInternal(context, conditions);
-			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
-			return new TokenBaseResult<>(new ArrayResult<Variant>()
-				.setData(variants), currentPage, pageSize, totalCount);
+			if (CollectionUtils.isEmpty(variants))
+				return new BaseResult<>(null, page, pageSize, 0);
+			else
+				return new BaseResult<>(variants.get(0), page, pageSize, 1);
 		}
 	}
 }

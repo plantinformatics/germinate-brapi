@@ -1,84 +1,55 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
-import org.jooq.DSLContext;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
-
-import java.io.File;
-import java.sql.*;
-import java.util.*;
-import java.util.stream.*;
-
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.util.*;
 import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.records.DatasetsRecord;
-import jhi.germinate.server.util.StringUtils;
-import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
+import jhi.germinate.server.util.*;
+import org.jooq.DSLContext;
+import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
-import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetIndividualCallServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetTokenServerResource;
+
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 import static jhi.germinate.server.database.codegen.tables.Markers.*;
 
-/**
- * @author Sebastian Raubach
- */
-public class VariantSetCallServerResource extends TokenBaseServerResource implements BrapiVariantSetIndividualCallServerResource
+@Path("brapi/v2/variantsets")
+@Secured
+@PermitAll
+public class VariantSetTokenServerResource extends TokenBaseServerResource implements BrapiVariantSetTokenServerResource, VariantSetBaseServerResource
 {
-	private static final String                 PARAM_EXPAND_HOMOZYGOTES = "expandHomozygotes";
-	private static final String                 PARAM_UNKNOWN_STRING     = "unknownString";
-	private static final String                 PARAM_SEP_PHASED         = "sepPhased";
-	private static final String                 PARAM_SEP_UNPHASED       = "sepUnphased";
-	private              GenotypeEncodingParams params                   = new GenotypeEncodingParams();
-
-	private String variantSetDbId;
-
-	@Override
-	public void doInit()
-	{
-		super.doInit();
-
-		try
-		{
-			String expand = getQueryValue(PARAM_EXPAND_HOMOZYGOTES);
-
-			if (!StringUtils.isEmpty(expand))
-				params.setCollapse(!Boolean.parseBoolean(expand));
-		}
-		catch (Exception e)
-		{
-		}
-		String unknownString = getQueryValue(PARAM_UNKNOWN_STRING);
-		if (unknownString != null)
-			params.setUnknownString(unknownString);
-		String sepPhased = getQueryValue(PARAM_SEP_PHASED);
-		if (sepPhased != null)
-			params.setSepPhased(sepPhased);
-		String sepUnphased = getQueryValue(PARAM_SEP_UNPHASED);
-		if (sepUnphased != null)
-			params.setSepUnphased(sepUnphased);
-
-		try
-		{
-			this.variantSetDbId = getRequestAttributes().get("variantSetDbId").toString();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
-	@Get
-	public TokenBaseResult<CallResult<Call>> getVariantSetByIdCalls()
+	@GET
+	@Path("/{variantSetDbId}/calls")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TokenBaseResult<CallResult<Call>> getVariantSetByIdCalls(@PathParam("variantSetDbId") String variantSetDbId,
+																	@QueryParam("expandHomozygotes") String expandHomozygotes,
+																	@QueryParam("unknownString") String unknownString,
+																	@QueryParam("sepPhased") String sepPhased,
+																	@QueryParam("sepUnphased") String sepUnphased)
+		throws SQLException, IOException
 	{
 		if (StringUtils.isEmpty(variantSetDbId))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
-
-		try (DSLContext context = Database.getContext())
 		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
 			String[] parts = variantSetDbId.split("-");
 
 			DatasetsRecord dataset = context.selectFrom(DATASETS)
@@ -88,15 +59,18 @@ public class VariantSetCallServerResource extends TokenBaseServerResource implem
 											.fetchAny();
 
 			if (dataset == null || StringUtils.isEmpty(dataset.getSourceFile()))
-				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+			{
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+				return null;
+			}
 
 			Hdf5DataExtractor extractor = new Hdf5DataExtractor(new File(Brapi.BRAPI.hdf5BaseFolder, dataset.getSourceFile()));
 			int markerCount = extractor.getMarkerCount();
 			int germplasmCount = extractor.getLineCount();
 
 			// Determine the coordinates in the matrix where we start and where we end (based on a reading-order like reading text, i.e. top left to bottom right per row)
-			int gStart = (currentPage * pageSize) / markerCount;
-			int mStart = (currentPage * pageSize) % markerCount;
+			int gStart = (page * pageSize) / markerCount;
+			int mStart = (page * pageSize) % markerCount;
 			int gEnd = gStart + (mStart + pageSize) / markerCount;
 			int mEnd = (mStart + pageSize) % markerCount;
 
@@ -108,6 +82,19 @@ public class VariantSetCallServerResource extends TokenBaseServerResource implem
 			{
 				gEnd = germplasmCount - 1;
 				mEnd = markerCount;
+			}
+
+			GenotypeEncodingParams params = new GenotypeEncodingParams();
+			params.setUnknownString(unknownString);
+			params.setSepPhased(sepPhased);
+			params.setSepUnphased(sepUnphased);
+			params.setUnknownString(unknownString);
+			try
+			{
+				params.setCollapse(!Boolean.parseBoolean(expandHomozygotes));
+			}
+			catch (Exception e)
+			{
 			}
 
 			List<String> alleles = new ArrayList<>();
@@ -168,7 +155,19 @@ public class VariantSetCallServerResource extends TokenBaseServerResource implem
 				.setSepPhased(params.getSepPhased())
 				.setSepUnphased(params.getSepUnphased())
 				.setUnknownString(params.getUnknownString());
-			return new TokenBaseResult<>(callResult, currentPage, pageSize, markerCount * germplasmCount);
+			return new TokenBaseResult<>(callResult, page, pageSize, markerCount * germplasmCount);
 		}
+	}
+
+	@GET
+	@Path("/{variantSetDbId}/variants")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TokenBaseResult<BaseResult<Variant>> getVariantSetByIdVariants(@PathParam("variantSetDbId") String variantSetDbId,
+																		  @QueryParam("variantDbId") String variantDbId)
+		throws IOException, SQLException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

@@ -77,7 +77,7 @@ public abstract class TrialBaseServerResource extends BaseServerResource
 		}
 
 		List<ViewTableExperiments> datasets = step.limit(pageSize)
-												  .offset(pageSize * currentPage)
+												  .offset(pageSize * page)
 												  .fetchInto(ViewTableExperiments.class);
 
 		return datasets.stream()

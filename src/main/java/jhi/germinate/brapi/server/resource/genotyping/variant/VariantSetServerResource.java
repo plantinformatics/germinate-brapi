@@ -1,56 +1,43 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
+import jhi.germinate.server.Database;
+import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.restlet.data.Status;
-import org.restlet.resource.*;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.CallSet;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
+import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetServerResource;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-
-import jhi.germinate.server.Database;
-import jhi.germinate.server.util.StringUtils;
-import uk.ac.hutton.ics.brapi.resource.base.*;
-import uk.ac.hutton.ics.brapi.resource.genotyping.variant.VariantSet;
-import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetServerResource;
 
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 
-/**
- * @author Sebastian Raubach
- */
-public class VariantSetServerResource extends VariantSetBaseServerResource implements BrapiVariantSetServerResource
+@Path("brapi/v2/variantsets")
+@Secured
+@PermitAll
+public class VariantSetServerResource extends BaseServerResource implements BrapiVariantSetServerResource, VariantSetBaseServerResource
 {
-	public static final String PARAM_VARIANT_SET_DB_ID = "variantSetDbId";
-	public static final String PARAM_VARIANT_DB_ID     = "variantDbId";
-	public static final String PARAM_CALL_SET_DB_ID    = "callSetDbId";
-	public static final String PARAM_STUDY_DB_ID       = "studyDbId";
-	public static final String PARAM_STUDY_NAME        = "studyName";
-
-	private String variantSetDbId;
-	private String variantDbId;
-	private String callSetDbId;
-	private String studyDbId;
-	private String studyName;
-
-	@Override
-	public void doInit()
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<VariantSet>> getVariantSets(@QueryParam("variantSetDbId") String variantSetDbId,
+															  @QueryParam("variantDbId") String variantDbId,
+															  @QueryParam("callSetDbId") String callSetDbId,
+															  @QueryParam("studyDbId") String studyDbId,
+															  @QueryParam("studyName") String studyName)
+		throws SQLException, IOException
 	{
-		super.doInit();
-
-		this.variantSetDbId = getQueryValue(PARAM_VARIANT_SET_DB_ID);
-		this.variantDbId = getQueryValue(PARAM_VARIANT_DB_ID);
-		this.callSetDbId = getQueryValue(PARAM_CALL_SET_DB_ID);
-		this.studyDbId = getQueryValue(PARAM_STUDY_DB_ID);
-		this.studyName = getQueryValue(PARAM_STUDY_NAME);
-	}
-
-	@Get
-	public BaseResult<ArrayResult<VariantSet>> getVariantSets()
-	{
-		try (DSLContext context = Database.getContext())
+		try (Connection conn = Database.getConnection())
 		{
+			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(variantSetDbId))
@@ -64,11 +51,54 @@ public class VariantSetServerResource extends VariantSetBaseServerResource imple
 			if (!StringUtils.isEmpty(studyName))
 				conditions.add(DATASETS.NAME.cast(String.class).eq(studyName));
 
-			List<VariantSet> result = getVariantSets(context, conditions);
+			List<VariantSet> result = getVariantSets(context, conditions, req, page, pageSize);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<VariantSet>()
-				.setData(result), currentPage, pageSize, totalCount);
+				.setData(result), page, pageSize, totalCount);
 		}
+	}
+
+	@GET
+	@Path("/{variantSetDbId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<VariantSet> getVariantSetById(@PathParam("variantSetDbId") String variantSetDbId)
+		throws SQLException, IOException
+	{
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<VariantSet> results = getVariantSets(context, Collections.singletonList(DATASETS.ID.cast(String.class).eq(variantSetDbId)), req, page, pageSize);
+			VariantSet result = CollectionUtils.isEmpty(results) ? null : results.get(0);
+
+			return new BaseResult<>(result, page, pageSize, 1);
+		}
+
+	}
+
+
+	@GET
+	@Path("/{variantSetDbId}/callsets")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<ArrayResult<CallSet>> getVariantSetByIdCallSet(@PathParam("variantSetDbId") String variantSetDbId,
+																	 @QueryParam("callSetDbId") String callSetDbId,
+																	 @QueryParam("callSetName") String callSetName)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
+	}
+
+	@POST
+	@Path("/extract")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<VariantSet> postVariantSetExtract(VariantSetExtract extract)
+		throws SQLException, IOException
+	{
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
+		return null;
 	}
 }

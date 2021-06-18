@@ -1,22 +1,19 @@
 package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
-import com.google.gson.*;
-
-import org.jooq.*;
-import org.restlet.data.Status;
-import org.restlet.resource.ResourceException;
-
-import java.math.*;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.util.*;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.location.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.math.*;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.Biologicalstatus.*;
 import static jhi.germinate.server.database.codegen.tables.Countries.*;
@@ -37,13 +34,20 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableLocations.*;
 public abstract class GermplasmBaseServerResource extends BaseServerResource
 {
 	protected Integer addGermplasm(DSLContext context, Germplasm newGermplasm, boolean forceId)
+		throws IOException
 	{
 		if (newGermplasm == null || StringUtils.isEmpty(newGermplasm.getAccessionNumber()))
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
+		{
+			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+			return null;
+		}
 
 		GerminatebaseRecord existing = context.selectFrom(GERMINATEBASE).where(GERMINATEBASE.NAME.eq(newGermplasm.getAccessionNumber())).fetchAny();
 		if (existing != null)
-			throw new ResourceException(Status.CLIENT_ERROR_CONFLICT, "Germplasm with this identifier already exists.");
+		{
+			resp.sendError(Response.Status.CONFLICT.getStatusCode(), "Germplasm with this identifier already exists.");
+			return null;
+		}
 
 		// Get country
 		CountriesRecord country = null;
@@ -155,7 +159,8 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 			}
 			catch (Exception e)
 			{
-				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Id has to be an integer");
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode(), "Id has to be an integer");
+				return null;
 			}
 		}
 
@@ -225,8 +230,7 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 
 		if (!CollectionUtils.isEmpty(newGermplasm.getSynonyms()))
 		{
-			JsonArray array = new JsonArray();
-			newGermplasm.getSynonyms().forEach(s -> array.add(new JsonPrimitive(s.getSynonym())));
+			String[] array = newGermplasm.getSynonyms().stream().map(Synonym::getSynonym).toArray(String[]::new);
 
 			SynonymsRecord synonyms = context.newRecord(SYNONYMS);
 			synonyms.setForeignId(germplasmId);
@@ -292,14 +296,14 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		}
 
 		List<Germplasm> result = step.limit(pageSize)
-									 .offset(pageSize * currentPage)
+									 .offset(pageSize * page)
 									 .fetchInto(Germplasm.class);
 
 		long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 
 		List<String> ids = result.stream().map(Germplasm::getGermplasmDbId).collect(Collectors.toList());
 
-		Map<Integer, JsonArray> synonyms = context.selectFrom(SYNONYMS).where(SYNONYMS.SYNONYMTYPE_ID.eq(1)).and(SYNONYMS.FOREIGN_ID.in(ids)).fetchMap(SYNONYMS.FOREIGN_ID, SYNONYMS.SYNONYMS_);
+		Map<Integer, String[]> synonyms = context.selectFrom(SYNONYMS).where(SYNONYMS.SYNONYMTYPE_ID.eq(1)).and(SYNONYMS.FOREIGN_ID.in(ids)).fetchMap(SYNONYMS.FOREIGN_ID, SYNONYMS.SYNONYMS_);
 		Map<Integer, ViewTableLocationsRecord> origins = context.select().from(VIEW_TABLE_LOCATIONS).leftJoin(GERMINATEBASE).on(GERMINATEBASE.LOCATION_ID.eq(VIEW_TABLE_LOCATIONS.LOCATION_ID)).where(GERMINATEBASE.LOCATION_ID.isNotNull()).and(VIEW_TABLE_LOCATIONS.LOCATION_TYPE.eq("collectingsites")).and(VIEW_TABLE_LOCATIONS.LOCATION_LATITUDE.isNotNull()).and(VIEW_TABLE_LOCATIONS.LOCATION_LONGITUDE.isNotNull()).fetchMap(GERMINATEBASE.ID, ViewTableLocationsRecord.class);
 		Map<Integer, List<Storage>> storage = new HashMap<>();
 		context.select().from(STORAGE).leftJoin(STORAGEDATA).on(STORAGEDATA.STORAGE_ID.eq(STORAGE.ID)).where(STORAGEDATA.GERMINATEBASE_ID.in(ids)).forEach(r -> {
@@ -317,11 +321,10 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 
 		result.forEach(g -> {
 			Integer id = Integer.parseInt(g.getGermplasmDbId());
-			JsonArray synonym = synonyms.get(id);
+			String[] synonym = synonyms.get(id);
 			if (synonym != null)
 			{
-				List<Synonym> mapped = new ArrayList<>();
-				synonym.forEach(s -> mapped.add(new Synonym().setSynonym(s.getAsString())));
+				List<Synonym> mapped = Arrays.stream(synonym).map(s -> new Synonym().setSynonym(s)).collect(Collectors.toList());
 				g.setSynonyms(mapped);
 			}
 
@@ -356,6 +359,6 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		});
 
 		return new BaseResult<>(new ArrayResult<Germplasm>()
-			.setData(result), currentPage, pageSize, totalCount);
+			.setData(result), page, pageSize, totalCount);
 	}
 }
