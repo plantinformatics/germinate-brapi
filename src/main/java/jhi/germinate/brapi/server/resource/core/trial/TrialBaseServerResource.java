@@ -1,5 +1,6 @@
 package jhi.germinate.brapi.server.resource.core.trial;
 
+import jhi.germinate.resource.ViewTableExperiments;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
@@ -7,7 +8,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import jhi.germinate.brapi.server.util.DateUtils;
-import jhi.germinate.server.database.codegen.tables.pojos.ViewTableExperiments;
 import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.Contact;
 import uk.ac.hutton.ics.brapi.resource.core.trial.*;
@@ -16,7 +16,6 @@ import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.Experiments.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableCollaborators.*;
-import static jhi.germinate.server.database.codegen.tables.ViewTableExperiments.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableLicenses.*;
 
 /**
@@ -67,8 +66,8 @@ public abstract class TrialBaseServerResource extends BaseServerResource
 
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
-											 .from(VIEW_TABLE_EXPERIMENTS)
-											 .where(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.EXPERIMENT_ID.eq(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID).and(DATASETS.DATASET_STATE_ID.eq(1)))));
+											 .from(EXPERIMENTS)
+											 .where(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.EXPERIMENT_ID.eq(EXPERIMENTS.ID).and(DATASETS.DATASET_STATE_ID.eq(1)))));
 
 		if (conditions != null)
 		{

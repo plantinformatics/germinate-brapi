@@ -54,7 +54,7 @@ public class GenotypeFileServerResource extends FileServerResource
 
 			File resultFile = createTempFile(null, "genotypes-" + ds.getId(), ".txt", true);
 
-			Hdf5ToFJTabbedConverter converter = new Hdf5ToFJTabbedConverter(new File(Brapi.BRAPI.hdf5BaseFolder, ds.getSourceFile()), null, null, resultFile.getAbsolutePath(), false);
+			Hdf5ToFJTabbedConverter converter = new Hdf5ToFJTabbedConverter(new File(Brapi.BRAPI.hdf5BaseFolder, ds.getSourceFile()).toPath(), null, null, resultFile.toPath(), false);
 			// TODO: Generate header links
 			String clientBase = Brapi.getServerBase(req);
 

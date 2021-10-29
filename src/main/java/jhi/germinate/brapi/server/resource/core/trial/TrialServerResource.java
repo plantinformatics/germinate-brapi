@@ -18,7 +18,7 @@ import java.sql.*;
 import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
-import static jhi.germinate.server.database.codegen.tables.ViewTableExperiments.*;
+import static jhi.germinate.server.database.codegen.tables.Experiments.*;
 
 /**
  * @author Sebastian Raubach
@@ -57,7 +57,7 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 			{
 				try
 				{
-					conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_DATE.ge(new Date(DateTimeUtils.parseDate(searchDateRangeStart).getTime())));
+					conditions.add(EXPERIMENTS.EXPERIMENT_DATE.ge(new Date(DateTimeUtils.parseDate(searchDateRangeStart).getTime())));
 				}
 				catch (Exception e)
 				{
@@ -67,18 +67,18 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 			{
 				try
 				{
-					conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_DATE.le(new Date(DateTimeUtils.parseDate(searchDateRangeEnd).getTime())));
+					conditions.add(EXPERIMENTS.EXPERIMENT_DATE.le(new Date(DateTimeUtils.parseDate(searchDateRangeEnd).getTime())));
 				}
 				catch (Exception e)
 				{
 				}
 			}
 			if (!StringUtils.isEmpty(studyDbId))
-				conditions.add(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.EXPERIMENT_ID.eq(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID)).and(DATASETS.ID.cast(String.class).eq(studyDbId))));
+				conditions.add(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.EXPERIMENT_ID.eq(EXPERIMENTS.ID)).and(DATASETS.ID.cast(String.class).eq(studyDbId))));
 			if (!StringUtils.isEmpty(trialDbId))
-				conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID.cast(String.class).eq(trialDbId));
+				conditions.add(EXPERIMENTS.ID.cast(String.class).eq(trialDbId));
 			if (!StringUtils.isEmpty(trialName))
-				conditions.add(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_NAME.eq(trialName));
+				conditions.add(EXPERIMENTS.EXPERIMENT_NAME.eq(trialName));
 
 			List<Trial> result = getTrials(context, conditions);
 
@@ -111,7 +111,7 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
-			List<Trial> result = getTrials(context, Collections.singletonList(VIEW_TABLE_EXPERIMENTS.EXPERIMENT_ID.cast(String.class).eq(trialsDbId)));
+			List<Trial> result = getTrials(context, Collections.singletonList(EXPERIMENTS.ID.cast(String.class).eq(trialsDbId)));
 
 			if (CollectionUtils.isEmpty(result))
 				return new BaseResult<>(null, page, pageSize, 0);
