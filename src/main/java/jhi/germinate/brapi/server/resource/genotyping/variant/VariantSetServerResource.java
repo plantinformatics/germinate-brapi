@@ -10,9 +10,9 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
@@ -51,7 +51,7 @@ public class VariantSetServerResource extends BaseServerResource implements Brap
 			if (!StringUtils.isEmpty(studyName))
 				conditions.add(DATASETS.NAME.cast(String.class).eq(studyName));
 
-			List<VariantSet> result = getVariantSets(context, conditions, req, page, pageSize);
+			List<VariantSet> result = getVariantSets(context, conditions, page, pageSize, req, resp, securityContext);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new BaseResult<>(new ArrayResult<VariantSet>()
@@ -69,7 +69,7 @@ public class VariantSetServerResource extends BaseServerResource implements Brap
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
-			List<VariantSet> results = getVariantSets(context, Collections.singletonList(DATASETS.ID.cast(String.class).eq(variantSetDbId)), req, page, pageSize);
+			List<VariantSet> results = getVariantSets(context, Collections.singletonList(DATASETS.ID.cast(String.class).eq(variantSetDbId)), page, pageSize, req, resp, securityContext);
 			VariantSet result = CollectionUtils.isEmpty(results) ? null : results.get(0);
 
 			return new BaseResult<>(result, page, pageSize, 1);

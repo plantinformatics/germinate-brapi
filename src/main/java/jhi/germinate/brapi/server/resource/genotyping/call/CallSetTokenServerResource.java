@@ -2,8 +2,9 @@ package jhi.germinate.brapi.server.resource.genotyping.call;
 
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.util.*;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
 import jhi.germinate.server.database.codegen.tables.records.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.DSLContext;
 import uk.ac.hutton.ics.brapi.resource.base.TokenBaseResult;
@@ -12,9 +13,9 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetTokenServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -46,13 +47,16 @@ public class CallSetTokenServerResource extends TokenBaseServerResource implemen
 			return null;
 		}
 
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			String[] parts = callSetDbId.split("-");
 
 			DatasetsRecord dataset = context.selectFrom(DATASETS)
-											.where(DATASETS.DATASET_STATE_ID.eq(1))
+											.where(DATASETS.ID.in(datasets))
 											.and(DATASETS.IS_EXTERNAL.eq(false))
 											.and(DATASETS.ID.cast(String.class).eq(parts[0]))
 											.fetchAny();

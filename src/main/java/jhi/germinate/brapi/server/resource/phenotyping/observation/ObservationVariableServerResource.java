@@ -12,9 +12,9 @@ import uk.ac.hutton.ics.brapi.resource.phenotyping.observation.ObservationVariab
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.phenotyping.observation.BrapiObservationVariableServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;

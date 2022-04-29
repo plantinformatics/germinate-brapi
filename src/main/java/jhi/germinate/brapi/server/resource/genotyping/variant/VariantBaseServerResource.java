@@ -1,9 +1,14 @@
 package jhi.germinate.brapi.server.resource.genotyping.variant;
 
+import jhi.germinate.server.AuthenticationFilter;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.CollectionUtils;
 import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
 
+import jakarta.servlet.http.*;
+import jakarta.ws.rs.core.SecurityContext;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,13 +17,18 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
 
 public interface VariantBaseServerResource
 {
-	default List<Variant> getVariantsInternal(DSLContext context, List<Condition> conditions, int page, int pageSize)
+	default List<Variant> getVariantsInternal(DSLContext context, List<Condition> conditions, int page, int pageSize, HttpServletRequest req, HttpServletResponse resp, SecurityContext securityContext)
+		throws SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(DATASETMEMBERS)
 											 .leftJoin(VIEW_TABLE_MARKERS).on(DATASETMEMBERS.FOREIGN_ID.eq(VIEW_TABLE_MARKERS.MARKER_ID))
-											 .where(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1));
+											 .where(DATASETMEMBERS.DATASET_ID.in(datasetIds))
+											 .and(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1));
 
 		if (!CollectionUtils.isEmpty(conditions))
 		{

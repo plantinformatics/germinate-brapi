@@ -2,8 +2,9 @@ package jhi.germinate.brapi.server.resource.genotyping.variant;
 
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.util.*;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
 import jhi.germinate.server.database.codegen.tables.records.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -14,9 +15,9 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantTokenServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -50,7 +51,7 @@ public class VariantTokenServerResource extends TokenBaseServerResource implemen
 			if (!StringUtils.isEmpty(variantSetDbId))
 				conditions.add(DATASETMEMBERS.DATASET_ID.cast(String.class).eq(variantSetDbId));
 
-			List<Variant> variants = getVariantsInternal(context, conditions, page, pageSize);
+			List<Variant> variants = getVariantsInternal(context, conditions, page, pageSize, req, resp, securityContext);
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 			return new TokenBaseResult<>(new ArrayResult<Variant>()
 				.setData(variants), page, pageSize, totalCount);
@@ -74,6 +75,9 @@ public class VariantTokenServerResource extends TokenBaseServerResource implemen
 			return null;
 		}
 
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
@@ -93,7 +97,7 @@ public class VariantTokenServerResource extends TokenBaseServerResource implemen
 			String[] parts = variantDbId.split("-");
 
 			DatasetsRecord dataset = context.selectFrom(DATASETS)
-											.where(DATASETS.DATASET_STATE_ID.eq(1))
+											.where(DATASETS.ID.in(datasetIds))
 											.and(DATASETS.IS_EXTERNAL.eq(false))
 											.and(DATASETS.ID.cast(String.class).eq(parts[0]))
 											.fetchAny();

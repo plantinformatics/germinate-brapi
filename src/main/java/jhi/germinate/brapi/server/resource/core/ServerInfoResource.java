@@ -7,7 +7,7 @@ import uk.ac.hutton.ics.brapi.resource.core.serverinfo.ServerInfo;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.core.serverinfo.BrapiServerInfoResource;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;

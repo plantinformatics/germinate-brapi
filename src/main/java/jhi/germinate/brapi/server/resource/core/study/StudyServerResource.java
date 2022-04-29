@@ -1,7 +1,8 @@
 package jhi.germinate.brapi.server.resource.core.study;
 
 import jhi.germinate.resource.enums.UserType;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -9,9 +10,9 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.Study;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiStudyServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.*;
@@ -49,10 +50,15 @@ public class StudyServerResource extends StudyBaseResource implements BrapiStudy
 													 @QueryParam("externalReferenceSource") String externalReferenceSource)
 		throws SQLException, IOException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, null);
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
+
+			conditions.add(VIEW_TABLE_DATASETS.DATASET_ID.in(datasetIds));
 
 			if (!StringUtils.isEmpty(studyType))
 				conditions.add(VIEW_TABLE_DATASETS.DATASET_TYPE.eq(studyType));

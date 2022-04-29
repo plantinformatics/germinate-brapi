@@ -1,29 +1,23 @@
 package jhi.germinate.brapi.server.resource.genotyping.call;
 
-import jhi.germinate.brapi.server.Brapi;
-import jhi.germinate.brapi.server.util.*;
-import jhi.germinate.server.Database;
-import jhi.germinate.server.database.codegen.tables.records.*;
+import jhi.germinate.server.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import uk.ac.hutton.ics.brapi.resource.base.*;
-import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
-import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
+import uk.ac.hutton.ics.brapi.resource.genotyping.call.CallSet;
 import uk.ac.hutton.ics.brapi.server.genotyping.call.BrapiCallSetServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import java.io.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.stream.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
-import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
-import static jhi.germinate.server.database.codegen.tables.Markers.*;
 
 @Path("brapi/v2/callsets")
 @Secured
@@ -40,10 +34,15 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 														@QueryParam("germplasmDbId") String germplasmDbId)
 		throws IOException, SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
+
+			conditions.add(DATASETMEMBERS.DATASET_ID.in(datasets));
 
 			if (!StringUtils.isEmpty(callSetDbId))
 				conditions.add(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), GERMINATEBASE.ID).eq(callSetDbId));

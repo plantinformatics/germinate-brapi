@@ -1,7 +1,8 @@
 package jhi.germinate.brapi.server.resource.core.trial;
 
 import jhi.germinate.resource.enums.UserType;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -9,9 +10,9 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.trial.Trial;
 import uk.ac.hutton.ics.brapi.server.core.trial.BrapiTrialServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.*;
@@ -48,10 +49,15 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 													@QueryParam("externalReferenceSource") String externalReferenceSource)
 		throws SQLException, IOException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "trials");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			List<Condition> conditions = new ArrayList<>();
+
+			conditions.add(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.ID.in(datasetIds))));
 
 			if (searchDateRangeStart != null)
 			{

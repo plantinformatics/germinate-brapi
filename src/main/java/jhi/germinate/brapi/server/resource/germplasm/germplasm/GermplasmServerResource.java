@@ -1,9 +1,10 @@
 package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
 import jhi.germinate.resource.enums.UserType;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
 import jhi.germinate.server.database.codegen.tables.Germinatebase;
 import jhi.germinate.server.database.codegen.tables.records.ViewTableLocationsRecord;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.*;
@@ -12,9 +13,9 @@ import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Collection;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -184,35 +185,38 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			return null;
 		}
 
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			Mcpd result = context.select(
-				GERMINATEBASE.NAME.as("accessionNumber"),
-				GERMINATEBASE.ACQDATE.as("acquisitionDate"),
-				GERMINATEBASE.COLLDATE.as("acquisitionDate"),
-				GERMINATEBASE.COLLSRC_ID.as("acquisitionSourceCode"),
-				DSL.inline(null, SQLDataType.VARCHAR).as("alternateIDs"),
-				PEDIGREEDEFINITIONS.DEFINITION.as("ancestralData"),
-				BIOLOGICALSTATUS.ID.cast(String.class).as("biologicalStatusOfAccessionCode"),
-				TAXONOMIES.CROPNAME.as("commonCropName"),
-				COUNTRIES.COUNTRY_CODE3.as("countryOfOrigin"),
-				TAXONOMIES.GENUS.as("genus"),
-				GERMINATEBASE.ID.as("germplasmDbId"),
-				GERMINATEBASE.PUID.as("germplasmPUI"),
-				INSTITUTIONS.CODE.as("instituteCode"),
-				GERMINATEBASE.MLSSTATUS_ID.as("mlsStatus"),
-				TAXONOMIES.SPECIES.as("species"),
-				TAXONOMIES.SPECIES_AUTHOR.as("speciesAuthority"),
-				TAXONOMIES.SUBTAXA.as("subtaxon"),
-				TAXONOMIES.SUBTAXA_AUTHOR.as("subtaxonAuthority")
-			)
+									 GERMINATEBASE.NAME.as("accessionNumber"),
+									 GERMINATEBASE.ACQDATE.as("acquisitionDate"),
+									 GERMINATEBASE.COLLDATE.as("acquisitionDate"),
+									 GERMINATEBASE.COLLSRC_ID.as("acquisitionSourceCode"),
+									 DSL.inline(null, SQLDataType.VARCHAR).as("alternateIDs"),
+									 PEDIGREEDEFINITIONS.DEFINITION.as("ancestralData"),
+									 BIOLOGICALSTATUS.ID.cast(String.class).as("biologicalStatusOfAccessionCode"),
+									 TAXONOMIES.CROPNAME.as("commonCropName"),
+									 COUNTRIES.COUNTRY_CODE3.as("countryOfOrigin"),
+									 TAXONOMIES.GENUS.as("genus"),
+									 GERMINATEBASE.ID.as("germplasmDbId"),
+									 GERMINATEBASE.PUID.as("germplasmPUI"),
+									 INSTITUTIONS.CODE.as("instituteCode"),
+									 GERMINATEBASE.MLSSTATUS_ID.as("mlsStatus"),
+									 TAXONOMIES.SPECIES.as("species"),
+									 TAXONOMIES.SPECIES_AUTHOR.as("speciesAuthority"),
+									 TAXONOMIES.SUBTAXA.as("subtaxon"),
+									 TAXONOMIES.SUBTAXA_AUTHOR.as("subtaxonAuthority")
+								 )
 								 .from(GERMINATEBASE)
 								 .leftJoin(BIOLOGICALSTATUS).on(BIOLOGICALSTATUS.ID.eq(GERMINATEBASE.BIOLOGICALSTATUS_ID))
 								 .leftJoin(LOCATIONS).on(LOCATIONS.ID.eq(GERMINATEBASE.LOCATION_ID))
 								 .leftJoin(COUNTRIES).on(COUNTRIES.ID.eq(LOCATIONS.COUNTRY_ID))
 								 .leftJoin(INSTITUTIONS).on(INSTITUTIONS.ID.eq(GERMINATEBASE.INSTITUTION_ID))
-								 .leftJoin(PEDIGREEDEFINITIONS).on(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.eq(GERMINATEBASE.ID))
+								 .leftJoin(PEDIGREEDEFINITIONS).on(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.eq(GERMINATEBASE.ID).and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds)))
 								 .leftJoin(TAXONOMIES).on(TAXONOMIES.ID.eq(GERMINATEBASE.TAXONOMY_ID))
 								 .leftJoin(SYNONYMS).on(SYNONYMS.FOREIGN_ID.eq(GERMINATEBASE.ID).and(SYNONYMS.SYNONYMTYPE_ID.eq(1)))
 								 .where(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId))
@@ -285,25 +289,30 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			return null;
 		}
 
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			Pedigree result = context.select(
-				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-				GERMINATEBASE.NAME.as("germplasmName"),
-				PEDIGREEDEFINITIONS.DEFINITION.as("pedigree")
-			)
+										 GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
+										 GERMINATEBASE.NAME.as("germplasmName"),
+										 PEDIGREEDEFINITIONS.DEFINITION.as("pedigree")
+									 )
 									 .from(PEDIGREEDEFINITIONS)
 									 .leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREEDEFINITIONS.GERMINATEBASE_ID))
 									 .where(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.cast(String.class).eq(germplasmDbId))
+									 .and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds))
 									 .fetchAnyInto(Pedigree.class);
 			List<Parent> parents = context.select(
-				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-				GERMINATEBASE.NAME.as("germplasmName"),
-				PEDIGREES.RELATIONSHIP_TYPE.cast(String.class).as("parentType")
-			).from(PEDIGREES)
+											  GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
+											  GERMINATEBASE.NAME.as("germplasmName"),
+											  PEDIGREES.RELATIONSHIP_TYPE.cast(String.class).as("parentType")
+										  ).from(PEDIGREES)
 										  .leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.PARENT_ID))
 										  .where(PEDIGREES.GERMINATEBASE_ID.cast(String.class).eq(germplasmDbId))
+										  .and(PEDIGREES.DATASET_ID.in(datasetIds))
 										  .fetchInto(Parent.class);
 
 			List<String> parentIds = parents.stream()
@@ -311,10 +320,11 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 											.collect(Collectors.toList());
 
 			List<Sibling> siblings = context.select(
-				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-				GERMINATEBASE.NAME.as("germplasmName")
-			).from(PEDIGREES).leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.GERMINATEBASE_ID))
+												GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
+												GERMINATEBASE.NAME.as("germplasmName")
+											).from(PEDIGREES).leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.GERMINATEBASE_ID))
 											.where(PEDIGREES.PARENT_ID.in(parentIds))
+											.and(PEDIGREES.DATASET_ID.in(datasetIds))
 											.and(PEDIGREES.GERMINATEBASE_ID.cast(String.class).notEqual(germplasmDbId))
 											.fetchInto(Sibling.class);
 
@@ -338,25 +348,30 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			return null;
 		}
 
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
 			Progeny result = context.select(
-				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-				GERMINATEBASE.NAME.as("germplasmName"),
-				PEDIGREEDEFINITIONS.DEFINITION.as("pedigree")
-			)
+										GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
+										GERMINATEBASE.NAME.as("germplasmName"),
+										PEDIGREEDEFINITIONS.DEFINITION.as("pedigree")
+									)
 									.from(PEDIGREEDEFINITIONS)
 									.leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREEDEFINITIONS.GERMINATEBASE_ID))
 									.where(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.cast(String.class).eq(germplasmDbId))
+									.and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds))
 									.fetchAnyInto(Progeny.class);
 			List<Parent> children = context.select(
-				GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-				GERMINATEBASE.NAME.as("germplasmName"),
-				PEDIGREES.RELATIONSHIP_TYPE.cast(String.class).as("parentType")
-			).from(PEDIGREES)
+											   GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
+											   GERMINATEBASE.NAME.as("germplasmName"),
+											   PEDIGREES.RELATIONSHIP_TYPE.cast(String.class).as("parentType")
+										   ).from(PEDIGREES)
 										   .leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.GERMINATEBASE_ID))
 										   .where(PEDIGREES.PARENT_ID.cast(String.class).eq(germplasmDbId))
+										   .and(PEDIGREES.DATASET_ID.in(datasetIds))
 										   .fetchInto(Parent.class);
 
 			result.setProgeny(children);

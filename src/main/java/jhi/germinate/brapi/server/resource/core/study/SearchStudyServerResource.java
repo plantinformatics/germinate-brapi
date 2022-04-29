@@ -1,6 +1,7 @@
 package jhi.germinate.brapi.server.resource.core.study;
 
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.CollectionUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -8,8 +9,8 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.*;
 import uk.ac.hutton.ics.brapi.server.core.study.BrapiSearchStudyServerResource;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.*;

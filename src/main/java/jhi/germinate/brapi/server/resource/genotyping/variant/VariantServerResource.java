@@ -9,9 +9,9 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
@@ -34,7 +34,7 @@ public class VariantServerResource extends BaseServerResource implements BrapiVa
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
-			List<Variant> variants = getVariantsInternal(context, Collections.singletonList(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId)), page, pageSize);
+			List<Variant> variants = getVariantsInternal(context, Collections.singletonList(DSL.concat(DATASETMEMBERS.DATASET_ID, DSL.val("-"), VIEW_TABLE_MARKERS.MARKER_ID).eq(variantDbId)), page, pageSize, req, resp, securityContext);
 
 			if (CollectionUtils.isEmpty(variants))
 				return new BaseResult<>(null, page, pageSize, 0);

@@ -1,6 +1,7 @@
 package jhi.germinate.brapi.server.resource.genotyping.map;
 
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -9,9 +10,9 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.map.Map;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.map.BrapiMapServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.List;
@@ -39,6 +40,9 @@ public class MapServerResource extends BaseServerResource implements BrapiMapSer
 												@QueryParam("studyDbId") String studyDbId)
 		throws IOException, SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
@@ -75,7 +79,7 @@ public class MapServerResource extends BaseServerResource implements BrapiMapSer
 										 .where(DATASETMEMBERS.FOREIGN_ID.eq(MAPDEFINITIONS.MARKER_ID))
 										 .and(DATASETMEMBERS.DATASETMEMBERTYPE_ID.eq(1))
 										 .and(DATASETS.IS_EXTERNAL.eq(false))
-										 .and(DATASETS.DATASET_STATE_ID.eq(1))
+										 .and(DATASETS.ID.in(datasetIds))
 										 .and(DATASETS.EXPERIMENT_ID.cast(String.class).eq(trialDbId))));
 			}
 

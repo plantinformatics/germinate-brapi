@@ -1,8 +1,11 @@
 package jhi.germinate.brapi.server.resource.core.season;
 
+import jhi.germinate.server.AuthenticationFilter;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,11 +20,15 @@ import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 public abstract class SeasonBaseServerResource extends BaseServerResource
 {
 	protected List<Season> getSeasons(DSLContext context, List<Condition> conditions)
+		throws SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, null);
+
 		SelectConditionStep<?> step = context.selectDistinct(DSL.year(DATASETS.DATE_START))
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(DATASETS)
-											 .where(DATASETS.DATASET_STATE_ID.eq(1))
+											 .where(DATASETS.ID.in(datasetIds))
 											 .and(DATASETS.IS_EXTERNAL.eq(false))
 											 .and(DATASETS.DATE_START.isNotNull());
 

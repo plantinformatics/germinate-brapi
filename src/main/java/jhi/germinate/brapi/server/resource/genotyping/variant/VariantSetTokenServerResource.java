@@ -2,20 +2,21 @@ package jhi.germinate.brapi.server.resource.genotyping.variant;
 
 import jhi.germinate.brapi.server.Brapi;
 import jhi.germinate.brapi.server.util.*;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
 import jhi.germinate.server.database.codegen.tables.records.DatasetsRecord;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.DSLContext;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
-import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
+import uk.ac.hutton.ics.brapi.resource.genotyping.variant.*;
 import uk.ac.hutton.ics.brapi.server.base.TokenBaseServerResource;
 import uk.ac.hutton.ics.brapi.server.genotyping.variant.BrapiVariantSetTokenServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -41,6 +42,9 @@ public class VariantSetTokenServerResource extends TokenBaseServerResource imple
 																	@QueryParam("sepUnphased") String sepUnphased)
 		throws SQLException, IOException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+
 		if (StringUtils.isEmpty(variantSetDbId))
 		{
 			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
@@ -53,7 +57,7 @@ public class VariantSetTokenServerResource extends TokenBaseServerResource imple
 			String[] parts = variantSetDbId.split("-");
 
 			DatasetsRecord dataset = context.selectFrom(DATASETS)
-											.where(DATASETS.DATASET_STATE_ID.eq(1))
+											.where(DATASETS.ID.in(datasetIds))
 											.and(DATASETS.IS_EXTERNAL.eq(false))
 											.and(DATASETS.ID.cast(String.class).eq(parts[0]))
 											.fetchAny();

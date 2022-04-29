@@ -1,6 +1,8 @@
 package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
+import jhi.germinate.server.AuthenticationFilter;
 import jhi.germinate.server.database.codegen.tables.records.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
@@ -8,10 +10,10 @@ import uk.ac.hutton.ics.brapi.resource.core.location.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.math.*;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -258,34 +260,38 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 	}
 
 	protected BaseResult<ArrayResult<Germplasm>> getGermplasm(DSLContext context, List<Condition> conditions)
+		throws SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+
 		SelectJoinStep<?> step = context.select(
-			GERMINATEBASE.NAME.as("accessionNumber"),
-			GERMINATEBASE.ACQDATE.as("acquisitionDate"),
-			BIOLOGICALSTATUS.ID.cast(String.class).as("biologicalStatusOfAccessionCode"),
-			BIOLOGICALSTATUS.SAMPSTAT.as("biologicalStatusOfAccessionDescription"),
-			TAXONOMIES.CROPNAME.as("commonCropName"),
-			COUNTRIES.COUNTRY_CODE3.as("countryOfOriginCode"),
-			GERMINATEBASE.NAME.as("defaultDisplayName"),
-			TAXONOMIES.GENUS.as("genus"),
-			GERMINATEBASE.ID.as("germplasmDbId"),
-			GERMINATEBASE.NAME.as("germplasmName"),
-			GERMINATEBASE.PUID.as("germplasmPUI"),
-			INSTITUTIONS.CODE.as("instituteCode"),
-			INSTITUTIONS.NAME.as("instituteName"),
-			PEDIGREEDEFINITIONS.DEFINITION.as("pedigree"),
-			TAXONOMIES.SPECIES.as("species"),
-			TAXONOMIES.SPECIES_AUTHOR.as("speciesAuthority"),
-			TAXONOMIES.SUBTAXA.as("subtaxa"),
-			TAXONOMIES.SUBTAXA_AUTHOR.as("subtaxaAuthority")
-		)
+											GERMINATEBASE.NAME.as("accessionNumber"),
+											GERMINATEBASE.ACQDATE.as("acquisitionDate"),
+											BIOLOGICALSTATUS.ID.cast(String.class).as("biologicalStatusOfAccessionCode"),
+											BIOLOGICALSTATUS.SAMPSTAT.as("biologicalStatusOfAccessionDescription"),
+											TAXONOMIES.CROPNAME.as("commonCropName"),
+											COUNTRIES.COUNTRY_CODE3.as("countryOfOriginCode"),
+											GERMINATEBASE.NAME.as("defaultDisplayName"),
+											TAXONOMIES.GENUS.as("genus"),
+											GERMINATEBASE.ID.as("germplasmDbId"),
+											GERMINATEBASE.NAME.as("germplasmName"),
+											GERMINATEBASE.PUID.as("germplasmPUI"),
+											INSTITUTIONS.CODE.as("instituteCode"),
+											INSTITUTIONS.NAME.as("instituteName"),
+											PEDIGREEDEFINITIONS.DEFINITION.as("pedigree"),
+											TAXONOMIES.SPECIES.as("species"),
+											TAXONOMIES.SPECIES_AUTHOR.as("speciesAuthority"),
+											TAXONOMIES.SUBTAXA.as("subtaxa"),
+											TAXONOMIES.SUBTAXA_AUTHOR.as("subtaxaAuthority")
+										)
 										.hint("SQL_CALC_FOUND_ROWS")
 										.from(GERMINATEBASE)
 										.leftJoin(BIOLOGICALSTATUS).on(BIOLOGICALSTATUS.ID.eq(GERMINATEBASE.BIOLOGICALSTATUS_ID))
 										.leftJoin(LOCATIONS).on(LOCATIONS.ID.eq(GERMINATEBASE.LOCATION_ID))
 										.leftJoin(COUNTRIES).on(COUNTRIES.ID.eq(LOCATIONS.COUNTRY_ID))
 										.leftJoin(INSTITUTIONS).on(INSTITUTIONS.ID.eq(GERMINATEBASE.INSTITUTION_ID))
-										.leftJoin(PEDIGREEDEFINITIONS).on(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.eq(GERMINATEBASE.ID))
+										.leftJoin(PEDIGREEDEFINITIONS).on(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.eq(GERMINATEBASE.ID).and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds)))
 										.leftJoin(TAXONOMIES).on(TAXONOMIES.ID.eq(GERMINATEBASE.TAXONOMY_ID))
 										.leftJoin(SYNONYMS).on(SYNONYMS.FOREIGN_ID.eq(GERMINATEBASE.ID).and(SYNONYMS.SYNONYMTYPE_ID.eq(1)));
 

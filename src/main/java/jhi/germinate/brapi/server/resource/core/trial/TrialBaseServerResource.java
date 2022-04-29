@@ -1,17 +1,19 @@
 package jhi.germinate.brapi.server.resource.core.trial;
 
+import jhi.germinate.brapi.server.util.DateUtils;
 import jhi.germinate.resource.ViewTableExperiments;
+import jhi.germinate.server.AuthenticationFilter;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
+import jhi.germinate.server.util.StringUtils;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import jhi.germinate.brapi.server.util.DateUtils;
-import jhi.germinate.server.util.StringUtils;
 import uk.ac.hutton.ics.brapi.resource.base.Contact;
 import uk.ac.hutton.ics.brapi.resource.core.trial.*;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.Experiments.*;
@@ -24,7 +26,11 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableLicenses.*;
 public abstract class TrialBaseServerResource extends BaseServerResource
 {
 	protected List<Trial> getTrials(DSLContext context, List<Condition> conditions)
+		throws SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "trials");
+
 		Map<Integer, List<Contact>> collaborators = new HashMap<>();
 		context.select()
 			   .from(VIEW_TABLE_COLLABORATORS)
@@ -62,12 +68,17 @@ public abstract class TrialBaseServerResource extends BaseServerResource
 
 				   list.add(new Authorship()
 					   .setLicense(r.get(VIEW_TABLE_LICENSES.LICENSE_NAME)));
+
+				   authorship.put(id, list);
 			   });
 
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(EXPERIMENTS)
-											 .where(DSL.exists(DSL.selectOne().from(DATASETS).where(DATASETS.EXPERIMENT_ID.eq(EXPERIMENTS.ID).and(DATASETS.DATASET_STATE_ID.eq(1)))));
+											 .where(DSL.exists(DSL.selectOne()
+																  .from(DATASETS)
+																  .where(DATASETS.ID.in(datasetIds))
+																  .and(DATASETS.EXPERIMENT_ID.eq(EXPERIMENTS.ID))));
 
 		if (conditions != null)
 		{

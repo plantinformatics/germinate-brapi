@@ -1,16 +1,18 @@
 package jhi.germinate.brapi.server.resource.core.study;
 
-import org.jooq.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import jhi.germinate.brapi.server.util.DateUtils;
+import jhi.germinate.server.AuthenticationFilter;
 import jhi.germinate.server.database.codegen.tables.pojos.ViewTableDatasets;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.core.study.Study;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
+
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.ViewTableCollaborators.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableDatasets.*;
@@ -21,8 +23,12 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableDatasets.*;
 public abstract class StudyBaseResource extends BaseServerResource
 {
 	protected List<Study> getStudies(DSLContext context, List<Condition> conditions)
+		throws SQLException
 	{
 		Map<Integer, List<Contact>> collaborators = new HashMap<>();
+
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, null);
 
 		context.selectFrom(VIEW_TABLE_COLLABORATORS)
 			   .forEach(r -> {
@@ -45,7 +51,7 @@ public abstract class StudyBaseResource extends BaseServerResource
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")
 											 .from(VIEW_TABLE_DATASETS)
-											 .where(VIEW_TABLE_DATASETS.DATASET_STATE.eq("public")) // TODO: Check user permissions
+											 .where(VIEW_TABLE_DATASETS.DATASET_ID.in(datasetIds))
 											 .and(VIEW_TABLE_DATASETS.IS_EXTERNAL.eq(false));
 
 		if (conditions != null)

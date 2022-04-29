@@ -8,9 +8,9 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.map.MarkerPosition;
 import uk.ac.hutton.ics.brapi.server.genotyping.marker.BrapiMarkerPositionServerResource;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.sql.*;
 import java.util.*;
 

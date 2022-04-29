@@ -5,8 +5,8 @@ import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.BreedingMethod;
 import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.germplasm.breedingmethod.BrapiBreedingMethodServerResource;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.sql.SQLException;
 

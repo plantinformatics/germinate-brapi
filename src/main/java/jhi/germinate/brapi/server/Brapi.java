@@ -2,7 +2,7 @@ package jhi.germinate.brapi.server;
 
 import org.jooq.tools.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Sebastian Raubach
