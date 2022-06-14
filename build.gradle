@@ -24,8 +24,7 @@ dependencies {
 
     implementation 'ch.systems.cisd:jhdf5:14.12.0'
 
-    implementation 'org.jooq:jooq:3.11.10'
-    implementation 'org.jooq:jooq-codegen:3.11.10'
+    implementation 'org.jooq:jooq:3.16.6'
 
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
     implementation 'javax.activation:activation:1.1.1'
