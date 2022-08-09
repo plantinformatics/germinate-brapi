@@ -10,6 +10,7 @@ import uk.ac.hutton.ics.brapi.server.genotyping.marker.BrapiSearchMarkerPosition
 import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
@@ -47,16 +48,16 @@ public class SearchMarkerPositionServerResource extends MarkerBaseServerResource
 			if (!CollectionUtils.isEmpty(search.getVariantDbIds()))
 				conditions.add(MARKERS.ID.cast(String.class).in(search.getVariantDbIds()));
 			if (search.getMaxPosition() != null)
-				conditions.add(MAPDEFINITIONS.DEFINITION_START.le(search.getMaxPosition()));
+				conditions.add(MAPDEFINITIONS.DEFINITION_START.le((double) search.getMaxPosition()));
 			if (search.getMinPosition() != null)
-				conditions.add(MAPDEFINITIONS.DEFINITION_START.ge(search.getMinPosition()));
+				conditions.add(MAPDEFINITIONS.DEFINITION_START.ge((double) search.getMinPosition()));
 
 			List<MarkerPosition> result = getMarkerPositions(context, conditions);
 
 			long totalCount = context.fetchOne("SELECT FOUND_ROWS()").into(Long.class);
 
 			return Response.ok(new BaseResult<>(new ArrayResult<MarkerPosition>()
-				.setData(result), page, pageSize, totalCount))
+							   .setData(result), page, pageSize, totalCount))
 						   .build();
 		}
 	}

@@ -162,15 +162,16 @@ public class PedigreeServerResource extends BaseServerResource implements BrapiP
 		}
 	}
 
-	private static class PedigreeWalker {
-		private final Map<String, Pedigree> result;
-		private final Map<String, Pedigree> lookup;
+	private static class PedigreeWalker
+	{
+		private final Map<String, Pedigree>                 result;
+		private final Map<String, Pedigree>                 lookup;
 		private final Map<String, List<ViewTablePedigrees>> parentToChildren;
 		private final Map<String, List<ViewTablePedigrees>> childrenToParents;
-		private final int maxPedigreeDepth;
-		private final int maxProgenyDepth;
-		private final boolean includeParents;
-		private final boolean includeProgeny;
+		private final int                                   maxPedigreeDepth;
+		private final int                                   maxProgenyDepth;
+		private final boolean                               includeParents;
+		private final boolean                               includeProgeny;
 
 		public PedigreeWalker(Map<String, Pedigree> lookup, Map<String, List<ViewTablePedigrees>> parentToChildren, Map<String, List<ViewTablePedigrees>> childrenToParents, int maxPedigreeDepth, int maxProgenyDepth, boolean includeParents, boolean includeProgeny)
 		{
@@ -184,7 +185,8 @@ public class PedigreeServerResource extends BaseServerResource implements BrapiP
 			this.includeProgeny = includeProgeny;
 		}
 
-		public void run(Pedigree current, int pedigreeLevel, int progenyLevel) {
+		public void run(Pedigree current, int pedigreeLevel, int progenyLevel)
+		{
 			if (result.containsKey(current.getGermplasmName()))
 				return;
 			if (pedigreeLevel > maxPedigreeDepth || progenyLevel > maxProgenyDepth)
@@ -227,11 +229,16 @@ public class PedigreeServerResource extends BaseServerResource implements BrapiP
 		}
 	}
 
-	private static String getParentType(ViewTablePedigreesRelationshipType type) {
-		if (type == null) {
+	private static String getParentType(ViewTablePedigreesRelationshipType type)
+	{
+		if (type == null)
+		{
 			return null;
-		} else {
-			switch (type) {
+		}
+		else
+		{
+			switch (type)
+			{
 				case F:
 					return "FEMALE";
 				case M:

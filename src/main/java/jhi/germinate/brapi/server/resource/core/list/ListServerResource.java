@@ -61,8 +61,8 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 				group.setDescription(lists.getListDescription());
 				group.setVisibility(true);
 				group.setGrouptypeId(groupType.getId());
-				group.setCreatedOn(lists.getDateCreated());
-				group.setUpdatedOn(lists.getDateModified());
+				group.setCreatedOn(toTimestamp(lists.getDateCreated()));
+				group.setUpdatedOn(toTimestamp(lists.getDateModified()));
 				try
 				{
 					group.setCreatedBy(Integer.parseInt(lists.getListOwnerPersonDbId()));
@@ -185,13 +185,13 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 	@Override
 	@Secured(UserType.AUTH_USER)
 	@POST
-	@Path("/{listDbId}/items")
+	@Path("/{listDbId}/data")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public BaseResult<Lists> postListByIdItems(@PathParam("listDbId") String listDbId, String[] ids)
+	public BaseResult<Lists> postListByIdData(@PathParam("listDbId") String listDbId, String[] data)
 		throws SQLException, IOException
 	{
-		if (ids == null)
+		if (data == null)
 		{
 			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
 			return null;
@@ -199,7 +199,7 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 
 		// TODO: Check if they're authorized to do this
 
-		List<String> stringIds = Arrays.asList(ids);
+		List<String> stringIds = Arrays.asList(data);
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
@@ -261,7 +261,9 @@ public class ListServerResource extends ListBaseServerResource implements BrapiL
 												   @QueryParam("listName") String listName,
 												   @QueryParam("listDbId") String listDbId,
 												   @QueryParam("listSource") String listSource,
-												   @QueryParam("externalReferenceID") String externalReferenceID,
+												   @QueryParam("commonCropName") String commonCropName,
+												   @QueryParam("programDbId") String programDbId,
+												   @QueryParam("externalReferenceId") String externalReferenceId,
 												   @QueryParam("externalReferenceSource") String externalReferenceSource)
 		throws SQLException
 	{

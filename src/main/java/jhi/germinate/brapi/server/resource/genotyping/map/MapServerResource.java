@@ -27,14 +27,15 @@ import static jhi.germinate.server.database.codegen.tables.Maps.*;
 @PermitAll
 public class MapServerResource extends BaseServerResource implements BrapiMapServerResource
 {
+	@Override
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public BaseResult<ArrayResult<Map>> getMaps(@QueryParam("commonCropName") String commonCropName,
-												@QueryParam("mapDbId") String mapDbId,
+	public BaseResult<ArrayResult<Map>> getMaps(@QueryParam("mapDbId") String mapDbId,
 												@QueryParam("mapPUI") String mapPUI,
 												@QueryParam("scientificName") String scientificName,
 												@QueryParam("type") String type,
+												@QueryParam("commonCropName") String commonCropName,
 												@QueryParam("programDbId") String programDbId,
 												@QueryParam("trialDbId") String trialDbId,
 												@QueryParam("studyDbId") String studyDbId)
@@ -97,6 +98,7 @@ public class MapServerResource extends BaseServerResource implements BrapiMapSer
 		}
 	}
 
+	@Override
 	@GET
 	@Path("/{mapDbId}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -132,6 +134,7 @@ public class MapServerResource extends BaseServerResource implements BrapiMapSer
 		}
 	}
 
+	@Override
 	@GET
 	@Path("/{mapDbId}/linkagegroups")
 	@Consumes(MediaType.APPLICATION_JSON)

@@ -60,7 +60,7 @@ public abstract class LocationBaseResource extends BaseServerResource
 								else
 									coordinates = new double[]{lng.doubleValue(), lat.doubleValue()};
 
-								location.setCoordinatesPoint(new CoordinatesPoint()
+								location.setCoordinates(new CoordinatesPoint()
 									.setType("Feature")
 									.setGeometry(new GeometryPoint()
 										.setCoordinates(coordinates)

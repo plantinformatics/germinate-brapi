@@ -37,8 +37,8 @@ public abstract class ListBaseServerResource extends BaseServerResource
 										   .fetchInto(ViewTableGroups.class);
 		return groups.stream()
 					 .map(l -> new Lists()
-						 .setDateCreated(l.getCreatedOn())
-						 .setDateModified(l.getUpdatedOn())
+						 .setDateCreated(fromTimestamp(l.getCreatedOn()))
+						 .setDateModified(fromTimestamp(l.getUpdatedOn()))
 						 .setListDbId(StringUtils.toString(l.getGroupId()))
 						 .setListDescription(l.getGroupDescription())
 						 .setListName(l.getGroupName())

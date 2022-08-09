@@ -44,14 +44,14 @@ public class SearchListServerResource extends ListBaseServerResource implements 
 			List<Condition> conditions = new ArrayList<>();
 
 			if (search.getDateCreatedRangeEnd() != null)
-				conditions.add(VIEW_TABLE_GROUPS.CREATED_ON.le(search.getDateCreatedRangeEnd()));
+				conditions.add(VIEW_TABLE_GROUPS.CREATED_ON.le(toTimestamp(search.getDateCreatedRangeEnd())));
 			if (search.getDateCreatedRangeStart() != null)
-				conditions.add(VIEW_TABLE_GROUPS.CREATED_ON.ge(search.getDateCreatedRangeStart()));
+				conditions.add(VIEW_TABLE_GROUPS.CREATED_ON.ge(toTimestamp(search.getDateCreatedRangeStart())));
 
 			if (search.getDateModifiedRangeEnd() != null)
-				conditions.add(VIEW_TABLE_GROUPS.UPDATED_ON.le(search.getDateModifiedRangeEnd()));
+				conditions.add(VIEW_TABLE_GROUPS.UPDATED_ON.le(toTimestamp(search.getDateModifiedRangeEnd())));
 			if (search.getDateModifiedRangeStart() != null)
-				conditions.add(VIEW_TABLE_GROUPS.UPDATED_ON.ge(search.getDateModifiedRangeStart()));
+				conditions.add(VIEW_TABLE_GROUPS.UPDATED_ON.ge(toTimestamp(search.getDateModifiedRangeStart())));
 
 			if (search.getListDbIds() != null)
 				conditions.add(VIEW_TABLE_GROUPS.GROUP_ID.in(search.getListDbIds()));

@@ -43,19 +43,22 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 	@Produces(MediaType.APPLICATION_JSON)
 	@Secured
 	@PermitAll
-	public BaseResult<ArrayResult<Germplasm>> getGermplasm(@QueryParam("germplasmPUI") String germplasmPUI,
-														   @QueryParam("germplasmDbId") String germplasmDbId,
-														   @QueryParam("germplasmName") String germplasmName,
-														   @QueryParam("commonCropName") String commonCropName,
-														   @QueryParam("accessionNumber") String accessionNumber,
+	public BaseResult<ArrayResult<Germplasm>> getGermplasm(@QueryParam("accessionNumber") String accessionNumber,
 														   @QueryParam("collection") String collection,
+														   @QueryParam("binomialName") String binomialName,
 														   @QueryParam("genus") String genus,
 														   @QueryParam("species") String species,
-														   @QueryParam("studyDbId") String studyDbId,
 														   @QueryParam("synonym") String synonym,
 														   @QueryParam("parentDbId") String parentDbId,
 														   @QueryParam("progenyDbId") String progenyDbId,
-														   @QueryParam("externalReferenceID") String externalReferenceID,
+														   @QueryParam("commonCropName") String commonCropName,
+														   @QueryParam("programDbId") String programDbId,
+														   @QueryParam("trialDbId") String trialDbId,
+														   @QueryParam("studyDbId") String studyDbId,
+														   @QueryParam("germplasmDbId") String germplasmDbId,
+														   @QueryParam("germplasmName") String germplasmName,
+														   @QueryParam("germplasmPUI") String germplasmPUI,
+														   @QueryParam("externalReferenceId") String externalReferenceId,
 														   @QueryParam("externalReferenceSource") String externalReferenceSource)
 		throws IOException, SQLException
 	{
@@ -269,112 +272,6 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 
 				result.setStorageTypeCodes(storage.get(id));
 			}
-
-			return new BaseResult<>(result, page, pageSize, 1);
-		}
-	}
-
-	@GET
-	@Path("/{germplasmDbId}/pedigree")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public BaseResult<Pedigree> getGermplasmByIdPedigree(@PathParam("germplasmDbId") String germplasmDbId,
-														 @QueryParam("notation") String notation,
-														 @QueryParam("includeSiblings") String includeSiblings)
-		throws IOException, SQLException
-	{
-		if (StringUtils.isEmpty(germplasmDbId))
-		{
-			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
-			return null;
-		}
-
-		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
-
-		try (Connection conn = Database.getConnection())
-		{
-			DSLContext context = Database.getContext(conn);
-			Pedigree result = context.select(
-										 GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-										 GERMINATEBASE.NAME.as("germplasmName"),
-										 PEDIGREEDEFINITIONS.DEFINITION.as("pedigree")
-									 )
-									 .from(PEDIGREEDEFINITIONS)
-									 .leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREEDEFINITIONS.GERMINATEBASE_ID))
-									 .where(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.cast(String.class).eq(germplasmDbId))
-									 .and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds))
-									 .fetchAnyInto(Pedigree.class);
-			List<Parent> parents = context.select(
-											  GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-											  GERMINATEBASE.NAME.as("germplasmName"),
-											  PEDIGREES.RELATIONSHIP_TYPE.cast(String.class).as("parentType")
-										  ).from(PEDIGREES)
-										  .leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.PARENT_ID))
-										  .where(PEDIGREES.GERMINATEBASE_ID.cast(String.class).eq(germplasmDbId))
-										  .and(PEDIGREES.DATASET_ID.in(datasetIds))
-										  .fetchInto(Parent.class);
-
-			List<String> parentIds = parents.stream()
-											.map(Parent::getGermplasmDbId)
-											.collect(Collectors.toList());
-
-			List<Sibling> siblings = context.select(
-												GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-												GERMINATEBASE.NAME.as("germplasmName")
-											).from(PEDIGREES).leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.GERMINATEBASE_ID))
-											.where(PEDIGREES.PARENT_ID.in(parentIds))
-											.and(PEDIGREES.DATASET_ID.in(datasetIds))
-											.and(PEDIGREES.GERMINATEBASE_ID.cast(String.class).notEqual(germplasmDbId))
-											.fetchInto(Sibling.class);
-
-			result.setParents(parents)
-				  .setSiblings(siblings);
-
-			return new BaseResult<>(result, page, pageSize, 1);
-		}
-	}
-
-	@GET
-	@Path("/{germplasmDbId}/progeny")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public BaseResult<Progeny> getGermplasmByIdProgeny(@PathParam("germplasmDbId") String germplasmDbId)
-		throws IOException, SQLException
-	{
-		if (StringUtils.isEmpty(germplasmDbId))
-		{
-			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
-			return null;
-		}
-
-		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
-
-		try (Connection conn = Database.getConnection())
-		{
-			DSLContext context = Database.getContext(conn);
-			Progeny result = context.select(
-										GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-										GERMINATEBASE.NAME.as("germplasmName"),
-										PEDIGREEDEFINITIONS.DEFINITION.as("pedigree")
-									)
-									.from(PEDIGREEDEFINITIONS)
-									.leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREEDEFINITIONS.GERMINATEBASE_ID))
-									.where(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.cast(String.class).eq(germplasmDbId))
-									.and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds))
-									.fetchAnyInto(Progeny.class);
-			List<Parent> children = context.select(
-											   GERMINATEBASE.ID.cast(String.class).as("germplasmDbId"),
-											   GERMINATEBASE.NAME.as("germplasmName"),
-											   PEDIGREES.RELATIONSHIP_TYPE.cast(String.class).as("parentType")
-										   ).from(PEDIGREES)
-										   .leftJoin(GERMINATEBASE).on(GERMINATEBASE.ID.eq(PEDIGREES.GERMINATEBASE_ID))
-										   .where(PEDIGREES.PARENT_ID.cast(String.class).eq(germplasmDbId))
-										   .and(PEDIGREES.DATASET_ID.in(datasetIds))
-										   .fetchInto(Parent.class);
-
-			result.setProgeny(children);
 
 			return new BaseResult<>(result, page, pageSize, 1);
 		}

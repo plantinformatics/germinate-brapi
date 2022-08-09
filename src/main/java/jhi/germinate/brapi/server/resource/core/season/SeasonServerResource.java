@@ -31,7 +31,8 @@ public class SeasonServerResource extends SeasonBaseServerResource implements Br
 	@PermitAll
 	public BaseResult<ArrayResult<Season>> getSeasons(@QueryParam("seasonDbId") String seasonDbId,
 													  @QueryParam("season") String season,
-													  @QueryParam("year") String year)
+													  @QueryParam("seasonName") String seasonName,
+													  @QueryParam("year") Integer year)
 		throws SQLException, IOException
 	{
 		try (Connection conn = Database.getConnection())

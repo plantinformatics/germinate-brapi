@@ -34,8 +34,10 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 	public BaseResult<ArrayResult<AttributeValue>> getAttributeValues(@QueryParam("attributeValueDbId") String attributeValueDbId,
 																	  @QueryParam("attributeDbId") String attributeDbId,
 																	  @QueryParam("attributeName") String attributeName,
+																	  @QueryParam("commonCropName") String commonCropName,
+																	  @QueryParam("programDbId") String programDbId,
 																	  @QueryParam("germplasmDbId") String germplasmDbId,
-																	  @QueryParam("externalReferenceID") String externalReferenceID,
+																	  @QueryParam("externalReferenceId") String externalReferenceId,
 																	  @QueryParam("externalReferenceSource") String externalReferenceSource)
 		throws IOException, SQLException
 	{
@@ -123,7 +125,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 											 AttributedataRecord record = context.newRecord(ATTRIBUTEDATA);
 											 record.setForeignId(germplasm.getId());
 											 record.setAttributeId(attribute.getId());
-											 record.setCreatedOn(v.getDeterminedDate());
+											 record.setCreatedOn(toTimestamp(v.getDeterminedDate()));
 											 record.setValue(v.getValue());
 											 record.store();
 
@@ -191,7 +193,7 @@ public class AttributeValueServerResource extends AttributeValueBaseServerResour
 			else
 			{
 				record.setValue(attributeValue.getValue());
-				record.setCreatedOn(attributeValue.getDeterminedDate());
+				record.setCreatedOn(toTimestamp(attributeValue.getDeterminedDate()));
 				record.store();
 
 				return getAttributeValueById(attributeValueDbId);

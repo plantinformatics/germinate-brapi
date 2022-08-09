@@ -23,14 +23,15 @@ import static jhi.germinate.server.database.codegen.tables.Markers.*;
 @PermitAll
 public class MarkerPositionServerResource extends MarkerBaseServerResource implements BrapiMarkerPositionServerResource
 {
+	@Override
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public BaseResult<ArrayResult<MarkerPosition>> getMarkerPositions(@QueryParam("mapDbId") String mapDbId,
 																	  @QueryParam("linkageGroupName") String linkageGroupName,
 																	  @QueryParam("variantDbId") String variantDbId,
-																	  @QueryParam("minPosition") String minPosition,
-																	  @QueryParam("maxPosition") String maxPosition)
+																	  @QueryParam("minPosition") Long minPosition,
+																	  @QueryParam("maxPosition") Long maxPosition)
 		throws SQLException, IOException
 	{
 		try (Connection conn = Database.getConnection())
@@ -48,7 +49,7 @@ public class MarkerPositionServerResource extends MarkerBaseServerResource imple
 			{
 				try
 				{
-					conditions.add(MAPDEFINITIONS.DEFINITION_START.le(Double.parseDouble(maxPosition)));
+					conditions.add(MAPDEFINITIONS.DEFINITION_START.le((double) maxPosition));
 				}
 				catch (Exception e)
 				{
@@ -58,7 +59,7 @@ public class MarkerPositionServerResource extends MarkerBaseServerResource imple
 			{
 				try
 				{
-					conditions.add(MAPDEFINITIONS.DEFINITION_START.ge(Double.parseDouble(minPosition)));
+					conditions.add(MAPDEFINITIONS.DEFINITION_START.ge((double) minPosition));
 				}
 				catch (Exception e)
 				{

@@ -8,8 +8,11 @@ import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Variant;
 
 import jakarta.servlet.http.*;
 import jakarta.ws.rs.core.SecurityContext;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
@@ -17,6 +20,8 @@ import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
 
 public interface VariantBaseServerResource
 {
+	SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 	default List<Variant> getVariantsInternal(DSLContext context, List<Condition> conditions, int page, int pageSize, HttpServletRequest req, HttpServletResponse resp, SecurityContext securityContext)
 		throws SQLException
 	{
@@ -42,8 +47,8 @@ public interface VariantBaseServerResource
 				   .map(m -> {
 					   Variant result = new Variant()
 						   .setVariantDbId(m.get(DATASETMEMBERS.DATASET_ID) + "-" + m.get(VIEW_TABLE_MARKERS.MARKER_ID))
-						   .setCreated(m.get(VIEW_TABLE_MARKERS.CREATED_ON))
-						   .setUpdated(m.get(VIEW_TABLE_MARKERS.UPDATED_ON))
+						   .setCreated(m.get(VIEW_TABLE_MARKERS.CREATED_ON, String.class))
+						   .setUpdated(m.get(VIEW_TABLE_MARKERS.UPDATED_ON, String.class))
 						   .setVariantType(m.get(VIEW_TABLE_MARKERS.MARKER_TYPE));
 
 					   List<String> names = new ArrayList<>();
