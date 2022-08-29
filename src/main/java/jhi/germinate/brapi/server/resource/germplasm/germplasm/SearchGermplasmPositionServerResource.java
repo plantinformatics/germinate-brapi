@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Mcpd.*;
 import static jhi.germinate.server.database.codegen.tables.Synonyms.*;
 import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 
@@ -39,7 +40,7 @@ public class SearchGermplasmPositionServerResource extends GermplasmBaseServerRe
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!CollectionUtils.isEmpty(search.getGermplasmPUIs()))
-				conditions.add(GERMINATEBASE.PUID.in(search.getGermplasmPUIs()));
+				conditions.add(MCPD.PUID.in(search.getGermplasmPUIs()));
 			if (!CollectionUtils.isEmpty(search.getGermplasmDbIds()))
 				conditions.add(GERMINATEBASE.ID.cast(String.class).in(search.getGermplasmDbIds()));
 			if (!CollectionUtils.isEmpty(search.getGermplasmNames()))

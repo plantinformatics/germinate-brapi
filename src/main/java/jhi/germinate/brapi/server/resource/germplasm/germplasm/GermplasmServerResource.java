@@ -1,21 +1,23 @@
 package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
-import jhi.germinate.resource.enums.UserType;
-import jhi.germinate.server.*;
-import jhi.germinate.server.database.codegen.tables.Germinatebase;
-import jhi.germinate.server.database.codegen.tables.records.ViewTableLocationsRecord;
-import jhi.germinate.server.resource.datasets.DatasetTableResource;
-import jhi.germinate.server.util.*;
-import org.jooq.*;
-import org.jooq.impl.*;
-import uk.ac.hutton.ics.brapi.resource.base.*;
-import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Collection;
-import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
-import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmServerResource;
-
 import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
+import jhi.germinate.resource.enums.UserType;
+import jhi.germinate.server.*;
+import jhi.germinate.server.database.codegen.enums.GermplasminstitutionsType;
+import jhi.germinate.server.database.codegen.tables.Germinatebase;
+import jhi.germinate.server.database.codegen.tables.pojos.*;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
+import jhi.germinate.server.util.*;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import uk.ac.hutton.ics.brapi.resource.base.*;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Collection;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.Mcpd;
+import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
+import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiGermplasmServerResource;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -25,12 +27,11 @@ import java.util.stream.Collectors;
 import static jhi.germinate.server.database.codegen.tables.Biologicalstatus.*;
 import static jhi.germinate.server.database.codegen.tables.Countries.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Germplasminstitutions.*;
 import static jhi.germinate.server.database.codegen.tables.Institutions.*;
 import static jhi.germinate.server.database.codegen.tables.Locations.*;
+import static jhi.germinate.server.database.codegen.tables.Mcpd.*;
 import static jhi.germinate.server.database.codegen.tables.Pedigreedefinitions.*;
-import static jhi.germinate.server.database.codegen.tables.Pedigrees.*;
-import static jhi.germinate.server.database.codegen.tables.Storage.*;
-import static jhi.germinate.server.database.codegen.tables.Storagedata.*;
 import static jhi.germinate.server.database.codegen.tables.Synonyms.*;
 import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTableLocations.*;
@@ -68,7 +69,7 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			List<Condition> conditions = new ArrayList<>();
 
 			if (!StringUtils.isEmpty(germplasmPUI))
-				conditions.add(GERMINATEBASE.PUID.eq(germplasmPUI));
+				conditions.add(MCPD.PUID.eq(germplasmPUI));
 			if (!StringUtils.isEmpty(germplasmDbId))
 				conditions.add(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId));
 			if (!StringUtils.isEmpty(germplasmName))
@@ -179,6 +180,8 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 	@Path("/{germplasmDbId}/mcpd")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@Secured
+	@PermitAll
 	public BaseResult<Mcpd> getGermplasmMcpd(@PathParam("germplasmDbId") String germplasmDbId)
 		throws IOException, SQLException
 	{
@@ -196,29 +199,27 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 			DSLContext context = Database.getContext(conn);
 			Mcpd result = context.select(
 									 GERMINATEBASE.NAME.as("accessionNumber"),
-									 GERMINATEBASE.ACQDATE.as("acquisitionDate"),
-									 GERMINATEBASE.COLLDATE.as("acquisitionDate"),
-									 GERMINATEBASE.COLLSRC_ID.as("acquisitionSourceCode"),
-									 DSL.inline(null, SQLDataType.VARCHAR).as("alternateIDs"),
+									 MCPD.ACQDATE.as("acquisitionDate"),
+									 MCPD.COLLDATE.as("acquisitionDate"),
+									 MCPD.COLLSRC.as("acquisitionSourceCode"),
 									 PEDIGREEDEFINITIONS.DEFINITION.as("ancestralData"),
 									 BIOLOGICALSTATUS.ID.cast(String.class).as("biologicalStatusOfAccessionCode"),
 									 TAXONOMIES.CROPNAME.as("commonCropName"),
 									 COUNTRIES.COUNTRY_CODE3.as("countryOfOrigin"),
 									 TAXONOMIES.GENUS.as("genus"),
 									 GERMINATEBASE.ID.as("germplasmDbId"),
-									 GERMINATEBASE.PUID.as("germplasmPUI"),
-									 INSTITUTIONS.CODE.as("instituteCode"),
-									 GERMINATEBASE.MLSSTATUS_ID.as("mlsStatus"),
+									 MCPD.PUID.as("germplasmPUI"),
+									 MCPD.MLSSTAT.as("mlsStatus"),
 									 TAXONOMIES.SPECIES.as("species"),
 									 TAXONOMIES.SPECIES_AUTHOR.as("speciesAuthority"),
 									 TAXONOMIES.SUBTAXA.as("subtaxon"),
 									 TAXONOMIES.SUBTAXA_AUTHOR.as("subtaxonAuthority")
 								 )
 								 .from(GERMINATEBASE)
-								 .leftJoin(BIOLOGICALSTATUS).on(BIOLOGICALSTATUS.ID.eq(GERMINATEBASE.BIOLOGICALSTATUS_ID))
+								 .leftJoin(MCPD).on(MCPD.GERMINATEBASE_ID.eq(GERMINATEBASE.ID))
+								 .leftJoin(BIOLOGICALSTATUS).on(BIOLOGICALSTATUS.ID.eq(MCPD.SAMPSTAT))
 								 .leftJoin(LOCATIONS).on(LOCATIONS.ID.eq(GERMINATEBASE.LOCATION_ID))
 								 .leftJoin(COUNTRIES).on(COUNTRIES.ID.eq(LOCATIONS.COUNTRY_ID))
-								 .leftJoin(INSTITUTIONS).on(INSTITUTIONS.ID.eq(GERMINATEBASE.INSTITUTION_ID))
 								 .leftJoin(PEDIGREEDEFINITIONS).on(PEDIGREEDEFINITIONS.GERMINATEBASE_ID.eq(GERMINATEBASE.ID).and(PEDIGREEDEFINITIONS.DATASET_ID.in(datasetIds)))
 								 .leftJoin(TAXONOMIES).on(TAXONOMIES.ID.eq(GERMINATEBASE.TAXONOMY_ID))
 								 .leftJoin(SYNONYMS).on(SYNONYMS.FOREIGN_ID.eq(GERMINATEBASE.ID).and(SYNONYMS.SYNONYMTYPE_ID.eq(1)))
@@ -229,48 +230,102 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 
 			if (result != null)
 			{
-				Map<Integer, String[]> synonyms = context.selectFrom(SYNONYMS).where(SYNONYMS.SYNONYMTYPE_ID.eq(1)).and(SYNONYMS.FOREIGN_ID.cast(String.class).eq(result.getGermplasmDbId())).fetchMap(SYNONYMS.FOREIGN_ID, SYNONYMS.SYNONYMS_);
-				Map<Integer, ViewTableLocationsRecord> origins = context.select().from(VIEW_TABLE_LOCATIONS).leftJoin(GERMINATEBASE).on(GERMINATEBASE.LOCATION_ID.eq(VIEW_TABLE_LOCATIONS.LOCATION_ID)).where(GERMINATEBASE.LOCATION_ID.isNotNull()).and(VIEW_TABLE_LOCATIONS.LOCATION_TYPE.eq("collectingsites")).and(VIEW_TABLE_LOCATIONS.LOCATION_LATITUDE.isNotNull()).and(VIEW_TABLE_LOCATIONS.LOCATION_LONGITUDE.isNotNull()).fetchMap(GERMINATEBASE.ID, ViewTableLocationsRecord.class);
-				Map<Integer, List<String>> storage = new HashMap<>();
-				context.select().from(STORAGE).leftJoin(STORAGEDATA).on(STORAGEDATA.STORAGE_ID.eq(STORAGE.ID)).where(STORAGEDATA.GERMINATEBASE_ID.cast(String.class).eq(result.getGermplasmDbId())).forEach(r -> {
-					List<String> list = storage.get(r.get(STORAGEDATA.GERMINATEBASE_ID));
+				Synonyms synonyms = context.selectFrom(SYNONYMS)
+										   .where(SYNONYMS.SYNONYMTYPE_ID.eq(1))
+										   .and(SYNONYMS.FOREIGN_ID.cast(String.class).eq(result.getGermplasmDbId()))
+										   .fetchAnyInto(Synonyms.class);
+				ViewTableLocations origin = context.select().from(VIEW_TABLE_LOCATIONS)
+												   .leftJoin(GERMINATEBASE).on(GERMINATEBASE.LOCATION_ID.eq(VIEW_TABLE_LOCATIONS.LOCATION_ID))
+												   .where(GERMINATEBASE.LOCATION_ID.isNotNull())
+												   .and(GERMINATEBASE.ID.cast(String.class).eq(result.getGermplasmDbId()))
+												   .and(VIEW_TABLE_LOCATIONS.LOCATION_TYPE.eq("collectingsites"))
+												   .and(VIEW_TABLE_LOCATIONS.LOCATION_LATITUDE.isNotNull())
+												   .and(VIEW_TABLE_LOCATIONS.LOCATION_LONGITUDE.isNotNull())
+												   .fetchAnyInto(ViewTableLocations.class);
 
-					if (list == null)
-						list = new ArrayList<>();
+				Map<GermplasminstitutionsType, List<Institutions>> institutions = new HashMap<>();
+				context.select()
+					   .from(GERMPLASMINSTITUTIONS).leftJoin(INSTITUTIONS).on(GERMPLASMINSTITUTIONS.INSTITUTION_ID.eq(INSTITUTIONS.ID))
+					   .where(GERMPLASMINSTITUTIONS.GERMINATEBASE_ID.cast(String.class).eq(result.getGermplasmDbId()))
+					   .forEach(i -> {
+						   Institutions inst = i.into(Institutions.class);
+						   GermplasminstitutionsType type = i.get(GERMPLASMINSTITUTIONS.TYPE);
 
-					list.add(Integer.toString(r.get(STORAGE.ID)));
+						   List<Institutions> typeInst = institutions.get(type);
 
-					storage.put(r.get(STORAGEDATA.GERMINATEBASE_ID), list);
-				});
+						   if (typeInst == null)
+							   typeInst = new ArrayList<>();
 
-				Integer id = Integer.parseInt(result.getGermplasmDbId());
-				String[] synonym = synonyms.get(id);
-				if (synonym != null)
+						   typeInst.add(inst);
+
+						   institutions.put(type, typeInst);
+					   });
+
+				Set<String> storage = new LinkedHashSet<>();
+				context.select(
+						   MCPD.GERMINATEBASE_ID,
+						   MCPD.STORAGE)
+					   .from(MCPD)
+					   .where(MCPD.GERMINATEBASE_ID.cast(String.class).eq(result.getGermplasmDbId()))
+					   .and(MCPD.STORAGE.isNotNull())
+					   .forEach(s -> {
+						   String st = s.get(MCPD.STORAGE);
+
+						   if (!StringUtils.isEmpty(st))
+							   storage.addAll(Arrays.asList(st.split(";")));
+					   });
+
+				if (synonyms != null && synonyms.getSynonyms() != null)
 				{
-					List<String> mapped = Arrays.stream(synonym).collect(Collectors.toList());
+					List<String> mapped = Arrays.stream(synonyms.getSynonyms()).collect(Collectors.toList());
 					result.setAlternateIDs(mapped);
 					result.setAccessionNames(mapped);
 				}
 
-				ViewTableLocationsRecord location = origins.get(id);
-				if (location != null)
+				List<Institutions> breedingInst = institutions.get(GermplasminstitutionsType.breeding);
+				if (!CollectionUtils.isEmpty(breedingInst))
+				{
+					result.setBreedingInstitutes(breedingInst.stream().map(i -> new Institute()
+																 .setInstituteName(i.getName())
+																 .setInstituteCode(i.getCode())
+																 .setInstituteAddress(i.getAddress()))
+															 .collect(Collectors.toList()));
+				}
+				List<Institutions> duplInst = institutions.get(GermplasminstitutionsType.duplicate);
+				if (!CollectionUtils.isEmpty(duplInst))
+				{
+					result.setSafetyDuplicateInstitutes(duplInst.stream().map(i -> new Institute()
+																	.setInstituteName(i.getName())
+																	.setInstituteCode(i.getCode())
+																	.setInstituteAddress(i.getAddress()))
+																.collect(Collectors.toList()));
+				}
+				List<Institutions> maintInst = institutions.get(GermplasminstitutionsType.maintenance);
+				if (!CollectionUtils.isEmpty(maintInst))
+				{
+					maintInst.stream().filter(i -> !StringUtils.isEmpty(i.getCode()))
+							 .findAny()
+							 .ifPresent(i -> result.setInstituteCode(i.getCode()));
+				}
+
+				if (origin != null)
 				{
 					// Then take care of the lat, lng and elv
-					BigDecimal lat = location.getLocationLatitude();
-					BigDecimal lng = location.getLocationLongitude();
-					BigDecimal elv = location.getLocationElevation();
+					BigDecimal lat = origin.getLocationLatitude();
+					BigDecimal lng = origin.getLocationLongitude();
+					BigDecimal elv = origin.getLocationElevation();
 
 					result.setCollectingInfo(new Collection()
 						.setCollectingSite(new Collsite()
-							.setCoordinateUncertainty(location.getLocationCoordinateUncertainty() != null ? Integer.toString(location.getLocationCoordinateUncertainty()) : null)
+							.setCoordinateUncertainty(origin.getLocationCoordinateUncertainty() != null ? Integer.toString(origin.getLocationCoordinateUncertainty()) : null)
 							.setElevation(elv != null ? elv.toPlainString() : null)
 							.setLatitudeDecimal(lat != null ? lat.toPlainString() : null)
 							.setLongitudeDecimal(lng != null ? lng.toPlainString() : null)
-							.setLocationDescription(location.getLocationName()))
+							.setLocationDescription(origin.getLocationName()))
 					);
 				}
 
-				result.setStorageTypeCodes(storage.get(id));
+				result.setStorageTypeCodes(new ArrayList<>(storage));
 			}
 
 			return new BaseResult<>(result, page, pageSize, 1);

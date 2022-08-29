@@ -21,6 +21,7 @@ import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Experiments.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
+import static jhi.germinate.server.database.codegen.tables.Mcpd.*;
 import static jhi.germinate.server.database.codegen.tables.Synonyms.*;
 import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 import static jhi.germinate.server.database.codegen.tables.ViewTablePedigrees.*;
@@ -70,23 +71,26 @@ public class PedigreeServerResource extends BaseServerResource implements BrapiP
 			context.select(
 					   GERMINATEBASE.ID.as("germplasmDbId"),
 					   GERMINATEBASE.NAME.as("germplasmName"),
-					   GERMINATEBASE.PUID.as("germplasmPUI"))
-				   .from(GERMINATEBASE).forEach(r -> lookup.put(r.get("germplasmName", String.class), new Pedigree().setGermplasmDbId(r.get("germplasmDbId", String.class))
-																													.setGermplasmName(r.get("germplasmName", String.class))
-																													.setGermplasmPUI(r.get("germplasmPUI", String.class))));
+					   MCPD.PUID.as("germplasmPUI"))
+				   .from(GERMINATEBASE)
+				   .leftJoin(MCPD).on(MCPD.GERMINATEBASE_ID.eq(GERMINATEBASE.ID))
+				   .forEach(r -> lookup.put(r.get("germplasmName", String.class), new Pedigree().setGermplasmDbId(r.get("germplasmDbId", String.class))
+																								.setGermplasmName(r.get("germplasmName", String.class))
+																								.setGermplasmPUI(r.get("germplasmPUI", String.class))));
 
 			SelectJoinStep<?> step = context.select(
 												GERMINATEBASE.ID.as("germplasmDbId"),
 												GERMINATEBASE.NAME.as("germplasmName"),
-												GERMINATEBASE.PUID.as("germplasmPUI")
+												MCPD.PUID.as("germplasmPUI")
 											)
 											.hint("SQL_CALC_FOUND_ROWS")
 											.from(GERMINATEBASE)
+											.leftJoin(MCPD).on(MCPD.GERMINATEBASE_ID.eq(GERMINATEBASE.ID))
 											.leftJoin(TAXONOMIES).on(TAXONOMIES.ID.eq(GERMINATEBASE.TAXONOMY_ID))
 											.leftJoin(SYNONYMS).on(SYNONYMS.FOREIGN_ID.eq(GERMINATEBASE.ID).and(SYNONYMS.SYNONYMTYPE_ID.eq(1)));
 
 			if (!StringUtils.isEmpty(germplasmPUI))
-				step.where(GERMINATEBASE.PUID.eq(germplasmPUI));
+				step.where(MCPD.PUID.eq(germplasmPUI));
 			if (!StringUtils.isEmpty(germplasmDbId))
 				step.where(GERMINATEBASE.ID.cast(String.class).eq(germplasmDbId));
 			if (!StringUtils.isEmpty(germplasmName))
