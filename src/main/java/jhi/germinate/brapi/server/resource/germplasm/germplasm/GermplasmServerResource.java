@@ -192,7 +192,7 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "pedigree");
 
 		try (Connection conn = Database.getConnection())
 		{

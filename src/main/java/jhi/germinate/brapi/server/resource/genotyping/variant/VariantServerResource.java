@@ -102,7 +102,7 @@ public class VariantServerResource extends BaseServerResource implements BrapiVa
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{

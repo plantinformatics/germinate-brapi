@@ -46,7 +46,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		throws IOException, SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -110,7 +110,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{

@@ -22,7 +22,7 @@ public interface VariantSetBaseServerResource
 		throws SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		SelectConditionStep<?> step = context.select(
 												 DATASETS.ID.as("studyDbId"),

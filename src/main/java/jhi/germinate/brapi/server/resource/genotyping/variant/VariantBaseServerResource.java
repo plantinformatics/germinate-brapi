@@ -26,7 +26,7 @@ public interface VariantBaseServerResource
 		throws SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		SelectConditionStep<?> step = context.select()
 											 .hint("SQL_CALC_FOUND_ROWS")

@@ -23,7 +23,7 @@ public abstract class SeasonBaseServerResource extends BaseServerResource
 		throws SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, null);
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, null);
 
 		SelectConditionStep<?> step = context.selectDistinct(DSL.year(DATASETS.DATE_START))
 											 .hint("SQL_CALC_FOUND_ROWS")

@@ -65,7 +65,7 @@ public class PedigreeServerResource extends BaseServerResource implements BrapiP
 			DSLContext context = Database.getContext(conn);
 
 			AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-			List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+			List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "pedigree");
 
 			Map<String, Pedigree> lookup = new HashMap<>();
 			context.select(

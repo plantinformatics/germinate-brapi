@@ -131,7 +131,7 @@ public class VariantSetServerResource extends BaseServerResource implements Brap
 		throws SQLException, IOException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		if (StringUtils.isEmpty(variantSetDbId))
 		{

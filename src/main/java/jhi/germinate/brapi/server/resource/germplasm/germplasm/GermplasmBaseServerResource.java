@@ -292,7 +292,7 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		throws SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "pedigree");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "pedigree");
 
 		SelectJoinStep<?> step = context.select(
 											GERMINATEBASE.NAME.as("accessionNumber"),

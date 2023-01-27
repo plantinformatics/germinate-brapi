@@ -3,6 +3,7 @@ package jhi.germinate.brapi.server.resource.core.trial;
 import jhi.germinate.brapi.server.util.DateUtils;
 import jhi.germinate.resource.ViewTableExperiments;
 import jhi.germinate.server.AuthenticationFilter;
+import jhi.germinate.server.database.codegen.tables.pojos.Experiments;
 import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.StringUtils;
 import org.jooq.*;
@@ -29,7 +30,7 @@ public abstract class TrialBaseServerResource extends BaseServerResource
 		throws SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "trials");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "trials");
 
 		Map<Integer, List<Contact>> collaborators = new HashMap<>();
 		context.select()
@@ -86,19 +87,19 @@ public abstract class TrialBaseServerResource extends BaseServerResource
 				step.and(condition);
 		}
 
-		List<ViewTableExperiments> datasets = step.limit(pageSize)
-												  .offset(pageSize * page)
-												  .fetchInto(ViewTableExperiments.class);
+		List<Experiments> experiments = step.limit(pageSize)
+											.offset(pageSize * page)
+											.fetchInto(Experiments.class);
 
-		return datasets.stream()
+		return experiments.stream()
 					   .map(r -> new Trial()
 						   .setActive(false)
-						   .setContacts(collaborators.get(r.getExperimentId()))
-						   .setDatasetAuthorships(authorship.get(r.getExperimentId()))
+						   .setContacts(collaborators.get(r.getId()))
+						   .setDatasetAuthorships(authorship.get(r.getId()))
 						   .setEndDate(DateUtils.getSimpleDate(r.getExperimentDate()))
 						   .setStartDate(DateUtils.getSimpleDate(r.getExperimentDate()))
-						   .setTrialDbId(Integer.toString(r.getExperimentId()))
-						   .setTrialDescription(r.getExperimentDescription())
+						   .setTrialDbId(Integer.toString(r.getId()))
+						   .setTrialDescription(r.getDescription())
 						   .setTrialName(r.getExperimentName())
 					   )
 					   .collect(Collectors.toList());

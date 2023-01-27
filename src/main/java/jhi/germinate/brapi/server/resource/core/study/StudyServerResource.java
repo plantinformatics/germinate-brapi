@@ -51,7 +51,7 @@ public class StudyServerResource extends StudyBaseResource implements BrapiStudy
 		throws SQLException, IOException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, null);
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, null);
 
 		try (Connection conn = Database.getConnection())
 		{
