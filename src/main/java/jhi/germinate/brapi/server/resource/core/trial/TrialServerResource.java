@@ -50,7 +50,7 @@ public class TrialServerResource extends TrialBaseServerResource implements Brap
 		throws SQLException, IOException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "trials");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, null);
 
 		try (Connection conn = Database.getConnection())
 		{

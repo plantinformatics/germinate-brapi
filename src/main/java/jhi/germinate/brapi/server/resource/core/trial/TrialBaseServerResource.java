@@ -30,7 +30,7 @@ public abstract class TrialBaseServerResource extends BaseServerResource
 		throws SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "trials");
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, null);
 
 		Map<Integer, List<Contact>> collaborators = new HashMap<>();
 		context.select()
