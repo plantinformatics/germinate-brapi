@@ -1,8 +1,10 @@
 package jhi.germinate.brapi.server.resource.germplasm.germplasm;
 
-import jhi.germinate.server.*;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
+import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.Germinatebase;
-import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -10,9 +12,6 @@ import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.germplasm.germplasm.*;
 import uk.ac.hutton.ics.brapi.server.germplasm.germplasm.BrapiSearchGermplasmServerResource;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
@@ -26,7 +25,7 @@ import static jhi.germinate.server.database.codegen.tables.Taxonomies.*;
 @Path("brapi/v2/search/germplasm")
 @Secured
 @PermitAll
-public class SearchGermplasmPositionServerResource extends GermplasmBaseServerResource implements BrapiSearchGermplasmServerResource
+public class SearchGermplasmServerResource extends GermplasmBaseServerResource implements BrapiSearchGermplasmServerResource
 {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -57,13 +56,14 @@ public class SearchGermplasmPositionServerResource extends GermplasmBaseServerRe
 			{
 				List<String> cleaned = search.getSynonyms()
 											 .stream()
+											 .filter(Objects::nonNull)
 											 .map(s -> s.replaceAll("[^a-zA-Z0-9_-]", ""))
 											 .collect(Collectors.toList());
 
-				Condition overall = DSL.condition("JSON_CONTAINS(" + SYNONYMS.SYNONYMS_.getName() + ", '\"" + cleaned.get(0) + "\"')");
+				Condition overall = DSL.condition("JSON_CONTAINS(LOWER(" + SYNONYMS.SYNONYMS_.getName() + "), '\"" + cleaned.get(0).toLowerCase() + "\"')");
 
 				for (int i = 1; i < cleaned.size(); i++)
-					overall = overall.or(DSL.condition("JSON_CONTAINS(" + SYNONYMS.SYNONYMS_.getName() + ", '\"" + cleaned.get(i) + "\"')"));
+					overall = overall.or(DSL.condition("JSON_CONTAINS(LOWER(" + SYNONYMS.SYNONYMS_.getName() + "), '\"" + cleaned.get(i).toLowerCase() + "\"')"));
 
 				conditions.add(overall);
 			}

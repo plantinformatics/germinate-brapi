@@ -119,9 +119,9 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 			// If there's at least one valid location
 			if (count[0] > 0)
 			{
-				BigDecimal lng = getBigDecimal(values[0]);
-				BigDecimal lat = getBigDecimal(values[1]);
-				BigDecimal elv = getBigDecimal(values[2]);
+				BigDecimal lng = toBigDecimal(values[0]);
+				BigDecimal lat = toBigDecimal(values[1]);
+				BigDecimal elv = toBigDecimal(values[2]);
 
 				SelectConditionStep<LocationsRecord> step = context.selectFrom(LOCATIONS)
 																   .where(LOCATIONS.LONGITUDE.eq(lng))
@@ -272,20 +272,6 @@ public abstract class GermplasmBaseServerResource extends BaseServerResource
 		}
 
 		return existing.getId();
-	}
-
-	private BigDecimal getBigDecimal(Double value)
-	{
-		try
-		{
-			BigDecimal result = new BigDecimal(value, MathContext.DECIMAL64);
-			result = result.setScale(10, RoundingMode.HALF_UP);
-			return result;
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
 	}
 
 	protected BaseResult<ArrayResult<Germplasm>> getGermplasm(DSLContext context, List<Condition> conditions)
