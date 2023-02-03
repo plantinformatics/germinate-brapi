@@ -125,6 +125,8 @@ public class GermplasmServerResource extends GermplasmBaseServerResource impleme
 										 .filter(Objects::nonNull)
 										 .collect(Collectors.toList());
 
+			page = 0;
+			pageSize = Integer.MAX_VALUE;
 			return getGermplasm(context, Collections.singletonList(GERMINATEBASE.ID.in(newIds)));
 		}
 	}

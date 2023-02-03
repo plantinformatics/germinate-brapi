@@ -269,10 +269,18 @@ public class ServerInfoResource extends BaseServerResource implements BrapiServe
 			.addContentType(BrapiCall.ContentType.json)
 			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ONE));
+		CALLS.add(new BrapiCall("observationunits")
+			.addContentType(BrapiCall.ContentType.json)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ONE));
 		// OBSERVATION VARIABLES
 		CALLS.add(new BrapiCall("variables")
 			.addContentType(BrapiCall.ContentType.json)
 			.addMethod(BrapiCall.Method.GET)
+			.addMethod(BrapiCall.Method.POST)
+			.addVersion(BrapiCall.Version.TWO_ONE));
+		CALLS.add(new BrapiCall("search/variables")
+			.addContentType(BrapiCall.ContentType.json)
 			.addMethod(BrapiCall.Method.POST)
 			.addVersion(BrapiCall.Version.TWO_ONE));
 	}

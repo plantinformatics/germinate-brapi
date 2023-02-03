@@ -7,10 +7,9 @@ import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.pojos.Datasets;
 import jhi.germinate.server.database.codegen.tables.records.PhenotypedataRecord;
 import jhi.germinate.server.util.*;
-import org.jooq.DSLContext;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.phenotyping.observation.Observation;
-import uk.ac.hutton.ics.brapi.server.base.BaseServerResource;
 import uk.ac.hutton.ics.brapi.server.phenotyping.observation.BrapiObservationServerResource;
 
 import java.io.IOException;
@@ -26,8 +25,21 @@ import static jhi.germinate.server.database.codegen.tables.Phenotypes.*;
 @Path("brapi/v2/observations")
 @Secured
 @PermitAll
-public class ObservationServerResource extends BaseServerResource implements BrapiObservationServerResource
+public class ObservationServerResource extends ObservationBaseServerResource implements BrapiObservationServerResource
 {
+	private void addCondition(List<Condition> conditions, Field<Integer> field, String value) {
+		if (!StringUtils.isEmpty(value))
+		{
+			try
+			{
+				conditions.add(field.eq(Integer.parseInt(value)));
+			}
+			catch (Exception e) {
+				// Do nothing
+			}
+		}
+	}
+
 	@Override
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -57,8 +69,18 @@ public class ObservationServerResource extends BaseServerResource implements Bra
 	)
 		throws IOException, SQLException
 	{
-		resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
-		return null;
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			List<Condition> conditions = new ArrayList<>();
+
+			addCondition(conditions, DATASETS.ID, studyDbId);
+			addCondition(conditions, DATASETS.EXPERIMENT_ID, trialDbId);
+			addCondition(conditions, PHENOTYPEDATA.GERMINATEBASE_ID, germplasmDbId);
+			addCondition(conditions, PHENOTYPES.ID, observationVariableDbId);
+
+			return getObservation(context, conditions);
+		}
 	}
 
 	@Override
@@ -103,7 +125,7 @@ public class ObservationServerResource extends BaseServerResource implements Bra
 			}
 			try
 			{
-				studyDbId = Integer.parseInt(n.getGermplasmDbId());
+				studyDbId = Integer.parseInt(n.getStudyDbId());
 			}
 			catch (Exception e)
 			{
@@ -136,6 +158,8 @@ public class ObservationServerResource extends BaseServerResource implements Bra
 				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
 				return null;
 			}
+
+			List<Integer> newIds = new ArrayList<>();
 
 			for (Observation n : newObservations)
 			{
@@ -199,13 +223,14 @@ public class ObservationServerResource extends BaseServerResource implements Bra
 
 				pd.store();
 
+				newIds.add(pd.getId());
 				// Update the id
 				n.setObservationDbId(Integer.toString(pd.getId()));
 			}
 
-			// TODO: Replace with an actual query against the database
-			return new BaseResult<ArrayResult<Observation>>()
-				.setResult(new ArrayResult<Observation>().setData(newObservations));
+			page = 0;
+			pageSize = Integer.MAX_VALUE;
+			return getObservation(context, Collections.singletonList(PHENOTYPEDATA.ID.in(newIds)));
 		}
 	}
 
@@ -258,7 +283,7 @@ public class ObservationServerResource extends BaseServerResource implements Bra
 	public BaseResult<Observation> getObservationById(@PathParam("observationDbId") String observationDbId)
 		throws IOException, SQLException
 	{
-		resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
 		return null;
 	}
 
@@ -270,7 +295,7 @@ public class ObservationServerResource extends BaseServerResource implements Bra
 	public BaseResult<Observation> putObservationById(@PathParam("observationDbId") String observationDbId, Observation observation)
 		throws IOException, SQLException
 	{
-		resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+		resp.sendError(Response.Status.NOT_IMPLEMENTED.getStatusCode());
 		return null;
 	}
 }
