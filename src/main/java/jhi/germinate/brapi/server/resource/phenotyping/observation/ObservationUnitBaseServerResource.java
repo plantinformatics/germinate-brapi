@@ -29,7 +29,6 @@ public class ObservationUnitBaseServerResource extends BaseServerResource
 		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "trials");
 
 		SelectConditionStep<?> step = context.select(
-												 PHENOTYPEDATA.ID.as("observationUnitDbId"),
 												 GERMINATEBASE.ID.as("germplasmDbId"),
 												 GERMINATEBASE.NAME.as("germplasmName"),
 												 PHENOTYPEDATA.TRIAL_ROW.as("trialRow"),
@@ -71,15 +70,17 @@ public class ObservationUnitBaseServerResource extends BaseServerResource
 				ObservationUnitPojo d = ou.into(ObservationUnitPojo.class);
 
 				ObservationUnit unit = new ObservationUnit();
-				unit.setObservationUnitDbId(d.getObservationUnitDbId());
+
 				unit.setGermplasmDbId(d.getGermplasmDbId());
 				unit.setGermplasmName(d.getGermplasmName());
-				unit.setObservationUnitDbId(d.getObservationUnitDbId());
 				unit.setStudyDbId(d.getStudyDbId());
 
 				String rep = d.getRep();
 				String col = d.getTrialColumn();
 				String row = d.getTrialRow();
+
+				String id = d.getGermplasmDbId() + "-" + d.getStudyDbId() + "-" + rep + "-" + col + "-" + row;
+				unit.setObservationUnitDbId(id);
 
 				if (!StringUtils.isEmpty(rep) || !StringUtils.isEmpty(col) || !StringUtils.isEmpty(row))
 				{
@@ -88,6 +89,7 @@ public class ObservationUnitBaseServerResource extends BaseServerResource
 						position.setObservationLevel(new ObservationLevel()
 							.setLevelName("rep")
 							.setLevelCode(rep));
+
 
 					if (!StringUtils.isEmpty(row))
 					{

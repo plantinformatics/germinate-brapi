@@ -5,7 +5,6 @@ import java.util.List;
 
 public class ObservationUnitPojo
 {
-	private String observationUnitDbId;
 	private String germplasmDbId;
 	private String germplasmName;
 	private String trialRow;
@@ -13,17 +12,6 @@ public class ObservationUnitPojo
 	private String rep;
 	private String studyDbId;
 	private List<ObservationUnitData> unitData;
-
-	public String getObservationUnitDbId()
-	{
-		return observationUnitDbId;
-	}
-
-	public ObservationUnitPojo setObservationUnitDbId(String observationUnitDbId)
-	{
-		this.observationUnitDbId = observationUnitDbId;
-		return this;
-	}
 
 	public String getGermplasmDbId()
 	{
