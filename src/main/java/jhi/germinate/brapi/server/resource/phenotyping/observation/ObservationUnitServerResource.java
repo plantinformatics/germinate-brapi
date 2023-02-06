@@ -8,14 +8,14 @@ import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.pojos.Datasets;
 import jhi.germinate.server.database.codegen.tables.records.PhenotypedataRecord;
 import jhi.germinate.server.util.*;
-import org.jooq.DSLContext;
+import org.jooq.*;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.phenotyping.observation.*;
 import uk.ac.hutton.ics.brapi.server.phenotyping.observation.BrapiObservationUnitServerResource;
 
 import java.io.IOException;
 import java.sql.*;
-import java.text.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
@@ -154,6 +154,7 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 						pd.setPhenotypeId(Integer.parseInt(o.getObservationVariableDbId()));
 						pd.setPhenotypeValue(o.getValue());
 						pd.setRep(rep);
+						pd.setBlock("1");
 						pd.setTrialRow(row);
 						pd.setTrialColumn(col);
 						if (o.getGeoCoordinates() != null)
@@ -209,11 +210,49 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 							// Ignore
 						}
 
-						pd.store();
+						// Check if there's already an entry for the same plot, trait and timepoint
+						SelectConditionStep<PhenotypedataRecord> query = context.selectFrom(PHENOTYPEDATA)
+																				.where(PHENOTYPEDATA.PHENOTYPE_ID.isNotDistinctFrom(pd.getPhenotypeId()))
+																				.and(PHENOTYPEDATA.REP.isNotDistinctFrom(pd.getRep()))
+																				.and(PHENOTYPEDATA.BLOCK.isNotDistinctFrom(pd.getBlock()))
+																				.and(PHENOTYPEDATA.TRIAL_ROW.isNotDistinctFrom(pd.getTrialRow()))
+																				.and(PHENOTYPEDATA.TRIAL_COLUMN.isNotDistinctFrom(pd.getTrialColumn()))
+																				.and(PHENOTYPEDATA.TREATMENT_ID.isNotDistinctFrom(pd.getTreatmentId()))
+																				.and(PHENOTYPEDATA.GERMINATEBASE_ID.isNotDistinctFrom(pd.getGerminatebaseId()))
+																				.and(PHENOTYPEDATA.DATASET_ID.isNotDistinctFrom(pd.getDatasetId()))
+																				.and(PHENOTYPEDATA.RECORDING_DATE.isNotDistinctFrom(pd.getRecordingDate()))
+																				.and(PHENOTYPEDATA.LOCATION_ID.isNotDistinctFrom(pd.getLocationId()))
+																				.and(PHENOTYPEDATA.TRIALSERIES_ID.isNotDistinctFrom(pd.getTrialseriesId()));
 
-						newIds.add(pd.getId());
+						PhenotypedataRecord pdOld = query.fetchAny();
+
+						Integer id;
+						// If there isn't an exact match, insert the new one
+						if (pdOld == null)
+						{
+							// Then store the new one
+							pd.store();
+							id = pd.getId();
+						}
+						else
+						{
+							// Else check the value. If it's different, use the new one
+							if (!Objects.equals(pdOld.getPhenotypeValue(), pd.getPhenotypeValue()))
+							{
+								pdOld.setPhenotypeValue(pd.getPhenotypeValue());
+								pdOld.store();
+								id = pdOld.getId();
+							}
+							else
+							{
+								// Nothing to do here...
+								id = pdOld.getId();
+							}
+						}
+
+						newIds.add(id);
 						// Update the id
-						o.setObservationDbId(Integer.toString(pd.getId()));
+						o.setObservationDbId(Integer.toString(id));
 					}
 				}
 			}

@@ -37,7 +37,7 @@ public class ObservationVariableServerResource extends ObservationVariableBaseSe
 		throws IOException, SQLException
 	{
 		// If there are no new variables, or any of them don't have a trait or any of them have a scale without name or data type, return BAD_REQUEST
-		if (CollectionUtils.isEmpty(newVariables) || newVariables.stream().anyMatch(ov -> ov.getTrait() == null || StringUtils.isEmpty(ov.getObservationVariableName()) || (ov.getScale() != null && (StringUtils.isEmpty(ov.getScale().getDataType()) || StringUtils.isEmpty(ov.getScale().getScaleName())))))
+		if (CollectionUtils.isEmpty(newVariables) || newVariables.stream().anyMatch(ov -> StringUtils.isEmpty(ov.getObservationVariableName()) || (ov.getScale() != null && (StringUtils.isEmpty(ov.getScale().getDataType())))))
 		{
 			resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
 			return null;
@@ -79,7 +79,7 @@ public class ObservationVariableServerResource extends ObservationVariableBaseSe
 												.and(PHENOTYPES.DATATYPE.eq(dataType))
 												.fetchAny();
 
-				if (ov.getScale() != null && unit == null)
+				if (ov.getScale() != null && unit == null && !StringUtils.isEmpty(ov.getScale().getScaleName()))
 				{
 					unit = context.newRecord(UNITS);
 					unit.setUnitName(ov.getScale().getScaleName());
@@ -136,7 +136,7 @@ public class ObservationVariableServerResource extends ObservationVariableBaseSe
 				ids.add(trait.getId());
 			}
 
-			return getVariables(context, Collections.singletonList(PHENOTYPEDATA.ID.in(ids)));
+			return getVariables(context, Collections.singletonList(PHENOTYPES.ID.in(ids)));
 		}
 	}
 
