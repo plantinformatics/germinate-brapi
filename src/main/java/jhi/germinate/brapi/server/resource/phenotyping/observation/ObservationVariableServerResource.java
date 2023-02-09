@@ -58,6 +58,7 @@ public class ObservationVariableServerResource extends ObservationVariableBaseSe
 					case "Date":
 						dataType = PhenotypesDatatype.date;
 						break;
+					case "Duration":
 					case "Numeric":
 						dataType = PhenotypesDatatype.numeric;
 						break;

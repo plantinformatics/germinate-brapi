@@ -8,7 +8,7 @@ import jhi.germinate.server.Database;
 import jhi.germinate.server.database.codegen.tables.pojos.Datasets;
 import jhi.germinate.server.database.codegen.tables.records.PhenotypedataRecord;
 import jhi.germinate.server.util.*;
-import org.jooq.*;
+import org.jooq.DSLContext;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.phenotyping.observation.*;
 import uk.ac.hutton.ics.brapi.server.phenotyping.observation.BrapiObservationUnitServerResource;
@@ -174,33 +174,6 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 								}
 							}
 						}
-						if (n.getAdditionalInfo() != null)
-						{
-							try
-							{
-								pd.setTrialRow(Short.parseShort(n.getAdditionalInfo().get("row")));
-							}
-							catch (Exception e)
-							{
-								// Ignore
-							}
-							try
-							{
-								pd.setTrialColumn(Short.parseShort(n.getAdditionalInfo().get("column")));
-							}
-							catch (Exception e)
-							{
-								// Ignore
-							}
-							try
-							{
-								pd.setRep(n.getAdditionalInfo().get("rep"));
-							}
-							catch (Exception e)
-							{
-								// Ignore
-							}
-						}
 						try
 						{
 							pd.setRecordingDate(new Timestamp(sdf.parse(o.getObservationTimeStamp()).getTime()));
@@ -210,49 +183,87 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 							// Ignore
 						}
 
-						// Check if there's already an entry for the same plot, trait and timepoint
-						SelectConditionStep<PhenotypedataRecord> query = context.selectFrom(PHENOTYPEDATA)
-																				.where(PHENOTYPEDATA.PHENOTYPE_ID.isNotDistinctFrom(pd.getPhenotypeId()))
-																				.and(PHENOTYPEDATA.REP.isNotDistinctFrom(pd.getRep()))
-																				.and(PHENOTYPEDATA.BLOCK.isNotDistinctFrom(pd.getBlock()))
-																				.and(PHENOTYPEDATA.TRIAL_ROW.isNotDistinctFrom(pd.getTrialRow()))
-																				.and(PHENOTYPEDATA.TRIAL_COLUMN.isNotDistinctFrom(pd.getTrialColumn()))
-																				.and(PHENOTYPEDATA.TREATMENT_ID.isNotDistinctFrom(pd.getTreatmentId()))
-																				.and(PHENOTYPEDATA.GERMINATEBASE_ID.isNotDistinctFrom(pd.getGerminatebaseId()))
-																				.and(PHENOTYPEDATA.DATASET_ID.isNotDistinctFrom(pd.getDatasetId()))
-																				.and(PHENOTYPEDATA.RECORDING_DATE.isNotDistinctFrom(pd.getRecordingDate()))
-																				.and(PHENOTYPEDATA.LOCATION_ID.isNotDistinctFrom(pd.getLocationId()))
-																				.and(PHENOTYPEDATA.TRIALSERIES_ID.isNotDistinctFrom(pd.getTrialseriesId()));
-
-						PhenotypedataRecord pdOld = query.fetchAny();
-
-						Integer id;
-						// If there isn't an exact match, insert the new one
-						if (pdOld == null)
+						// Let's see if this comes from GridScore and we can get information about the trait type
+						boolean isMultiTrait = false;
+						if (o.getAdditionalInfo() != null)
 						{
-							// Then store the new one
-							pd.store();
-							id = pd.getId();
-						}
-						else
-						{
-							// Else check the value. If it's different, use the new one
-							if (!Objects.equals(pdOld.getPhenotypeValue(), pd.getPhenotypeValue()))
+							try
 							{
-								pdOld.setPhenotypeValue(pd.getPhenotypeValue());
-								pdOld.store();
-								id = pdOld.getId();
+								isMultiTrait = Objects.equals(o.getAdditionalInfo().get("traitMType"), "multi");
+							}
+							catch (Exception e)
+							{
+								// Ignore...
+							}
+						}
+
+						if (isMultiTrait)
+						{
+							// Check if there's already an entry for the same plot, trait and timepoint and value
+							PhenotypedataRecord pdOld = context.selectFrom(PHENOTYPEDATA)
+															   .where(PHENOTYPEDATA.PHENOTYPE_ID.isNotDistinctFrom(pd.getPhenotypeId()))
+															   .and(PHENOTYPEDATA.REP.isNotDistinctFrom(pd.getRep()))
+															   .and(PHENOTYPEDATA.BLOCK.isNotDistinctFrom(pd.getBlock()))
+															   .and(PHENOTYPEDATA.TRIAL_ROW.isNotDistinctFrom(pd.getTrialRow()))
+															   .and(PHENOTYPEDATA.TRIAL_COLUMN.isNotDistinctFrom(pd.getTrialColumn()))
+															   .and(PHENOTYPEDATA.TREATMENT_ID.isNotDistinctFrom(pd.getTreatmentId()))
+															   .and(PHENOTYPEDATA.GERMINATEBASE_ID.isNotDistinctFrom(pd.getGerminatebaseId()))
+															   .and(PHENOTYPEDATA.DATASET_ID.isNotDistinctFrom(pd.getDatasetId()))
+															   .and(PHENOTYPEDATA.RECORDING_DATE.isNotDistinctFrom(pd.getRecordingDate()))
+															   .and(PHENOTYPEDATA.LOCATION_ID.isNotDistinctFrom(pd.getLocationId()))
+															   .and(PHENOTYPEDATA.TRIALSERIES_ID.isNotDistinctFrom(pd.getTrialseriesId()))
+															   .and(PHENOTYPEDATA.PHENOTYPE_VALUE.eq(pd.getPhenotypeValue()))
+															   .fetchAny();
+
+							if (pdOld == null)
+							{
+								pd.store();
+								newIds.add(pd.getId());
 							}
 							else
 							{
-								// Nothing to do here...
-								id = pdOld.getId();
+								newIds.add(pdOld.getId());
 							}
 						}
+						else
+						{
+							// Otherwise, check if there's a match when ignoring the value. Single traits get their values updated if different
+							List<PhenotypedataRecord> matches = context.selectFrom(PHENOTYPEDATA)
+																	   .where(PHENOTYPEDATA.PHENOTYPE_ID.isNotDistinctFrom(pd.getPhenotypeId()))
+																	   .and(PHENOTYPEDATA.REP.isNotDistinctFrom(pd.getRep()))
+																	   .and(PHENOTYPEDATA.BLOCK.isNotDistinctFrom(pd.getBlock()))
+																	   .and(PHENOTYPEDATA.TRIAL_ROW.isNotDistinctFrom(pd.getTrialRow()))
+																	   .and(PHENOTYPEDATA.TRIAL_COLUMN.isNotDistinctFrom(pd.getTrialColumn()))
+																	   .and(PHENOTYPEDATA.TREATMENT_ID.isNotDistinctFrom(pd.getTreatmentId()))
+																	   .and(PHENOTYPEDATA.GERMINATEBASE_ID.isNotDistinctFrom(pd.getGerminatebaseId()))
+																	   .and(PHENOTYPEDATA.DATASET_ID.isNotDistinctFrom(pd.getDatasetId()))
+																	   .and(PHENOTYPEDATA.RECORDING_DATE.isNotDistinctFrom(pd.getRecordingDate()))
+																	   .and(PHENOTYPEDATA.LOCATION_ID.isNotDistinctFrom(pd.getLocationId()))
+																	   .and(PHENOTYPEDATA.TRIALSERIES_ID.isNotDistinctFrom(pd.getTrialseriesId()))
+																	   .fetch();
 
-						newIds.add(id);
-						// Update the id
-						o.setObservationDbId(Integer.toString(id));
+							if (!CollectionUtils.isEmpty(matches))
+							{
+								// At this point, there should only be one match (because it's a single trait), but just in case, check them all
+								for (PhenotypedataRecord match : matches)
+								{
+									if (!Objects.equals(match.getPhenotypeValue(), pd.getPhenotypeValue()))
+									{
+										// If it doesn't match, the value has been updated on the client, do so here as well
+										match.setPhenotypeValue(pd.getPhenotypeValue());
+										match.store();
+									}
+
+									newIds.add(match.getId());
+								}
+							}
+							else
+							{
+								// Then store the new one
+								pd.store();
+								newIds.add(pd.getId());
+							}
+						}
 					}
 				}
 			}
