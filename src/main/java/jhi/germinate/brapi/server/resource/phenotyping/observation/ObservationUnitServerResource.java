@@ -237,7 +237,7 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 																	   .and(PHENOTYPEDATA.TREATMENT_ID.isNotDistinctFrom(pd.getTreatmentId()))
 																	   .and(PHENOTYPEDATA.GERMINATEBASE_ID.isNotDistinctFrom(pd.getGerminatebaseId()))
 																	   .and(PHENOTYPEDATA.DATASET_ID.isNotDistinctFrom(pd.getDatasetId()))
-																	   .and(PHENOTYPEDATA.RECORDING_DATE.isNotDistinctFrom(pd.getRecordingDate()))
+//																	   .and(PHENOTYPEDATA.RECORDING_DATE.isNotDistinctFrom(pd.getRecordingDate()))
 																	   .and(PHENOTYPEDATA.LOCATION_ID.isNotDistinctFrom(pd.getLocationId()))
 																	   .and(PHENOTYPEDATA.TRIALSERIES_ID.isNotDistinctFrom(pd.getTrialseriesId()))
 																	   .fetch();
@@ -251,6 +251,7 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 									{
 										// If it doesn't match, the value has been updated on the client, do so here as well
 										match.setPhenotypeValue(pd.getPhenotypeValue());
+										match.setRecordingDate(pd.getRecordingDate());
 										match.store();
 									}
 
