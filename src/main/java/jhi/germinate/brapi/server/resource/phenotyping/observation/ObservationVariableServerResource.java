@@ -4,10 +4,11 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import jhi.germinate.resource.enums.UserType;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
 import jhi.germinate.server.database.codegen.enums.PhenotypesDatatype;
 import jhi.germinate.server.database.codegen.tables.records.*;
 import jhi.germinate.server.database.pojo.TraitRestrictions;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -170,6 +171,9 @@ public class ObservationVariableServerResource extends ObservationVariableBaseSe
 		@QueryParam("externalReferenceSource") String externalReferenceSource)
 		throws IOException, SQLException
 	{
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "trials");
+
 		try (Connection conn = Database.getConnection())
 		{
 			DSLContext context = Database.getContext(conn);
@@ -195,6 +199,11 @@ public class ObservationVariableServerResource extends ObservationVariableBaseSe
 				try
 				{
 					Integer datasetId = Integer.parseInt(studyDbId);
+					if (!datasetIds.contains(datasetId))
+					{
+						resp.sendError(Response.Status.FORBIDDEN.getStatusCode());
+						return null;
+					}
 					conditions.add(DSL.exists(DSL.selectOne().from(PHENOTYPEDATA).where(PHENOTYPEDATA.DATASET_ID.eq(datasetId)).and(PHENOTYPEDATA.PHENOTYPE_ID.eq(PHENOTYPES.ID))));
 				}
 				catch (NumberFormatException e)

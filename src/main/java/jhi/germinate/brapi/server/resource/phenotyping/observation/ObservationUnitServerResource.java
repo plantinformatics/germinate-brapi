@@ -4,9 +4,10 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import jhi.germinate.resource.enums.UserType;
-import jhi.germinate.server.Database;
+import jhi.germinate.server.*;
 import jhi.germinate.server.database.codegen.tables.pojos.Datasets;
 import jhi.germinate.server.database.codegen.tables.records.PhenotypedataRecord;
+import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.DSLContext;
 import uk.ac.hutton.ics.brapi.resource.base.*;
@@ -66,6 +67,34 @@ public class ObservationUnitServerResource extends ObservationUnitBaseServerReso
 			return new BaseResult<ArrayResult<ObservationUnit>>()
 				.setResult(new ArrayResult<ObservationUnit>()
 					.setData(new ArrayList<>()));
+		}
+
+		// Check that all requested study ids are valid and the user has permissions
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasetIds = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "trials");
+		for (ObservationUnit ou : newObservationUnits)
+		{
+			if (!CollectionUtils.isEmpty(ou.getObservations()))
+			{
+				for (Observation o : ou.getObservations())
+				{
+					try
+					{
+						Integer id = Integer.parseInt(o.getStudyDbId());
+
+						if (!datasetIds.contains(id))
+						{
+							resp.sendError(Response.Status.FORBIDDEN.getStatusCode());
+							return null;
+						}
+					}
+					catch (NullPointerException | NumberFormatException e)
+					{
+						resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+						return null;
+					}
+				}
+			}
 		}
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
