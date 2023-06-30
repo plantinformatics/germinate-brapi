@@ -110,7 +110,9 @@ public class Hdf5DataExtractor implements AutoCloseable
 
 		return alleles;
 	}
+//
 
+//
 	private String encodeAllele(String alleleValue, GenotypeEncodingParams params)
 	{
 		if (alleleValue.contains("/"))
@@ -144,6 +146,16 @@ public class Hdf5DataExtractor implements AutoCloseable
 	public List<String> getMarkers()
 	{
 		return hdf5Markers;
+	}
+
+	public List<String> getMarkersIds()
+	{	
+		List<String> MarkerIDs = new ArrayList<String>();
+
+		for(int i = 0; i < hdf5Markers.size(); i++) {
+			MarkerIDs.add(String.valueOf(i+1));
+		}
+		return MarkerIDs;
 	}
 
 	public int getLineCount()
