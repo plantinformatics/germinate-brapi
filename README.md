@@ -5,6 +5,8 @@ These endpoints have been added to the Germinate-BrAPI to specifically serve req
 
 Work carried out by Agriculture Victoria as part of the Australian Grains Genebank Strategic Partnership.
 
+A step by step guide to using the new feature is available here: https://github.com/plantinformatics/pretzel/files/13699164/PretzelGerminateBrAPIConnection_StepByStepGuide.pdf
+
 ### Get a List of Samples in a Specified Dataset
 **Endpoint:** `brapi/v2/callsets/dataset/{datasetID}`
 
