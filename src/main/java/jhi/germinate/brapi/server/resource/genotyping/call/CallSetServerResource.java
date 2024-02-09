@@ -9,6 +9,7 @@ import jhi.germinate.server.resource.datasets.DatasetTableResource;
 import jhi.germinate.server.util.*;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import uk.ac.hutton.ics.brapi.resource.base.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.call.*;
 import uk.ac.hutton.ics.brapi.resource.genotyping.variant.Genotype;
@@ -23,12 +24,10 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.*;
 
-
 import static jhi.germinate.server.database.codegen.tables.Datasetmembers.*;
 import static jhi.germinate.server.database.codegen.tables.Datasets.*;
 import static jhi.germinate.server.database.codegen.tables.Germinatebase.*;
 import static jhi.germinate.server.database.codegen.tables.Markers.*;
-import static jhi.germinate.server.database.codegen.tables.ViewTableMarkers.*;
 import static jhi.germinate.server.database.codegen.tables.Mapdefinitions.*;
 import static jhi.germinate.server.database.codegen.tables.Maps.*;
 
@@ -50,7 +49,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		throws IOException, SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -93,7 +92,6 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 			else
 				return new BaseResult<>(callSets.get(0), page, pageSize, 1);
 		}
-
 	}
 
 	@Override
@@ -115,7 +113,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -138,11 +136,10 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 			}
 
 			GenotypeEncodingParams params = new GenotypeEncodingParams();
-			params.setUnknownString(unknownString != null && !unknownString.isEmpty() ? unknownString : "N");
-			params.setSepPhased(sepPhased != null && !sepPhased.isEmpty() ? sepPhased : "|");
-			params.setSepUnphased(sepUnphased != null && !sepUnphased.isEmpty() ? sepUnphased : "/");
-			params.setUnknownString(unknownString != null && !unknownString.isEmpty() ? unknownString : "N");
-			
+			params.setUnknownString(unknownString);
+			params.setSepPhased(sepPhased);
+			params.setSepUnphased(sepUnphased);
+			params.setUnknownString(unknownString);
 			try
 			{
 				params.setCollapse(!expandHomozygotes);
@@ -178,7 +175,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 			return new BaseResult<>(callResult, page, pageSize, alleles.size());
 		}
 	}
-
+	
 	@GET
 	@Path("/{callSetDbId}/calls/mapid/{mapid}/position/{positionStart}/{positionEnd}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -204,7 +201,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -308,7 +305,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		throws IOException, SQLException
 	{
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -348,7 +345,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -453,7 +450,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		}
 
 		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
-		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, resp, userDetails, "genotype");
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
 
 		try (Connection conn = Database.getConnection())
 		{
@@ -480,14 +477,16 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 			}
 
 			List<Integer> chromosomeCounts = context.selectCount()
-													.from(MAPS)
-													.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
-													.where(MAPS.ID.eq(mapid))
-													.and(MAPS.VISIBILITY.eq(true)
-														.or(MAPS.USER_ID.eq(userDetails.getId())))
-													.groupBy(MAPDEFINITIONS.CHROMOSOME)
-													.fetch()
-													.into(Integer.class);
+						                .from(MAPS)
+						                .leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+						                .where(MAPS.ID.eq(mapid))
+						                .and(MAPS.VISIBILITY.eq(true)
+						                    .or(MAPS.USER_ID.eq(userDetails.getId())))
+						                .groupBy(MAPDEFINITIONS.CHROMOSOME)
+						                .orderBy(DSL.cast(MAPDEFINITIONS.CHROMOSOME, SQLDataType.INTEGER))
+						                .fetch()
+						                .into(Integer.class);
+
 
 
 			List<Double> positions = context.select(MAPDEFINITIONS.DEFINITION_START)
@@ -623,4 +622,3 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 		}
 	}
 }
-
