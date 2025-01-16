@@ -732,7 +732,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 											.setCallSetDbId(callSetDbId)
 											.setCallSetName(germplasm.getName())
 											.setGenotypeValue(alleles.get(i))
-											.setVariantName(filteredMarkerNames.get(i) + "-" + filteredPositions.get(i))
+											.setVariantName(filteredMarkerNames.get(i) + "-" + filteredPositions.get(i) + "-" + mapid)
 											)
 										.collect(Collectors.toList());
 
@@ -934,7 +934,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 											.setCallSetDbId(callSetDbId)
 											.setCallSetName(germplasm.getName())
 											.setGenotypeValue(filteredAlleles.get(i))
-											.setVariantName(filteredMarkerNames.get(i) + "-" + filteredPositions.get(i))
+											.setVariantName(filteredMarkerNames.get(i) + "-" + filteredPositions.get(i) + "-" + mapid)
 											)
 										.collect(Collectors.toList());
 
