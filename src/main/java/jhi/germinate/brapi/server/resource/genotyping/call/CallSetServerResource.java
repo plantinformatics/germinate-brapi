@@ -977,4 +977,72 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 			return new BaseResult<>(callResult, page, pageSize, filteredAlleles.size());
 		}
 	}
+
+	@GET
+	@Path("/{callSetDbId}/chromosomes")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public String[] getChromosomesByCallSet(@PathParam("callSetDbId") String callSetDbId)
+		throws IOException, SQLException, Exception
+	{
+		if (StringUtils.isEmpty(callSetDbId) || !callSetDbId.contains("-"))
+		{
+			resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+			return null;
+		}
+
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			String[] parts = callSetDbId.split("-");
+
+			DatasetsRecord dataset = context.selectFrom(DATASETS)
+											.where(DATASETS.ID.in(datasets))
+											.and(DATASETS.IS_EXTERNAL.eq(false))
+											.and(DATASETS.ID.cast(String.class).eq(parts[0]))
+											.fetchAny();
+			GerminatebaseRecord germplasm = context.selectFrom(GERMINATEBASE)
+												   .where(GERMINATEBASE.ID.cast(String.class).eq(parts[1]))
+												   .fetchAny();
+			
+
+			Timestamp datasetCreatedOn = dataset.getCreatedOn();
+			Timestamp lowerBound = new Timestamp(datasetCreatedOn.getTime() - 5000); // 5 seconds earlier
+			Timestamp upperBound = new Timestamp(datasetCreatedOn.getTime() + 5000); // 5 seconds later
+
+			Integer mapid = context.select(MAPS.ID)
+					       .from(MAPS)
+					       .where(MAPS.CREATED_ON.between(lowerBound, upperBound))
+					       .orderBy(MAPS.CREATED_ON.asc()) // Optional: to get the closest match if multiple records fall within the interval
+					       .fetchAny(MAPS.ID);
+
+			if (mapid == null) {
+			    throw new IllegalArgumentException("No matching mapid found within the 5-second interval of the dataset's created_on timestamp");
+			}
+			
+			List<Integer> chromosomes = context.selectDistinct(MAPDEFINITIONS.CHROMOSOME)
+				.from(MAPS)
+				.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+				.where(MAPS.ID.eq(mapid))
+				.and(MAPS.VISIBILITY.eq(true).or(MAPS.USER_ID.eq(userDetails.getId())))
+				.fetch()
+				.into(Integer.class);
+				
+			if (dataset == null || StringUtils.isEmpty(dataset.getSourceFile()) || germplasm == null)
+			{
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+				return null;
+			}
+
+			String[] chromosomeArray = chromosomes.stream()
+                                      .map(String::valueOf)
+	                                  .toArray(String[]::new);
+
+			
+			return chromosomeArray;
+		}
+	}
 }
