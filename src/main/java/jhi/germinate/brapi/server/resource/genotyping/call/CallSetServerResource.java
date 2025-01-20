@@ -129,6 +129,36 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 												   .where(GERMINATEBASE.ID.cast(String.class).eq(parts[1]))
 												   .fetchAny();
 
+			Timestamp datasetCreatedOn = dataset.getCreatedOn();
+			Timestamp lowerBound = new Timestamp(datasetCreatedOn.getTime() - 5000); // 5 seconds earlier
+			Timestamp upperBound = new Timestamp(datasetCreatedOn.getTime() + 5000); // 5 seconds later
+
+			Integer mapid = context.select(MAPS.ID)
+					       .from(MAPS)
+					       .where(MAPS.CREATED_ON.between(lowerBound, upperBound))
+					       .orderBy(MAPS.CREATED_ON.asc()) // Optional: to get the closest match if multiple records fall within the interval
+					       .fetchAny(MAPS.ID);
+
+			if (mapid == null) {
+			    throw new IllegalArgumentException("No matching mapid found within the 5-second interval of the dataset's created_on timestamp");
+			}
+
+			List<Double> positions = context.select(MAPDEFINITIONS.DEFINITION_START)
+				.from(MAPS)
+				.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+				.where(MAPS.ID.eq(mapid))
+				.and(MAPS.VISIBILITY.eq(true).or(MAPS.USER_ID.eq(userDetails.getId())))
+				.fetch()
+				.into(Double.class);
+
+			List<Integer> chromosomes = context.select(MAPDEFINITIONS.CHROMOSOME)
+				.from(MAPS)
+				.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+				.where(MAPS.ID.eq(mapid))
+				.and(MAPS.VISIBILITY.eq(true).or(MAPS.USER_ID.eq(userDetails.getId())))
+				.fetch()
+				.into(Integer.class);
+
 			if (dataset == null || StringUtils.isEmpty(dataset.getSourceFile()) || germplasm == null)
 			{
 				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
@@ -163,7 +193,7 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 											.setCallSetName(germplasm.getName())
 											.setGenotypeValue(alleles.get(i))
 											.setVariantDbId(dataset.getId() + "-" + markerNamesToIds.get(markerNames.get(i)))
-											.setVariantName(markerNames.get(i)))
+        									.setVariantName(markerNames.get(i) + "-" + positions.get(i) + "-" + chromosomes.get(i)))
 										.collect(Collectors.toList());
 
 			CallResult<Call> callResult = new CallResult<Call>()
