@@ -979,6 +979,188 @@ public class CallSetServerResource extends CallSetBaseServerResource implements 
 	}
 
 	@GET
+	@Path("/{callSetDbId}/calls/chromosome/{chromosome}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseResult<CallResult<Call>> getGenotypesByChromosome(@PathParam("callSetDbId") String callSetDbId,
+																  @PathParam("chromosome") Integer chromosome,
+																  @QueryParam("expandHomozygotes") Boolean expandHomozygotes,
+																  @QueryParam("unknownString") String unknownString,
+																  @QueryParam("sepPhased") String sepPhased,
+															      @QueryParam("sepUnphased") String sepUnphased)
+		throws IOException, SQLException, Exception
+	{
+		if (StringUtils.isEmpty(callSetDbId) || !callSetDbId.contains("-"))
+		{
+			resp.sendError(Response.Status.NOT_FOUND.getStatusCode());
+			return null;
+		}
+
+		AuthenticationFilter.UserDetails userDetails = (AuthenticationFilter.UserDetails) securityContext.getUserPrincipal();
+		List<Integer> datasets = DatasetTableResource.getDatasetIdsForUser(req, userDetails, "genotype");
+
+		try (Connection conn = Database.getConnection())
+		{
+			DSLContext context = Database.getContext(conn);
+			String[] parts = callSetDbId.split("-");
+
+			DatasetsRecord dataset = context.selectFrom(DATASETS)
+											.where(DATASETS.ID.in(datasets))
+											.and(DATASETS.IS_EXTERNAL.eq(false))
+											.and(DATASETS.ID.cast(String.class).eq(parts[0]))
+											.fetchAny();
+			GerminatebaseRecord germplasm = context.selectFrom(GERMINATEBASE)
+												   .where(GERMINATEBASE.ID.cast(String.class).eq(parts[1]))
+												   .fetchAny();
+			
+
+			Timestamp datasetCreatedOn = dataset.getCreatedOn();
+			Timestamp lowerBound = new Timestamp(datasetCreatedOn.getTime() - 5000); // 5 seconds earlier
+			Timestamp upperBound = new Timestamp(datasetCreatedOn.getTime() + 5000); // 5 seconds later
+
+			Integer mapid = context.select(MAPS.ID)
+					       .from(MAPS)
+					       .where(MAPS.CREATED_ON.between(lowerBound, upperBound))
+					       .orderBy(MAPS.CREATED_ON.asc()) // Optional: to get the closest match if multiple records fall within the interval
+					       .fetchAny(MAPS.ID);
+
+			if (mapid == null) {
+			    throw new IllegalArgumentException("No matching mapid found within the 5-second interval of the dataset's created_on timestamp");
+			}
+			
+			List<Integer> chromosomeCounts = context.selectCount()
+						                .from(MAPS)
+						                .leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+						                .where(MAPS.ID.eq(mapid))
+						                .and(MAPS.VISIBILITY.eq(true)
+						                    .or(MAPS.USER_ID.eq(userDetails.getId())))
+						                .groupBy(MAPDEFINITIONS.CHROMOSOME)
+						                .orderBy(DSL.cast(MAPDEFINITIONS.CHROMOSOME, SQLDataType.INTEGER))
+						                .fetch()
+						                .into(Integer.class);
+
+
+
+			List<Double> positions = context.select(MAPDEFINITIONS.DEFINITION_START)
+				.from(MAPS)
+				.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+				.where(MAPS.ID.eq(mapid))
+				.and(MAPS.VISIBILITY.eq(true).or(MAPS.USER_ID.eq(userDetails.getId())))
+				.fetch()
+				.into(Double.class);
+			
+			List<Integer> chromosomes = context.select(MAPDEFINITIONS.CHROMOSOME)
+				.from(MAPS)
+				.leftJoin(MAPDEFINITIONS).on(MAPDEFINITIONS.MAP_ID.eq(MAPS.ID))
+				.where(MAPS.ID.eq(mapid))
+				.and(MAPS.VISIBILITY.eq(true).or(MAPS.USER_ID.eq(userDetails.getId())))
+				.fetch()
+				.into(Integer.class);
+				
+			if (dataset == null || StringUtils.isEmpty(dataset.getSourceFile()) || germplasm == null)
+			{
+				resp.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+				return null;
+			}
+
+			GenotypeEncodingParams params = new GenotypeEncodingParams();
+			params.setUnknownString(unknownString != null && !unknownString.isEmpty() ? unknownString : "N");
+			params.setSepPhased(sepPhased != null && !sepPhased.isEmpty() ? sepPhased : "|");
+			params.setSepUnphased(sepUnphased != null && !sepUnphased.isEmpty() ? sepUnphased : "/");
+			params.setUnknownString(unknownString != null && !unknownString.isEmpty() ? unknownString : "N");
+			
+			try
+			{
+				params.setCollapse(!expandHomozygotes);
+			}
+			catch (Exception e)
+			{
+			}
+
+			Hdf5DataExtractor extractor = new Hdf5DataExtractor(new File(Brapi.BRAPI.hdf5BaseFolder, dataset.getSourceFile()));
+			List<String> alleles = extractor.getAllelesForLine(germplasm.getName(), params);
+			List<String> markerNames = extractor.getMarkers();
+
+
+			if (alleles.size()!= chromosomeCounts.stream().mapToInt(Integer::intValue).sum()) {
+				throw new Exception("wrong mapID is selected");
+			}
+
+			// CHROMOSOME
+			List<List<Integer>> processedListChromosomes = new ArrayList<>();
+			int index = 0;
+			for (int count : chromosomeCounts) {
+				List<Integer> sublistC = chromosomes.subList(index, index + count);
+				processedListChromosomes.add(sublistC);
+				index += count;
+			}
+
+			int indexOfChromosome = -1;
+			for (int i = 0; i < processedListChromosomes.size(); i++) {
+				List<Integer> sublist = processedListChromosomes.get(i);
+				if (sublist.contains(chromosome)) {
+					indexOfChromosome = i;
+					break;
+				}
+			}
+
+			if (indexOfChromosome == -1) {
+				throw new Exception("Chromosome is not found");
+			}			
+
+			// ALLELES
+			List<List<String>> processedListAlleles = new ArrayList<>();
+			index = 0;
+			for (int count : chromosomeCounts) {
+				List<String> sublistA = alleles.subList(index, index + count);
+				processedListAlleles.add(sublistA);
+				index += count;
+			}
+			List<String> nthSublistOfAlleles = processedListAlleles.get(indexOfChromosome);
+
+			//POSITION
+			List<List<Double>> processedListPositions = new ArrayList<>();
+			index = 0;
+			for (int count : chromosomeCounts) {
+				List<Double> sublistP = positions.subList(index, index + count);
+				processedListPositions.add(sublistP);
+				index += count;
+			}
+			List<Double> nthSublistOfPositions = processedListPositions.get(indexOfChromosome);
+
+			//MARKERS
+			List<List<String>> processedListMarkerNames = new ArrayList<>();
+			index = 0;
+			for (int count : chromosomeCounts) {
+				List<String> sublistM = markerNames.subList(index, index + count);
+				processedListMarkerNames.add(sublistM);
+				index += count;
+			}
+			List<String> nthSublistOfMarkerNames = processedListMarkerNames.get(indexOfChromosome);
+
+
+			List<Call> calls = IntStream.range(0, nthSublistOfAlleles.size())
+										.skip(pageSize * page)
+										.limit(pageSize)
+										.mapToObj(i -> new Call()
+											.setCallSetDbId(callSetDbId)
+											.setCallSetName(germplasm.getName())
+											.setGenotypeValue(nthSublistOfAlleles.get(i))
+											.setVariantName(nthSublistOfMarkerNames.get(i) + "-" + nthSublistOfPositions.get(i) + "-" + chromosome)
+											)
+										.collect(Collectors.toList());
+
+			CallResult<Call> callResult = new CallResult<Call>()
+				.setData(calls)
+				.setExpandHomozygotes(!params.isCollapse())
+				.setSepPhased(params.getSepPhased())
+				.setSepUnphased(params.getSepUnphased())
+				.setUnknownString(params.getUnknownString());
+			return new BaseResult<>(callResult, page, pageSize, nthSublistOfAlleles.size());
+		}
+	}
+
+	@GET
 	@Path("/{callSetDbId}/chromosomes")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
